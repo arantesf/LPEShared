@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RevitAddIns>
+ <AddIn Type="Application">
+       <Name>Revit</Name>
+       <FullClassName>Revit.Common.ExternalApplication</FullClassName>
+       <Text>Revit Addin</Text>
+       <Description>A simple add-in</Description>
+       <VisibilityMode>AlwaysVisible</VisibilityMode>
+       <Assembly>Revit.dll</Assembly>
+       <AddInId>601FFC79-C4C3-4A5B-A0FE-CE89CEC7EE04</AddInId>
+    <VendorId>ADSK</VendorId>
+    <VendorDescription>FCA</VendorDescription>
+ </AddIn>
+</RevitAddIns>
+            
+    
+

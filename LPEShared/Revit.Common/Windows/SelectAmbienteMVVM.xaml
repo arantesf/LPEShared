@@ -1,0 +1,72 @@
+﻿<Window x:Class="Revit.Common.SelectAmbienteMVVM"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Revit.Common"
+             DataContext="{Binding RelativeSource={RelativeSource Self}}"
+             mc:Ignorable="d" 
+             Height="450" Width="600"
+        Loaded="Window_Loaded">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="50"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Image
+            Grid.Row="0"
+            HorizontalAlignment="Left"
+            Margin="10"
+            Source="/Revit.Resources;component/Images/LOGO LPE.png" Width="100"
+            />
+        <ListBox
+            x:Name="Ambientes_ListBox"
+            Margin="10,0"
+            Grid.Row="1"
+            Height="Auto"
+            ItemsSource="{Binding AmbienteModels}"
+            d:ItemsSource="{d:SampleData ItemCount=5}"
+            >
+            <ListBox.ItemTemplate >
+                <DataTemplate>
+                    <StackPanel>
+                        <CheckBox Content="{Binding Name}" IsChecked="{Binding IsChecked}"/>
+                    </StackPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+        <CheckBox
+            Content="Selecionar todos"
+            Margin="10"
+            Grid.Row="2"
+            />
+        <Grid
+            Grid.Row="3"
+            Margin="10"
+            >
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+                <ColumnDefinition Width="10"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <Button 
+                x:Name="Execute_Button"
+                Content="DIVIDIR PISOS"
+                Click="Execute_Button_Click"
+                Grid.Column="0"
+                />
+            <Button 
+                x:Name="SelectPisos_Button"
+                Content="SELECIONAR PISOS NO MODELO"
+                Click="Select_Button_Click"
+                Grid.Column="2"
+                />
+            
+        </Grid>
+
+
+
+    </Grid>
+</Window>
