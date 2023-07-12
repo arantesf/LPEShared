@@ -531,7 +531,7 @@ namespace Revit.Common
             try
             {
                 Solid solid1 = GetElementSolid(element1);
-
+                
                 if (solid1 == null)
                 {
                     return false;

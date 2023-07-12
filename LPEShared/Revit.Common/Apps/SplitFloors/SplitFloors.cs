@@ -13,6 +13,7 @@ using System.IO;
 using System.Runtime;
 using Autodesk.Revit.DB.Architecture;
 using Microsoft.SqlServer.Server;
+using System.Xml.Linq;
 
 namespace Revit.Common
 {
@@ -210,6 +211,13 @@ namespace Revit.Common
                         }
                         Solid solidUp = GeometryCreationUtilities.CreateExtrusionGeometry(curveLoops, XYZ.BasisZ, 1000);
                         Solid solidDown = GeometryCreationUtilities.CreateExtrusionGeometry(curveLoops, -XYZ.BasisZ, 1000);
+
+                        Transaction tx = new Transaction(doc, "directShape");
+                        tx.Start();
+                        DirectShape directShape = DirectShape.CreateElement(doc, Category.GetCategory(doc, BuiltInCategory.OST_Walls).Id);
+                        directShape.AppendShape(new List<GeometryObject> { solidUp, solidDown });
+                        tx.Commit();
+
                         if (Utils.SolidIntersectSolid(openingsSolid, solidDown))
                         {
                             continue;
@@ -219,26 +227,31 @@ namespace Revit.Common
                         {
                             continue;
                         }
-                        bool matchedExistingFloor = false;
+                        //bool matchedExistingFloor = false;
                         foreach (Floor existingFloor in floors)
                         {
                             if (Utils.ElementIntersectSolid(existingFloor, solidUp) || Utils.ElementIntersectSolid(existingFloor, solidDown))
                             {
                                 Utils.ChangeTypeId(createdFloor, existingFloor.GetTypeId());
                                 Utils.CopyAllParameters(existingFloor, createdFloor, new List<BuiltInParameter>() { BuiltInParameter.ALL_MODEL_MARK/*, BuiltInParameter.FLOOR_HEIGHTABOVELEVEL_PARAM*/ });
-                                if (existingFloor.SlabShapeEditor == null || existingFloor.SlabShapeEditor.IsEnabled)
+#if Revit2021 || Revit2022 || Revit2023
+                                SlabShapeEditor slabShapeEditor = existingFloor.SlabShapeEditor;
+#else
+                                SlabShapeEditor slabShapeEditor = existingFloor.GetSlabShapeEditor();
+#endif
+                                if (slabShapeEditor == null || slabShapeEditor.IsEnabled)
                                 {
                                     Utils.SetPointsElevationsOfNewFloor(existingFloor as Floor, createdFloor, 0);
                                 }
-                                matchedExistingFloor = true;
+                                //matchedExistingFloor = true;
                                 break;
                             }
                         }
-                        if (!matchedExistingFloor)
-                        {
-                            Utils.DeleteElements(doc, new List<Element>() { createdFloor });
-                            continue;
-                        }
+                        //if (!matchedExistingFloor)
+                        //{
+                        //    Utils.DeleteElements(doc, new List<Element>() { createdFloor });
+                        //    continue;
+                        //}
                         Utils.SetParameter(createdFloor, "Piso em placas", 1);
                         foreach (Floor existingFloor in reforcoOrPlacafloors)
                         {
@@ -260,7 +273,7 @@ namespace Revit.Common
 
                     Utils.DeleteElements(doc, floors);
 
-                watchRooms:;
+                //watchRooms:;
                     //uidoc.ActiveView = initialView;
                     transactionGroup.Assimilate();
 

@@ -100,7 +100,7 @@
     <EmbeddedResource Include="Images\RestaurarPisosLPE.png" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Images\TagearCotasLPE.png" />
+    <EmbeddedResource Include="Images\TagearJuntasLPE.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
