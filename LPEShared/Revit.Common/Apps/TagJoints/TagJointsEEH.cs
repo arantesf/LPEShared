@@ -1,45 +1,39 @@
-﻿#region Namespaces
 using Autodesk.Revit.ApplicationServices;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using System.Linq;
+using Autodesk.Revit.UI.Selection;
 using System;
 using System.Collections.Generic;
-
-#endregion
+using System.Diagnostics;
+using Autodesk.Revit.DB.Events;
+using System.Reflection;
+using System.IO;
+using System.Runtime;
+using Autodesk.Revit.DB.Architecture;
+using Microsoft.SqlServer.Server;
+using System.Xml.Linq;
+using System.Diagnostics.Eventing.Reader;
+using System.Windows;
 
 namespace Revit.Common
 {
     [Transaction(TransactionMode.Manual)]
-    public class TagJoints : IExternalCommand
+    public class TagJointsEEH : IExternalEventHandler
     {
-        public Result Execute(
-          ExternalCommandData commandData,
-          ref string message,
-          ElementSet elements)
+        public void Execute(UIApplication uiapp)
         {
-            UIApplication uiapp = commandData.Application;
-            UIDocument uidoc = uiapp.ActiveUIDocument;
-            Application app = uiapp.Application;
-            Document doc = uidoc.Document;
-            View initialView = uidoc.ActiveView;
-
-            bool OK = true;
-            string error = "";
-            if (!Utils.VerifyIfProjectParameterExists(doc, "Ambiente"))
-            {
-                error += "\n- Ambiente";
-                OK = false;
-            }
-            if (!OK)
-            {
-                TaskDialog.Show("ATENÇÃO!", $"Não foi possível executar o comando por não existir no modelo os seguintes parâmetros:\n {error}");
-                return Result.Cancelled;
-            }
-
             try
             {
+                SelectAmbienteMVVM.MainView.Ambientes_ListBox.IsEnabled = false;
+                SelectAmbienteMVVM.MainView.SelectAll_CheckBox.IsEnabled = false;
+                SelectAmbienteMVVM.MainView.SelectPisos_Button.IsEnabled = false;
+                SelectAmbienteMVVM.MainView.Execute_Button.IsEnabled = false;
+
+                UIDocument uidoc = uiapp.ActiveUIDocument;
+                Document doc = uidoc.Document;
+                View initialView = uidoc.ActiveView;
 
                 Element e100 = new FilteredElementCollector(doc)
                     .WhereElementIsElementType()
@@ -53,16 +47,8 @@ namespace Revit.Common
                     .Where(a => a.Name == "80%")
                     .First();
 
-                var window = new SelectAmbienteMVVM(uidoc, SelectAmbientMVVMExecuteCommand.TagJoints);
-                //var window = new SelectAmbienteMVVM(floors, "TAGEAR JUNTAS", System.Windows.Visibility.Collapsed);
-                window.ShowDialog();
-                if (!window.Execute)
-                {
-                    return Result.Cancelled;
-                }
-
                 List<string> selectedAmbientes = new List<string>();
-                foreach (string item in window.AmbienteViewModels.Where(x => x.IsChecked).Select(x => x.Name))
+                foreach (string item in SelectAmbienteMVVM.MainView.AmbienteViewModels.Where(x => x.IsChecked).Select(x => x.Name))
                 {
                     selectedAmbientes.Add(item);
                 }
@@ -143,7 +129,13 @@ namespace Revit.Common
                         }
                     }
 
-                    using (Transaction tx = new Transaction(doc, "Create Tags"))
+
+                    SelectAmbienteMVVM.ProgressBarViewModel.ProgressBarValue = 0;
+                    SelectAmbienteMVVM.MainView.ProgressBar.Maximum = verticalGroups.Count + horizontalGroups.Count;
+                    int count = 0;
+                        
+
+                        using (Transaction tx = new Transaction(doc, "Create Tags"))
                     {
                         tx.Start();
                         int jump = 0;
@@ -187,6 +179,10 @@ namespace Revit.Common
                             {
                                 jump = 0;
                             }
+                            SelectAmbienteMVVM.ProgressBarViewModel.ProgressBarValue += 1;
+                            count++;
+                            ExternalApplication.LPEApp.SelectAmbienteMVVM.ProgressBar_TextBlock.Text = $"Tageando juntas do ambiente \"{ambiente}\" ({count}/{verticalGroups.Count + horizontalGroups.Count})";
+
                         }
                         jump = 0;
                         foreach (var group in horizontalGroups)
@@ -227,21 +223,32 @@ namespace Revit.Common
                             {
                                 jump = 0;
                             }
+                            SelectAmbienteMVVM.ProgressBarViewModel.ProgressBarValue += 1;
+                            count++;
+                            ExternalApplication.LPEApp.SelectAmbienteMVVM.ProgressBar_TextBlock.Text = $"Tageando juntas do ambiente \"{ambiente}\" ({count}/{verticalGroups.Count + horizontalGroups.Count})";
                         }
                         tx.Commit();
                     }
                 }
 
                 tg.Assimilate();
-
-                return Result.Succeeded;
+                SelectAmbienteMVVM.MainView.Dispose();
 
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                TaskDialog.Show("ERRO", $"Houve um erro não mapeado na execução do plug-in, contate os desenvolvedores.\n\n{e.Message}");
-                return Result.Cancelled;
+                SelectAmbienteMVVM.MainView.Dispose(); 
+                TaskDialog.Show("ATEN��O!", "Erro n�o mapeado, contate os desenvolvedores.\n\n" + ex.StackTrace);
+                throw;
             }
+
+        }
+
+        public string GetName()
+        {
+            return this.GetType().Name;
         }
     }
+
+
 }

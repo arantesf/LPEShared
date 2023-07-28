@@ -16,14 +16,14 @@ using System.Globalization;
 namespace Revit.Common
 {
     [Transaction(TransactionMode.Manual)]
-    public class Version : IExternalCommand
+    public class About : IExternalCommand
     {
         public Result Execute(
           ExternalCommandData commandData,
           ref string message,
           ElementSet elements)
         {
-            var window = new FormVersion();
+            var window = new AboutMVVM();
             window.ShowDialog();
             return Result.Succeeded;
         }

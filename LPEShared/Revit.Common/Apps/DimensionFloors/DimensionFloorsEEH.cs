@@ -1,4 +1,3 @@
-#region Namespaces
 using Autodesk.Revit.ApplicationServices;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
@@ -9,52 +8,36 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Autodesk.Revit.DB.Events;
-
-#endregion
+using System.Reflection;
+using System.IO;
+using System.Runtime;
+using Autodesk.Revit.DB.Architecture;
+using Microsoft.SqlServer.Server;
+using System.Xml.Linq;
+using System.Diagnostics.Eventing.Reader;
+using System.Windows;
+using System.Windows.Controls;
 
 namespace Revit.Common
 {
     [Transaction(TransactionMode.Manual)]
-    public class DimensionFloors : IExternalCommand
+    public class DimensionFloorsEEH : IExternalEventHandler
     {
-        public Result Execute(
-          ExternalCommandData commandData,
-          ref string message,
-          ElementSet elements)
+        public void Execute(UIApplication uiapp)
         {
-            UIApplication uiapp = commandData.Application;
-            UIDocument uidoc = uiapp.ActiveUIDocument;
-            Application app = uiapp.Application;
-            Document doc = uidoc.Document;
-            View initialView = uidoc.ActiveView;
-
-            bool OK = true;
-            string errors = "";
-            if (!Utils.VerifyIfProjectParameterExists(doc, "Ambiente"))
-            {
-                errors += "\n- Ambiente";
-                OK = false;
-            }
-            if (!Utils.VerifyIfProjectParameterExists(doc, "Reforço de Tela"))
-            {
-                errors += "\n- Reforço de Tela";
-                OK = false;
-            }
-            if (!OK)
-            {
-                TaskDialog.Show("ATENÇÃO!", $"Não foi possível executar o comando por não existir no modelo os seguintes parâmetros:\n {errors}");
-                return Result.Cancelled;
-            }
-
-            if (uidoc.ActiveView is View3D)
-            {
-                TaskDialog.Show("Atenção!", "Abra uma vista de planta para rodar o plug-in!");
-                return Result.Cancelled;
-            }
-
             try
             {
+                SelectAmbienteMVVM.MainView.Ambientes_ListBox.IsEnabled = false;
+                SelectAmbienteMVVM.MainView.SelectAll_CheckBox.IsEnabled = false;
+                SelectAmbienteMVVM.MainView.SelectPisos_Button.IsEnabled = false;
+                SelectAmbienteMVVM.MainView.Execute_Button.IsEnabled = false;
 
+                UIDocument uidoc = uiapp.ActiveUIDocument;
+                Document doc = uidoc.Document;
+                View initialView = uidoc.ActiveView;
+                List<ElementId> selectedFloorIds = SelectAmbienteMVVM.MainView.SelectedFloorsIds;
+
+                List<string> selectedAmbientes = SelectAmbienteMVVM.MainView.AmbienteViewModels.Where(x => x.IsChecked).Select(x => x.Name).ToList();
 
                 List<string> floors = new FilteredElementCollector(doc, uidoc.ActiveView.Id)
                    .WhereElementIsNotElementType()
@@ -64,7 +47,7 @@ namespace Revit.Common
                    .Select(a => a.First().LookupParameter("Ambiente").AsString())
                    .ToList();
 
-                List<Element> allFloors = new FilteredElementCollector(doc, initialView.Id)
+                List<Element> allFloors = new FilteredElementCollector(doc, uidoc.ActiveView.Id)
                     .WhereElementIsNotElementType()
                     .OfCategory(BuiltInCategory.OST_Floors)
                     .ToList();
@@ -75,49 +58,9 @@ namespace Revit.Common
                     .Cast<DimensionType>()
                     .FirstOrDefault();
 
-                if (cotaLPEType == null)
-                {
-                    TaskDialog.Show("ATENÇÃO!", $"Não foi possível executar o comando por não existir as seguintes famílias no modelo:\n Cota_LPE");
-                    return Result.Cancelled;
-                }
-
-                var window = new SelectAmbienteMVVM(uidoc, SelectAmbientMVVMExecuteCommand.DimensionFloors);
-                //var window = new SelectAmbienteMVVM(floors, "COTAR PISOS", System.Windows.Visibility.Collapsed);
-                window.ShowDialog();
-
-                if (!window.Execute)
-                {
-                    return Result.Cancelled;
-                }
-                List<string> selectedAmbientes = new List<string>();
-                List<ElementId> selectedFloorIds = new List<ElementId>();
-
-                if (window.Select)
-                {
-                    foreach (var reference in uidoc.Selection.PickObjects(ObjectType.Element, new FloorSelectionFilter(), "Selecione os pisos que deseja reforçar"))
-                    {
-                        selectedAmbientes.Add(doc.GetElement(reference).LookupParameter("Ambiente").AsString());
-                        selectedFloorIds.Add(reference.ElementId);
-                    }
-                    selectedAmbientes = selectedAmbientes.Distinct().ToList();
-                }
-                else
-                {
-                    foreach (string item in window.AmbienteViewModels.Where(x => x.IsChecked).Select(x => x.Name))
-                    {
-                        selectedAmbientes.Add(item);
-                        selectedFloorIds.AddRange(new FilteredElementCollector(doc)
-                            .WhereElementIsNotElementType()
-                            .OfCategory(BuiltInCategory.OST_Floors)
-                            .Where(a => a.LookupParameter("Ambiente").AsString() == item)
-                            .Select(a => a.Id)
-                            .ToList());
-                    }
-                }
-
                 Options options = new Options
                 {
-                    View = initialView,
+                    View = uidoc.ActiveView,
                     ComputeReferences = true,
                     IncludeNonVisibleObjects = true
                 };
@@ -132,9 +75,29 @@ namespace Revit.Common
                     ElementCategoryFilter dimFilter = new ElementCategoryFilter(BuiltInCategory.OST_Dimensions);
                     ElementCategoryFilter linesFilter = new ElementCategoryFilter(BuiltInCategory.OST_SketchLines);
 
+                    if (!selectedFloorIds.Any())
+                    {
+                        foreach (string item in SelectAmbienteMVVM.MainView.AmbienteViewModels.Where(x => x.IsChecked).Select(x => x.Name))
+                        {
+                            selectedAmbientes.Add(item);
+                            selectedFloorIds.AddRange(new FilteredElementCollector(doc)
+                                .WhereElementIsNotElementType()
+                                .OfCategory(BuiltInCategory.OST_Floors)
+                                .Where(a => a.LookupParameter("Ambiente").AsString() == item)
+                                .Select(a => a.Id)
+                                .ToList());
+                        }
+                    }
+
+                    SelectAmbienteMVVM.ProgressBarViewModel.ProgressBarValue = 0;
+                    SelectAmbienteMVVM.MainView.ProgressBar.Maximum = selectedFloorIds.Count;
+                    int count = 0;
 
                     foreach (var floor in selectedFloorIds.Select(a => doc.GetElement(a)))
                     {
+                        SelectAmbienteMVVM.ProgressBarViewModel.ProgressBarValue += 1;
+                        count++;
+                        ExternalApplication.LPEApp.SelectAmbienteMVVM.ProgressBar_TextBlock.Text = $"Cotando pisos ({count}/{selectedFloorIds.Count})";
                         if (floor.LookupParameter("Reforço de Tela").AsInteger() == 1 || !selectedAmbientes.Contains(floor.LookupParameter("Ambiente").AsString()))
                         {
                             continue;
@@ -156,11 +119,20 @@ namespace Revit.Common
                             if (geomObj is Solid)
                             {
                                 Solid solid = geomObj as Solid;
-                                foreach (Edge edge in solid.Edges)
+                                foreach (var face in solid.Faces.Cast<Face>().Where(face => face.ComputeNormal(new UV(0, 0)).Z > 0.1))
                                 {
-                                    if (edge.AsCurve() is Line)
+                                    foreach (EdgeArray edgearray in face.EdgeLoops)
                                     {
-                                        allFloorEdges.Add(edge);
+                                        foreach (Edge edge in edgearray)
+                                        {
+                                            if (edge.AsCurve() is Line)
+                                            {
+                                                if ((edge.AsCurve() as Line).Direction.Z < 0.9)
+                                                {
+                                                    allFloorEdges.Add(edge);
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -278,28 +250,19 @@ namespace Revit.Common
                 }
 
                 tg.Assimilate();
-                return Result.Succeeded;
-
+                SelectAmbienteMVVM.MainView.Dispose();
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                TaskDialog.Show("ERRO", $"Houve um erro não mapeado na execução do plug-in, contate os desenvolvedores.\n\n{e.Message}");
-                return Result.Cancelled;
+                SelectAmbienteMVVM.MainView.Dispose(); 
+                TaskDialog.Show("ATENÇÃO!", "Erro não mapeado, contate os desenvolvedores.\n\n" + ex.StackTrace);
+                throw;
             }
         }
-    }
-    public class TransformedPoint
-    {
-        public Reference Reference { get; set; }
-        public XYZ XYZ { get; set; }
-        public XYZ TranformedXYZ { get; set; }
 
-        public TransformedPoint(Edge edge, int epNumber, Transform transform)
+        public string GetName()
         {
-            Reference = edge.GetEndPointReference(epNumber);
-            XYZ = edge.AsCurve().GetEndPoint(epNumber);
-            TranformedXYZ = transform.OfPoint(XYZ);
+            return this.GetType().Name;
         }
-
     }
 }

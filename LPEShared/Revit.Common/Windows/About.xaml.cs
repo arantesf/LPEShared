@@ -18,9 +18,9 @@ namespace Revit.Common
     /// <summary>
     /// Interaction logic for About.xaml
     /// </summary>
-    public partial class About : Window
+    public partial class AboutMVVM : Window
     {
-        public About()
+        public AboutMVVM()
         {
             InitializeComponent();
         }

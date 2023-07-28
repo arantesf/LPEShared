@@ -11,20 +11,39 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Apps\About\About.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Apps\DimensionFloors\DimensionFloors.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Apps\DimensionFloors\DimensionFloorsEEH.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Apps\DimensionFloors\DimensionFloorsEC.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Apps\MeshReinforcement\MeshReinforcementEC.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Apps\MeshReinforcement\MeshReinforcementEEH.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Apps\MeshReinforcement\MeshReinforcement.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Apps\RestoreFloors\RestoreFloorsEC.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Apps\RestoreFloors\RestoreFloors.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Apps\SplitFloors\SplitFloors.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Apps\RestoreFloors\RestoreFloorsEEH.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Apps\SplitFloors\SelectFloorsEEH.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Apps\SplitFloors\SplitFloorsUIService.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Apps\SplitFloors\SplitFloorsEEH.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Apps\SplitFloors\SplitFloorsEC.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Apps\SplitJoints\SplitJoints.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Apps\SplitJoints\SplitJointsEC.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Apps\SplitJoints\SplitJointsEEH.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Apps\TagJoints\TagJointsEC.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Apps\TagJoints\TagJointsEEH.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Apps\TagJoints\TagJoints.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Classes\GroupOfJoints.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ExternalApplication\ExternalApplication.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)ViewModels\AmbienteModel.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)ViewModels\CurveAndProjection.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ViewModels\AmbienteReinforcementViewModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ViewModels\AmbienteViewModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Classes\CurveAndProjection.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utils\Utils.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ViewModels\KeyScheduleElementViewModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ViewModels\ProgressBarViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\ViewModelBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Windows\About.xaml.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Windows\SelectAmbienteMVVM.xaml.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Windows\SelectAmbienteReinforcementMVVM.xaml.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)Revit.addin">
+    <None Include="$(MSBuildThisFileDirectory)LPE-PisosEJuntas.addin">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
@@ -32,8 +51,6 @@
     <Content Include="$(MSBuildThisFileDirectory)PackageContents.xml" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="$(MSBuildThisFileDirectory)Apps\MeshReinforcement\" />
-    <Folder Include="$(MSBuildThisFileDirectory)Apps\RestoreFloors\" />
     <Folder Include="$(MSBuildThisFileDirectory)ExternalApplication\" />
   </ItemGroup>
   <ItemGroup>
@@ -42,6 +59,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="$(MSBuildThisFileDirectory)Windows\SelectAmbienteMVVM.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="$(MSBuildThisFileDirectory)Windows\SelectAmbienteReinforcementMVVM.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -14,6 +14,9 @@ namespace Revit.Common
     [Regeneration(RegenerationOption.Manual)]
     public class ExternalApplication : IExternalApplication
     {
+        internal UIApplication uiApp = null;
+        internal static ExternalApplication LPEApp = new ExternalApplication();
+
         public Result OnShutdown(UIControlledApplication application)
         {
             return Result.Succeeded;
@@ -26,6 +29,104 @@ namespace Revit.Common
             return Result.Succeeded;
         }
 
+        internal ExternalEvent ExternalEvent = null;
+        internal SelectAmbienteMVVM SelectAmbienteMVVM = null;
+        internal SelectAmbienteReinforcementMVVM SelectAmbienteReinforcementMVVM = null;
+
+        internal void ShowMeshReinforcementUI()
+        {
+            if (SelectAmbienteReinforcementMVVM == null || SelectAmbienteReinforcementMVVM.IsLoaded == false)
+            {
+                UIDocument uidoc = uiApp.ActiveUIDocument;
+                //INICIALIZANDO A JANELA E PASSANDO O EXTERNAL EVENT
+                SelectAmbienteReinforcementMVVM = new SelectAmbienteReinforcementMVVM(uidoc);
+                SelectAmbienteReinforcementMVVM.Topmost = true;
+                if (SelectAmbienteReinforcementMVVM.IsInitialized)
+                {
+                    SelectAmbienteReinforcementMVVM.Show();
+                }
+            }
+        }
+
+        internal void ShowSplitFloorsUI()
+        {
+            if (SelectAmbienteMVVM == null || SelectAmbienteMVVM.IsLoaded == false)
+            {
+                UIDocument uidoc = uiApp.ActiveUIDocument;
+
+                //INICIALIZANDO A JANELA E PASSANDO O EXTERNAL EVENT
+                SelectAmbienteMVVM = new SelectAmbienteMVVM(uidoc, SelectAmbientMVVMExecuteCommand.SplitFloors);
+                SelectAmbienteMVVM.Topmost = true;
+                if (SelectAmbienteMVVM.IsInitialized)
+                {
+                    SelectAmbienteMVVM.Show();
+                }
+            }
+        }
+
+        internal void ShowRestoreFloorsUI()
+        {
+            if (SelectAmbienteMVVM == null || SelectAmbienteMVVM.IsLoaded == false)
+            {
+                UIDocument uidoc = uiApp.ActiveUIDocument;
+
+                //INICIALIZANDO A JANELA E PASSANDO O EXTERNAL EVENT
+                SelectAmbienteMVVM = new SelectAmbienteMVVM(uidoc, SelectAmbientMVVMExecuteCommand.RestoreFloors);
+                SelectAmbienteMVVM.Topmost = true;
+                if (SelectAmbienteMVVM.IsInitialized)
+                {
+                    SelectAmbienteMVVM.Show();
+                }
+            }
+        }
+
+        internal void ShowDimensionFloorsUI()
+        {
+            if (SelectAmbienteMVVM == null || SelectAmbienteMVVM.IsLoaded == false)
+            {
+                UIDocument uidoc = uiApp.ActiveUIDocument;
+
+                //INICIALIZANDO A JANELA E PASSANDO O EXTERNAL EVENT
+                SelectAmbienteMVVM = new SelectAmbienteMVVM(uidoc, SelectAmbientMVVMExecuteCommand.DimensionFloors);
+                SelectAmbienteMVVM.Topmost = true;
+                if (SelectAmbienteMVVM.IsInitialized)
+                {
+                    SelectAmbienteMVVM.Show();
+                }
+            }
+        }
+
+        internal void ShowTagJointsUI()
+        {
+            if (SelectAmbienteMVVM == null || SelectAmbienteMVVM.IsLoaded == false)
+            {
+                UIDocument uidoc = uiApp.ActiveUIDocument;
+
+                //INICIALIZANDO A JANELA E PASSANDO O EXTERNAL EVENT
+                SelectAmbienteMVVM = new SelectAmbienteMVVM(uidoc, SelectAmbientMVVMExecuteCommand.TagJoints);
+                SelectAmbienteMVVM.Topmost = true;
+                if (SelectAmbienteMVVM.IsInitialized)
+                {
+                    SelectAmbienteMVVM.Show();
+                }
+            }
+        }
+
+        internal void ShowSplitJointsUI()
+        {
+            if (SelectAmbienteMVVM == null || SelectAmbienteMVVM.IsLoaded == false)
+            {
+                UIDocument uidoc = uiApp.ActiveUIDocument;
+
+                //INICIALIZANDO A JANELA E PASSANDO O EXTERNAL EVENT
+                SelectAmbienteMVVM = new SelectAmbienteMVVM(uidoc, SelectAmbientMVVMExecuteCommand.SplitJoints);
+                SelectAmbienteMVVM.Topmost = true;
+                if (SelectAmbienteMVVM.IsInitialized)
+                {
+                    SelectAmbienteMVVM.Show();
+                }
+            }
+        }
         private void AddRibbonButtons(UIControlledApplication application)
         {
             Assembly assembly = Assembly.GetExecutingAssembly();
@@ -47,73 +148,66 @@ namespace Revit.Common
 
             //////////// SPLIT FLOORS ////////////
 
-            PushButtonData splitFloorsPBD = new PushButtonData("SplitFloors", "Dividir Pisos", executingAssemblyPath, typeof(SplitFloors).FullName)
+            panel.AddItem(new PushButtonData("SplitFloors", "Dividir Pisos", executingAssemblyPath, typeof(SplitFloorsEC).FullName)
             {
                 ToolTip = "Divide o piso de um ambiente com base nas suas juntas.",
                 LongDescription = "O parâmetro \"Ambiente\" deve ser preenchido tanto nos elementos de pisos quanto nos respectivos elementos de juntas.",
                 LargeImage = ResourceImage.GetIcon("DividirPisosLPE.png")
-            };
-            panel.AddItem(splitFloorsPBD);
+            });
 
             //////////// SPLIT JOINTS ////////////
 
-            PushButtonData splitJointsPBD = new PushButtonData("SplitJoints", "Dividir Juntas", executingAssemblyPath, typeof(SplitJoints).FullName)
+            panel.AddItem(new PushButtonData("SplitJoints", "Dividir Juntas", executingAssemblyPath, typeof(SplitJointsEC).FullName)
             {
                 ToolTip = "Divide as juntas do modelo pelos encontros com outras juntas ou outros pisos do mesmo ambiente.",
                 LongDescription = "O parâmetro \"Ambiente\" deve ser preenchido tanto nos elementos de pisos quanto nos respectivos elementos de juntas.",
                 LargeImage = ResourceImage.GetIcon("DividirJuntasLPE.png")
-            };
-            panel.AddItem(splitJointsPBD);
+            });
 
             //////////// DIMENSION FLOORS ////////////
 
-            PushButtonData dimensionPBD = new PushButtonData("DimensionFloors", "Cotar Pisos", executingAssemblyPath, typeof(DimensionFloors).FullName)
+            panel.AddItem(new PushButtonData("DimensionFloors", "Cotar Pisos", executingAssemblyPath, typeof(DimensionFloorsEC).FullName)
             {
                 ToolTip = "Cota os pisos divididos em suas duas direções principais.",
                 LongDescription = "O comando utilizará o comando Aligned Dimension para criar 2 cotas em cada piso do modelo.",
                 LargeImage = ResourceImage.GetIcon("CotarPisosLPE.png")
-            };
-            panel.AddItem(dimensionPBD);
+            });
 
-            //////////// MESH REINFORCEMENT ////////////
+            ////////////// MESH REINFORCEMENT ////////////
 
-            PushButtonData meshReinforcementPBD = new PushButtonData("MeshReinforcement", "Reforçar com Tela", executingAssemblyPath, typeof(SplitJoints).FullName)
+            panel.AddItem(new PushButtonData("MeshReinforcement", "Reforçar com Tela", executingAssemblyPath, typeof(MeshReinforcementEC).FullName)
             {
                 ToolTip = "Caracteriza os pisos de fibra (Parâmetro ''(s/n) Fibra'') que possuem dimensões com porporção maiores que 1,5:1 com uma hachura e o preenchimento dos parâmetros de espaçadores.",
                 LongDescription = "Escolha, na janela que se abre, a tela que deseja inserir como reforço e o cobrimento a ser aplicado.",
                 LargeImage = ResourceImage.GetIcon("ReforçarPisosLPE.png")
-            };
-            panel.AddItem(splitJointsPBD);
+            });
 
             //////////// TAG JOINTS ////////////
 
-            PushButtonData tagJointsPBD = new PushButtonData("TagJoints", "Tagear Juntas", executingAssemblyPath, typeof(TagJoints).FullName)
+            panel.AddItem(new PushButtonData("TagJoints", "Tagear Juntas", executingAssemblyPath, typeof(TagJointsEC).FullName)
             {
                 ToolTip = "Etiqueta as juntas dos ambientes escolhidos na janela.",
                 LongDescription = "As juntas serão etiquetadas alternadamente.",
                 LargeImage = ResourceImage.GetIcon("TagearJuntasLPE.png")
-            };
-            panel.AddItem(splitJointsPBD);
+            });
 
             //////////// RESTORE FLOORS ////////////
 
-            PushButtonData restoreFloorsPBD = new PushButtonData("RestoreFloors", "Restaurar Pisos", executingAssemblyPath, typeof(RestoreFloors).FullName)
+            panel.AddItem(new PushButtonData("RestoreFloors", "Restaurar Pisos", executingAssemblyPath, typeof(RestoreFloorsEC).FullName)
             {
                 ToolTip = "Restaura os pisos divididos pelo comando \"Dividir Pisos\" ao seu formato original.",
                 LongDescription = "O comando utilizará o valor prenchido no parâmetro \"Ambiente\" para identificar quais pisos se unirão.",
-                LargeImage = ResourceImage.GetIcon("TagearJuntasLPE.png")
-            };
-            panel.AddItem(splitJointsPBD);
+                LargeImage = ResourceImage.GetIcon("RestaurarPisosLPE.png")
+            });
 
             //////////// ABOUT ////////////
 
-            PushButtonData aboutPBD = new PushButtonData("About", "Sobre", executingAssemblyPath, typeof(About).FullName)
+            panel.AddItem(new PushButtonData("About", "Sobre", executingAssemblyPath, typeof(About).FullName)
             {
                 ToolTip = "",
                 LongDescription = "",
-                LargeImage = ResourceImage.GetIcon("TagearJuntasLPE.png")
-            };
-            panel.AddItem(splitJointsPBD);
+                LargeImage = ResourceImage.GetIcon("About.png")
+            });
         }
     }
 }

@@ -7,10 +7,12 @@ using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Selection;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Controls;
+using System.Windows.Media;
 using System.Xml.Linq;
 
 namespace Revit.Common
@@ -57,7 +59,14 @@ namespace Revit.Common
         {
             try
             {
-                if (element.Category != null && element.Category.Id.IntegerValue == (int)BuiltInCategory.OST_Floors)
+                Category category = element.Category;
+                if (category == null) return false;
+#if Revit2021 || Revit2022 || Revit2023
+                int categoryId = element.Category.Id.IntegerValue;
+#else
+                int categoryId = (int)element.Category.Id.Value;
+#endif
+                if (element.Category != null && categoryId == (int)BuiltInCategory.OST_Floors)
                 {
                     return true;
                 }
@@ -214,7 +223,7 @@ namespace Revit.Common
             }
         }
 
-        public static Floor CreateFloor(Document doc, CurveArray curveArray, bool structural)
+        public static Floor CreateFloor(Document doc, CurveArray curveArray, ElementId typeId, ElementId levelId)
         {
             using (var trans = new Transaction(doc))
             {
@@ -222,7 +231,43 @@ namespace Revit.Common
                 {
                     trans.Start("Internal Transaction");
                     HideRevitWarnings(trans);
-                    Floor createdFloor = doc.Create.NewFloor(curveArray, structural);
+#if Revit2021
+                    Floor createdFloor = doc.Create.NewFloor(curveArray, false);
+#else
+                    List<CurveLoop> curveLoops = GetCurveLoopsByCurveArray(curveArray);
+                    Floor createdFloor = Floor.Create(doc, curveLoops, typeId, levelId);
+#endif
+                    trans.Commit();
+                    return createdFloor;
+                }
+                catch (Exception)
+                {
+                    return null;
+                }
+            }
+        }
+
+        public static Floor CreateFloor(Document doc, List<CurveLoop> curveLoops, ElementId typeId, ElementId levelId)
+        {
+            using (var trans = new Transaction(doc))
+            {
+                try
+                {
+                    trans.Start("Internal Transaction");
+                    HideRevitWarnings(trans);
+#if Revit2021
+                    CurveArray curveArray = new CurveArray();
+                    foreach (var curveloop in curveLoops)
+                    {
+                        foreach (var curve in curveloop)
+                        {
+                            curveArray.Append(curve);
+                        }
+                    }
+                    Floor createdFloor = doc.Create.NewFloor(curveArray,doc.GetElement(typeId) as FloorType, doc.GetElement(levelId) as Level, false);
+#else
+                    Floor createdFloor = Floor.Create(doc, curveLoops, typeId, levelId);
+#endif
                     trans.Commit();
                     return createdFloor;
                 }
@@ -243,6 +288,17 @@ namespace Revit.Common
             }
         }
 
+        
+        public static void JoinElements(Document doc, Element firstElement, Element secondElement)
+        {
+            using (var trans = new Transaction(doc))
+            {
+                trans.Start("Internal Transaction");
+                HideRevitWarnings(trans);
+                JoinGeometryUtils.JoinGeometry(doc, firstElement, secondElement);
+                trans.Commit();
+            }
+        }
 
         public static void DeleteElements(Document doc, IEnumerable<Element> elements)
         {
@@ -252,11 +308,10 @@ namespace Revit.Common
                 HideRevitWarnings(trans);
                 foreach (var element in elements)
                 {
-                    try
+                    if (element != null && element.IsValidObject)
                     {
                         doc.Delete(element.Id);
                     }
-                    catch { }
                 };
                 trans.Commit();
             }
@@ -272,10 +327,35 @@ namespace Revit.Common
                 {
                     if (curve is Arc)
                     {
-                        XYZ ep0 = new XYZ(curve.GetEndPoint(0).X, curve.GetEndPoint(0).Y, levelZValue);
-                        XYZ midPoint = new XYZ(curve.Evaluate(0.5, true).X, curve.Evaluate(0.5, true).Y, levelZValue);
-                        XYZ ep1 = new XYZ(curve.GetEndPoint(1).X, curve.GetEndPoint(1).Y, levelZValue);
-                        curveArrayInLevelElevation.Append(Arc.Create(ep0, ep1, midPoint));
+                        if (curve.IsBound)
+                        {
+                            XYZ ep0 = new XYZ(curve.GetEndPoint(0).X, curve.GetEndPoint(0).Y, levelZValue);
+                            XYZ midPoint = new XYZ(curve.Evaluate(0.5, true).X, curve.Evaluate(0.5, true).Y, levelZValue);
+                            XYZ ep1 = new XYZ(curve.GetEndPoint(1).X, curve.GetEndPoint(1).Y, levelZValue);
+                            curveArrayInLevelElevation.Append(Arc.Create(ep0, ep1, midPoint));
+                        }
+                        else
+                        {
+                            XYZ center = (curve as Arc).Center;
+                            double radius = (curve as Arc).Radius;
+                            XYZ ep0 = new XYZ((center + radius * XYZ.BasisY).X, (center + radius * XYZ.BasisY).Y, levelZValue);
+                            XYZ ep025 = new XYZ((center + radius * XYZ.BasisX).X, (center + radius * XYZ.BasisX).Y, levelZValue);
+                            XYZ ep050 = new XYZ((center - radius * XYZ.BasisY).X, (center - radius * XYZ.BasisY).Y, levelZValue);
+                            XYZ ep075 = new XYZ((center - radius * XYZ.BasisX).X, (center - radius * XYZ.BasisX).Y, levelZValue);
+                            curveArrayInLevelElevation.Append(Arc.Create(ep0, ep025, ep050));
+                            curveArrayInLevelElevation.Append(Arc.Create(ep050, ep075, ep0));
+                        }
+                    }
+                    else if (curve is HermiteSpline)
+                    {
+                        HermiteSpline spline = (HermiteSpline)curve;
+                        List<XYZ> newControlPoints = new List<XYZ>();
+                        foreach (var controlPoint in spline.ControlPoints)
+                        {
+                            newControlPoints.Add(new XYZ(controlPoint.X, controlPoint.Y, levelZValue));
+                        }
+                        curveArrayInLevelElevation.Append(HermiteSpline.Create(newControlPoints, spline.IsPeriodic));
+
                     }
                     else
                     {
@@ -320,7 +400,17 @@ namespace Revit.Common
                 return initialView;
             }
         }
-
+        public static Level CreateLevel(Document doc, double elevation)
+        {
+            using (var trans = new Transaction(doc))
+            {
+                trans.Start("Internal Transaction");
+                HideRevitWarnings(trans);
+                Level level = Level.Create(doc, elevation);
+                trans.Commit();
+                return level;
+            }
+        }
 
 
         public static List<Room> CreateRooms(Document doc, Level level)
@@ -433,6 +523,117 @@ namespace Revit.Common
             return curveLoops;
         }
 
+        public static Solid GetSolid(Element element)
+        {
+            Solid solid = null;
+            Options opt = new Options();
+            try
+            {
+                GeometryElement geoEle = element.get_Geometry(opt);
+                foreach (GeometryObject geoObj in geoEle)
+                {
+                    if (geoObj is Solid)
+                    {
+                        solid = geoObj as Solid;
+                    }
+                }
+            }
+            catch { }
+
+            return solid;
+        }
+
+        public static List<CurveLoop> FixCurveLoopsSmallLines(List<CurveLoop> curveLoops, double tolerance)
+        {
+            List<CurveLoop> fixedCurveLoops = new List<CurveLoop>();
+            CurveArray curveArray = new CurveArray();
+            foreach (var curveLoop in curveLoops)
+            {
+                if (curveLoop.Where(curve => curve.Length < tolerance).Any())
+                {
+                    CurveLoop fixedCurveLoop = new CurveLoop();
+                    for (int i = 0; i < curveLoop.Count(); i++)
+                    {
+                        Curve curve = curveLoop.ElementAt(i);
+                        if (curve.Length > tolerance)
+                        {
+                            try
+                            {
+                                fixedCurveLoop.Append(curve);
+                            }
+                            catch (Exception)
+                            {
+                                Curve correctionCurve = Line.CreateBound(fixedCurveLoop.Last().GetEndPoint(1), curve.GetEndPoint(1));
+                                fixedCurveLoop.Append(correctionCurve);
+                            }
+                        }
+                        else
+                        {
+                            if (i == curveLoop.Count() - 1)
+                            {
+                                List<Curve> otherCurves = new List<Curve>();
+                                otherCurves.AddRange(fixedCurveLoop);
+                                int count = fixedCurveLoop.Count();
+                                Curve nextCurve = fixedCurveLoop.ElementAt(0);
+                                fixedCurveLoop = new CurveLoop();
+                                XYZ initialPoint = curve.GetEndPoint(0);
+                                Curve fixedCurve = null;
+                                if (nextCurve is Arc)
+                                {
+                                    fixedCurve = Arc.Create(initialPoint, nextCurve.GetEndPoint(1), nextCurve.Evaluate(0.5, true));
+                                }
+                                else if (nextCurve is HermiteSpline)
+                                {
+                                    HermiteSpline spline = (HermiteSpline)nextCurve;
+                                    List<XYZ> newPoints = new List<XYZ>() { initialPoint };
+                                    newPoints.AddRange(spline.Tessellate().Skip(1));
+                                    fixedCurve = HermiteSpline.Create(newPoints, spline.IsPeriodic);
+                                }
+                                else
+                                {
+                                    fixedCurve = Line.CreateBound(initialPoint, nextCurve.GetEndPoint(1));
+                                }
+                                fixedCurveLoop.Append(fixedCurve);
+                                for (int j = 1; j < otherCurves.Count; j++)
+                                {
+                                    fixedCurveLoop.Append(otherCurves[j]);
+                                }
+                            }
+                            else
+                            {
+                                Curve nextCurve = curveLoop.ElementAt(i + 1);
+                                XYZ initialPoint = curve.GetEndPoint(0);
+                                Curve fixedCurve = null;
+                                if (nextCurve is Arc)
+                                {
+                                    fixedCurve = Arc.Create(initialPoint, nextCurve.GetEndPoint(1), nextCurve.Evaluate(0.5, true));
+                                }
+                                else if (nextCurve is HermiteSpline)
+                                {
+                                    HermiteSpline spline = (HermiteSpline)nextCurve;
+                                    List<XYZ> newPoints = new List<XYZ>() { initialPoint };
+                                    newPoints.AddRange(spline.Tessellate().Skip(1));
+                                    fixedCurve = HermiteSpline.Create(newPoints, spline.IsPeriodic);
+                                }
+                                else
+                                {
+                                    fixedCurve = Line.CreateBound(initialPoint, nextCurve.GetEndPoint(1));
+                                }
+                                fixedCurveLoop.Append(fixedCurve);
+                                i++;
+                            }
+                        }
+                    }
+                    fixedCurveLoops.Add(fixedCurveLoop);
+                }
+                else
+                {
+                    fixedCurveLoops.Add(curveLoop);
+                }
+            }
+            return fixedCurveLoops;
+        }
+
         public static CurveArray GetCurveArrayByCurveLoop(CurveLoop curveLoop)
         {
             CurveArray curveArray = new CurveArray();
@@ -531,7 +732,7 @@ namespace Revit.Common
             try
             {
                 Solid solid1 = GetElementSolid(element1);
-                
+
                 if (solid1 == null)
                 {
                     return false;
@@ -927,7 +1128,12 @@ namespace Revit.Common
 
             foreach (var item in floor.GetDependentElements(linesFilter))
             {
-                if (doc.GetElement(item).Category.Id.IntegerValue == (int)BuiltInCategory.OST_SketchLines)
+#if Revit2021 || Revit2022 || Revit2023
+                int categoryId = doc.GetElement(item).Category.Id.IntegerValue;
+#else
+                int categoryId = (int)doc.GetElement(item).Category.Id.Value;
+#endif
+                if (categoryId == (int)BuiltInCategory.OST_SketchLines)
                 {
                     bool boundaryLine = false;
                     foreach (Parameter parameter in (doc.GetElement(item) as CurveElement).Parameters)
@@ -1016,7 +1222,12 @@ namespace Revit.Common
 
             foreach (var item in floor.GetDependentElements(linesFilter))
             {
-                if (doc.GetElement(item).Category.Id.IntegerValue == (int)BuiltInCategory.OST_SketchLines)
+#if Revit2021 || Revit2022 || Revit2023
+                int categoryId = doc.GetElement(item).Category.Id.IntegerValue;
+#else
+                int categoryId = (int)doc.GetElement(item).Category.Id.Value;
+#endif
+                if (categoryId == (int)BuiltInCategory.OST_SketchLines)
                 {
                     bool boundaryLine = false;
                     foreach (Parameter parameter in (doc.GetElement(item) as CurveElement).Parameters)
@@ -1237,7 +1448,12 @@ namespace Revit.Common
 
             foreach (var item in floor.GetDependentElements(linesFilter))
             {
-                if (doc.GetElement(item).Category.Id.IntegerValue == (int)BuiltInCategory.OST_SketchLines)
+#if Revit2021 || Revit2022 || Revit2023
+                int categoryId = doc.GetElement(item).Category.Id.IntegerValue;
+#else
+                int categoryId = (int)doc.GetElement(item).Category.Id.Value;
+#endif
+                if (categoryId == (int)BuiltInCategory.OST_SketchLines)
                 {
                     bool boundaryLine = false;
                     foreach (Parameter parameter in (doc.GetElement(item) as CurveElement).Parameters)
@@ -1519,12 +1735,14 @@ namespace Revit.Common
                         txDivide.SetFailureHandlingOptions(failOpt);
                         txDivide.Start();
 
-                        ////2021////
+#if Revit2021
                         Floor newFloor = floor.Document.Create.NewFloor(cArray, floor.FloorType, floor.Document.GetElement(floor.LevelId) as Level, true);
 
-                        ////2022////
-                        //CurveLoop loop = Utils.ArrayToLoop(cArray);
-                        //Floor newFloor = Floor.Create(floor.Document, new List<CurveLoop>() { loop }, floor.FloorType.Id, floor.LevelId);
+#else
+                        CurveLoop loop = Utils.ArrayToLoop(cArray);
+                        Floor newFloor = Floor.Create(floor.Document, new List<CurveLoop>() { loop }, floor.FloorType.Id, floor.LevelId);
+#endif
+
 
 
                         txDivide.Commit();
@@ -1541,16 +1759,21 @@ namespace Revit.Common
                             //Utils.SetPreviousPointsElevationsToNewFloor(floor as Floor, newFloor);
 
                         }
-                        if (floor.SlabShapeEditor == null)
+#if Revit2021 || Revit2022 || Revit2023
+                        SlabShapeEditor slabShapeEditor = floor.SlabShapeEditor;
+#else
+                        SlabShapeEditor slabShapeEditor = floor.GetSlabShapeEditor();
+#endif
+                        if (slabShapeEditor == null)
                         {
-                            Utils.SetPointsElevationsOfNewFloor(floor as Floor, newFloor, 0);
+                            SetPointsElevationsOfNewFloor(floor as Floor, newFloor, 0);
                             continue;
                         }
-                        else if (floor.SlabShapeEditor.IsEnabled)
+                        else if (slabShapeEditor.IsEnabled)
                         {
                             double e = (floor.Document.GetElement(floor.LevelId) as Level).Elevation + floor.get_Parameter(BuiltInParameter.FLOOR_HEIGHTABOVELEVEL_PARAM).AsDouble();
                             bool change = false;
-                            foreach (SlabShapeVertex XYZ in floor.SlabShapeEditor.SlabShapeVertices)
+                            foreach (SlabShapeVertex XYZ in slabShapeEditor.SlabShapeVertices)
                             {
                                 if (e != XYZ.Position.Z)
                                 {
@@ -2103,7 +2326,7 @@ namespace Revit.Common
                     }
                     foreach (var joint2 in joints)
                     {
-                        if (joint2.Id.IntegerValue != joint.Id.IntegerValue)
+                        if (joint2.Id != joint.Id)
                         {
                             if ((joint2.Location as LocationCurve).Curve.Length == 0)
                             {
@@ -2473,7 +2696,11 @@ namespace Revit.Common
             Transaction tx = new Transaction(oldFloor.Document, "transatcion");
 
             tx.Start("Enable Editor");
+#if Revit2021 || Revit2022 || Revit2023
             SlabShapeEditor sse = newFloor.SlabShapeEditor;
+#else
+            SlabShapeEditor sse = newFloor.GetSlabShapeEditor();
+#endif
             sse.Enable();
             tx.Commit();
 
@@ -2484,7 +2711,7 @@ namespace Revit.Common
             tx.SetFailureHandlingOptions(failOpt);
 
 
-            foreach (SlabShapeVertex newVertex in newFloor.SlabShapeEditor.SlabShapeVertices)
+            foreach (SlabShapeVertex newVertex in sse.SlabShapeVertices)
             {
                 XYZ newPoint = newVertex.Position;
 
@@ -2508,8 +2735,11 @@ namespace Revit.Common
         public static void SetPointsElevationsOfNewFloor(Floor oldFloor, Floor newFloor, double offset)
         {
             Transaction tx = new Transaction(oldFloor.Document, "transatcion");
-
+#if Revit2021 || Revit2022 || Revit2023
             SlabShapeEditor sse = newFloor.SlabShapeEditor;
+#else
+            SlabShapeEditor sse = newFloor.GetSlabShapeEditor();
+#endif
             if (!sse.IsEnabled)
             {
                 tx.Start("Enable Editor");
@@ -2526,7 +2756,7 @@ namespace Revit.Common
             tx.SetFailureHandlingOptions(failOpt);
 
 
-            foreach (SlabShapeVertex newVertex in newFloor.SlabShapeEditor.SlabShapeVertices)
+            foreach (SlabShapeVertex newVertex in sse.SlabShapeVertices)
             {
                 XYZ newPoint = newVertex.Position;
 
@@ -2554,8 +2784,14 @@ namespace Revit.Common
             Transaction tx = new Transaction(newFloor.Document, "transatcion");
 
             tx.Start("Enable Editor");
-            SlabShapeEditor sse = newFloor.SlabShapeEditor;
-            sse.Enable();
+#if Revit2021 || Revit2022 || Revit2023
+            SlabShapeEditor newSSE = newFloor.SlabShapeEditor;
+            SlabShapeEditor oldSSE = oldFloor.SlabShapeEditor;
+#else
+            SlabShapeEditor newSSE = newFloor.GetSlabShapeEditor();
+            SlabShapeEditor oldSSE = oldFloor.GetSlabShapeEditor();
+#endif
+            newSSE.Enable();
             tx.Commit();
 
 
@@ -2566,11 +2802,11 @@ namespace Revit.Common
             tx.Start("Change Points Elevations");
 
 
-            foreach (SlabShapeVertex oldVertex in oldFloor.SlabShapeEditor.SlabShapeVertices)
+            foreach (SlabShapeVertex oldVertex in oldSSE.SlabShapeVertices)
             {
                 XYZ oldPoint = oldVertex.Position;
                 bool foundSimilarPoint = false;
-                foreach (SlabShapeVertex newVertex in newFloor.SlabShapeEditor.SlabShapeVertices)
+                foreach (SlabShapeVertex newVertex in newSSE.SlabShapeVertices)
                 {
                     XYZ newPoint = newVertex.Position;
 
@@ -2581,7 +2817,7 @@ namespace Revit.Common
                             try
                             {
                                 XYZ projectedPoint = oldFloor.GetVerticalProjectionPoint(newPoint, FloorFace.Top);
-                                sse.ModifySubElement(newVertex, projectedPoint.Z - newVertex.Position.Z);
+                                newSSE.ModifySubElement(newVertex, projectedPoint.Z - newVertex.Position.Z);
                             }
                             catch (Exception)
                             {
@@ -2640,54 +2876,51 @@ namespace Revit.Common
                                             break;
                                     }
                                 }
-                                //try
-                                //{
-                                //    if (parameter.GUID == newFloorParameter.GUID)
-                                //    {
-
-                                //    }
-                                //}
-                                //catch (Exception)
-                                //{
-
-                                //}
-
-                                //try
-                                //{
-                                //    if (parameter.Id == newFloorParameter.Id)
-                                //    {
-                                //        switch (parameter.StorageType)
-                                //        {
-                                //            case StorageType.None:
-                                //                break;
-                                //            case StorageType.Integer:
-                                //                newFloorParameter.Set(parameter.AsInteger());
-                                //                break;
-                                //            case StorageType.Double:
-                                //                newFloorParameter.Set(parameter.AsDouble());
-                                //                break;
-                                //            case StorageType.String:
-                                //                newFloorParameter.Set(parameter.AsString());
-                                //                break;
-                                //            case StorageType.ElementId:
-                                //                newFloorParameter.Set(parameter.AsElementId());
-                                //                break;
-                                //            default:
-                                //                break;
-                                //        }
-                                //    }
-                                //}
-                                //catch (Exception)
-                                //{
-
-                                //}
                             }
                         }
                     }
                 }
-                //tx.Commit();
-                //}
                 trans.Commit();
+            }
+
+        }
+        public static void CopyAllParametersWithoutTransaction(Element elementFrom, Element elementTo, List<BuiltInParameter> parametersToIgnore)
+        {
+
+            foreach (Parameter parameter in (elementFrom).Parameters)
+            {
+                if (!parameter.IsReadOnly && parameter.HasValue)
+                {
+                    foreach (Parameter newFloorParameter in elementTo.Parameters)
+                    {
+                        if (!newFloorParameter.IsReadOnly &&
+                            !parametersToIgnore.Contains((newFloorParameter.Definition as InternalDefinition).BuiltInParameter))
+                        {
+                            if (parameter.Definition.Name == newFloorParameter.Definition.Name)
+                            {
+                                switch (parameter.StorageType)
+                                {
+                                    case StorageType.None:
+                                        break;
+                                    case StorageType.Integer:
+                                        newFloorParameter.Set(parameter.AsInteger());
+                                        break;
+                                    case StorageType.Double:
+                                        newFloorParameter.Set(parameter.AsDouble());
+                                        break;
+                                    case StorageType.String:
+                                        newFloorParameter.Set(parameter.AsString());
+                                        break;
+                                    case StorageType.ElementId:
+                                        newFloorParameter.Set(parameter.AsElementId());
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            }
+                        }
+                    }
+                }
             }
 
         }

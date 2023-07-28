@@ -65,6 +65,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="icon-lpe-engenharia.ico" />
     <Content Include="InstallScript.iss" />
   </ItemGroup>
   <ItemGroup>
