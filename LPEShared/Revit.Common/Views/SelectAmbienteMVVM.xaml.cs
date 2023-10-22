@@ -19,6 +19,7 @@ namespace Revit.Common
         public ObservableCollection<AmbienteViewModel> AmbienteViewModels { get; set; } = new ObservableCollection<AmbienteViewModel>();
         private ListCollectionView AmbienteCollectionView { get; set; }
         private string ExecuteButtonText { get; set; } = "Dividir Pisos";
+        private System.Windows.Visibility DivideReinforcementIsVisible { get; set; } = System.Windows.Visibility.Collapsed;
         private System.Windows.Visibility SelectIsVisible { get; set; } = System.Windows.Visibility.Collapsed;
         public bool Execute { get; set; } = false;
         public bool Select { get; set; } = false;
@@ -35,6 +36,7 @@ namespace Revit.Common
             ActiveDocument = uidoc.Document;
             List<string> ambientes = new List<string>();
             SelectExternalEvent = ExternalEvent.Create(new SelectFloorsEEH());
+            DivideReinforcementIsVisible = System.Windows.Visibility.Collapsed;
 
             switch (ambienteCommand)
             {
@@ -47,6 +49,7 @@ namespace Revit.Common
                         .Select(a => a.First().LookupParameter("Ambiente").AsString())
                         .ToList();
                     SelectIsVisible = System.Windows.Visibility.Visible;
+                    DivideReinforcementIsVisible = System.Windows.Visibility.Visible;
                     ExecuteExternalEvent = ExternalEvent.Create(new SplitFloorsEEH());
                     ExecuteButtonText = "DIVIDIR PISOS";
                     break;
@@ -139,6 +142,7 @@ namespace Revit.Common
             AmbienteCollectionView.SortDescriptions.Add(new System.ComponentModel.SortDescription("Name", System.ComponentModel.ListSortDirection.Ascending));
             Ambientes_ListBox.ItemsSource = AmbienteCollectionView;
             SelectPisos_Button.Visibility = SelectIsVisible;
+            DivideReinforcement_CheckBox.Visibility = DivideReinforcementIsVisible;
             Execute_Button.Content = ExecuteButtonText;
             this.Title = ExecuteButtonText;
         }

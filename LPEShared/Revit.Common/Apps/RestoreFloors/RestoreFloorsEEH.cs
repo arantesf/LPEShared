@@ -36,14 +36,14 @@ namespace Revit.Common
                 Document doc = uidoc.Document;
 
                 List<string> checkedAmbientesNames = SelectAmbienteMVVM.MainView.AmbienteViewModels.Where(x => x.IsChecked).Select(x => x.Name).ToList();
-                List<ElementId> selectedFloorsIds = SelectAmbienteMVVM.MainView.SelectedFloorsIds;
-                if (selectedFloorsIds.Any())
-                {
-                    foreach (var id in selectedFloorsIds)
-                    {
-                        checkedAmbientesNames.Add(doc.GetElement(id).LookupParameter("Ambiente").AsString());
-                    }
-                }
+                //List<ElementId> selectedFloorsIds = SelectAmbienteMVVM.MainView.SelectedFloorsIds;
+                //if (selectedFloorsIds.Any())
+                //{
+                //    foreach (var id in selectedFloorsIds)
+                //    {
+                //        checkedAmbientesNames.Add(doc.GetElement(id).LookupParameter("Ambiente").AsString());
+                //    }
+                //}
                 checkedAmbientesNames = checkedAmbientesNames.Distinct().ToList();
 
                 using (TransactionGroup tg = new TransactionGroup(doc, "Restaurar Pisos"))
@@ -221,10 +221,12 @@ namespace Revit.Common
 
                             tx.Start("Delete Other Floors");
 
+
                             for (int i = 0; i < floorCurveLoops.Count; i++)
                             {
+                                CurveLoop joinedCurveLoop = Utils.JoinColinearCurves(doc, floorCurveLoops.ElementAt(i).Key, out bool _);
                                 CurveArray curveArray = new CurveArray();
-                                foreach (var curve in floorCurveLoops.ElementAt(i).Key)
+                                foreach (var curve in joinedCurveLoop)
                                 {
                                     curveArray.Append(curve);
                                 }
@@ -261,10 +263,11 @@ namespace Revit.Common
 
                             foreach (Floor newFloor in newFloors.Select(a => a.Value))
                             {
-                                foreach (Floor floor in pair.Value.Cast<Floor>())
-                                {
-                                    Utils.SetPointsElevationsOfNewFloor(floor as Floor, newFloor, 0);
-                                }
+                                Utils.SetPointsElevationsOfNewFloor(pair.Value.Cast<Floor>().ToList(), newFloor, 0);
+                                //foreach (Floor floor in pair.Value.Cast<Floor>())
+                                //{
+                                //    Utils.SetPointsElevationsOfNewFloor(floor, newFloor, 0);
+                                //}
                                 tx.Start();
                                 foreach (Floor floor1 in pair.Value.Cast<Floor>())
                                 {

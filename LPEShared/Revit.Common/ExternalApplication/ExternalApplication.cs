@@ -7,6 +7,7 @@ using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using Revit.Resources;
+using System.Collections.Generic;
 
 namespace Revit.Common
 {
@@ -32,6 +33,22 @@ namespace Revit.Common
         internal ExternalEvent ExternalEvent = null;
         internal SelectAmbienteMVVM SelectAmbienteMVVM = null;
         internal SelectAmbienteReinforcementMVVM SelectAmbienteReinforcementMVVM = null;
+        internal AmbienteManagerMVVM AmbienteManagerMVVM = null;
+
+        internal void ShowAmbienteManagerUI(List<FullAmbienteViewModel> fullAmbienteViewModels)
+        {
+            if (AmbienteManagerMVVM == null || AmbienteManagerMVVM.IsLoaded == false)
+            {
+                UIDocument uidoc = uiApp.ActiveUIDocument;
+                //INICIALIZANDO A JANELA E PASSANDO O EXTERNAL EVENT
+                AmbienteManagerMVVM = new AmbienteManagerMVVM(uidoc, fullAmbienteViewModels);
+                AmbienteManagerMVVM.Topmost = true;
+                if (AmbienteManagerMVVM.IsInitialized)
+                {
+                    AmbienteManagerMVVM.Show();
+                }
+            }
+        }
 
         internal void ShowMeshReinforcementUI()
         {
@@ -144,11 +161,13 @@ namespace Revit.Common
             {
                 // tab already exists
             }
-            RibbonPanel panel = application.CreateRibbonPanel(tabName, "Pisos e Juntas");
+            RibbonPanel pisosEJuntasPanel = application.CreateRibbonPanel(tabName, "Pisos e Juntas");
+            RibbonPanel ambientesPanel = application.CreateRibbonPanel(tabName, "Ambientes");
+            RibbonPanel sobrePanel = application.CreateRibbonPanel(tabName, "Sobre");
 
             //////////// SPLIT FLOORS ////////////
 
-            panel.AddItem(new PushButtonData("SplitFloors", "Dividir Pisos", executingAssemblyPath, typeof(SplitFloorsEC).FullName)
+            pisosEJuntasPanel.AddItem(new PushButtonData("SplitFloors", "Dividir Pisos", executingAssemblyPath, typeof(SplitFloorsEC).FullName)
             {
                 ToolTip = "Divide o piso de um ambiente com base nas suas juntas.",
                 LongDescription = "O parâmetro \"Ambiente\" deve ser preenchido tanto nos elementos de pisos quanto nos respectivos elementos de juntas.",
@@ -157,7 +176,7 @@ namespace Revit.Common
 
             //////////// SPLIT JOINTS ////////////
 
-            panel.AddItem(new PushButtonData("SplitJoints", "Dividir Juntas", executingAssemblyPath, typeof(SplitJointsEC).FullName)
+            pisosEJuntasPanel.AddItem(new PushButtonData("SplitJoints", "Dividir Juntas", executingAssemblyPath, typeof(SplitJointsEC).FullName)
             {
                 ToolTip = "Divide as juntas do modelo pelos encontros com outras juntas ou outros pisos do mesmo ambiente.",
                 LongDescription = "O parâmetro \"Ambiente\" deve ser preenchido tanto nos elementos de pisos quanto nos respectivos elementos de juntas.",
@@ -166,7 +185,7 @@ namespace Revit.Common
 
             //////////// DIMENSION FLOORS ////////////
 
-            panel.AddItem(new PushButtonData("DimensionFloors", "Cotar Pisos", executingAssemblyPath, typeof(DimensionFloorsEC).FullName)
+            pisosEJuntasPanel.AddItem(new PushButtonData("DimensionFloors", "Cotar Pisos", executingAssemblyPath, typeof(DimensionFloorsEC).FullName)
             {
                 ToolTip = "Cota os pisos divididos em suas duas direções principais.",
                 LongDescription = "O comando utilizará o comando Aligned Dimension para criar 2 cotas em cada piso do modelo.",
@@ -175,7 +194,7 @@ namespace Revit.Common
 
             ////////////// MESH REINFORCEMENT ////////////
 
-            panel.AddItem(new PushButtonData("MeshReinforcement", "Reforçar com Tela", executingAssemblyPath, typeof(MeshReinforcementEC).FullName)
+            pisosEJuntasPanel.AddItem(new PushButtonData("MeshReinforcement", "Reforçar com Tela", executingAssemblyPath, typeof(MeshReinforcementEC).FullName)
             {
                 ToolTip = "Caracteriza os pisos de fibra (Parâmetro ''(s/n) Fibra'') que possuem dimensões com porporção maiores que 1,5:1 com uma hachura e o preenchimento dos parâmetros de espaçadores.",
                 LongDescription = "Escolha, na janela que se abre, a tela que deseja inserir como reforço e o cobrimento a ser aplicado.",
@@ -184,7 +203,7 @@ namespace Revit.Common
 
             //////////// TAG JOINTS ////////////
 
-            panel.AddItem(new PushButtonData("TagJoints", "Tagear Juntas", executingAssemblyPath, typeof(TagJointsEC).FullName)
+            pisosEJuntasPanel.AddItem(new PushButtonData("TagJoints", "Tagear Juntas", executingAssemblyPath, typeof(TagJointsEC).FullName)
             {
                 ToolTip = "Etiqueta as juntas dos ambientes escolhidos na janela.",
                 LongDescription = "As juntas serão etiquetadas alternadamente.",
@@ -193,21 +212,31 @@ namespace Revit.Common
 
             //////////// RESTORE FLOORS ////////////
 
-            panel.AddItem(new PushButtonData("RestoreFloors", "Restaurar Pisos", executingAssemblyPath, typeof(RestoreFloorsEC).FullName)
+            pisosEJuntasPanel.AddItem(new PushButtonData("RestoreFloors", "Restaurar Pisos", executingAssemblyPath, typeof(RestoreFloorsEC).FullName)
             {
                 ToolTip = "Restaura os pisos divididos pelo comando \"Dividir Pisos\" ao seu formato original.",
                 LongDescription = "O comando utilizará o valor prenchido no parâmetro \"Ambiente\" para identificar quais pisos se unirão.",
                 LargeImage = ResourceImage.GetIcon("RestaurarPisosLPE.png")
             });
 
+            //////////// AMBIENTE MANAGER ////////////
+
+            ambientesPanel.AddItem(new PushButtonData("AmbienteManager", "Gerenciador\nde Ambientes", executingAssemblyPath, typeof(AmbienteManagerEC).FullName)
+            {
+                ToolTip = "O gerenciador de ambientes facilita a gestão dos keyschedules, centralizando as informações.\nEle permite criar, editar, duplicar, importar e deletar ambientes.",
+                LongDescription = "",
+                LargeImage = ResourceImage.GetIcon("AmbienteManagerLPE.png")
+            });
+
             //////////// ABOUT ////////////
 
-            panel.AddItem(new PushButtonData("About", "Sobre", executingAssemblyPath, typeof(About).FullName)
+            sobrePanel.AddItem(new PushButtonData("About", "Sobre", executingAssemblyPath, typeof(About).FullName)
             {
                 ToolTip = "",
                 LongDescription = "",
                 LargeImage = ResourceImage.GetIcon("About.png")
             });
+
         }
     }
 }

@@ -11,11 +11,12 @@
              Height="450" Width="650"
         Loaded="Window_Loaded">
     <Grid
-        Background="#FF555555"
+        Background="#FF222933"
         >
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="30"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
@@ -27,11 +28,11 @@
             />
         <ListBox
             x:Name="Ambientes_ListBox"
-            Margin="10,0,10,10"
+            Margin="10,0"
             Grid.Row="1"
             Height="Auto"
             ItemsSource="{Binding AmbienteModels}"
-            Background="#FFEEEEEE"
+            Background="#FFDDDDDD"
             d:ItemsSource="{d:SampleData ItemCount=5}"
             >
             <ListBox.ItemTemplate >
@@ -43,16 +44,9 @@
             </ListBox.ItemTemplate>
         </ListBox>
         <Grid
-            Grid.Row="2"
-            Margin="10,0"
+            Grid.Row="2"      
+            Margin="10"
             >
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"></ColumnDefinition>
-                <ColumnDefinition Width="*"></ColumnDefinition>
-                <ColumnDefinition Width="200"></ColumnDefinition>
-                <ColumnDefinition Width="10"></ColumnDefinition>
-                <ColumnDefinition Width="200"></ColumnDefinition>
-            </Grid.ColumnDefinitions>
             <CheckBox
             x:Name="SelectAll_CheckBox"
             Content="Selecionar todos"
@@ -63,6 +57,28 @@
             Checked="SelectAll_CheckBox_Checked"
             Unchecked="SelectAll_CheckBox_Unchecked"
             />
+            <CheckBox
+            x:Name="DivideReinforcement_CheckBox"
+                Visibility="Collapsed"
+            Content="Dividir pisos de Reforço de Tela"
+            Foreground="White"
+            HorizontalAlignment="Right"
+            Grid.Column="0"
+            IsChecked="False"
+            />
+        </Grid>
+        <Grid
+            Grid.Row="3"
+            Margin="10,0"
+            >
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+                <ColumnDefinition Width="200"></ColumnDefinition>
+                <ColumnDefinition Width="10"></ColumnDefinition>
+                <ColumnDefinition Width="200"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            
             <Button 
                 x:Name="Execute_Button"
                 Content="DIVIDIR PISOS"
@@ -70,13 +86,13 @@
                 Grid.Column="4">
                 <Button.Style>
                     <Style TargetType="{x:Type Button}">
-                        <Setter Property="Background" Value="#FF0e538c"/>
+                        <Setter Property="Background" Value="#FF3b4453"/>
                         <Setter Property="BorderBrush" Value="Black"/>
                         <Setter Property="Foreground" Value="White"/>
                         <Setter Property="FontWeight" Value="SemiBold"/>
                         <Style.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#FFFFFFFF"/>
+                                <Setter Property="Background" Value="#FF000000"/>
                                 <Setter Property="Foreground" Value="#FF0e538c"/>
                             </Trigger>
                         </Style.Triggers>
@@ -89,7 +105,17 @@
                 Click="Select_Button_Click"
                 Grid.Column="2"
                 >
-
+                <Button.Style>
+                    <Style TargetType="{x:Type Button}">
+                        <Setter Property="BorderBrush" Value="Black"/>
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#FF000000"/>
+                                <Setter Property="Foreground" Value="#FF0e538c"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
             </Button>
 
         </Grid>
@@ -99,7 +125,8 @@
             >
             <ProgressBar x:Name="ProgressBar"
                          DataContext="{Binding ProgressBarViewModel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                         Foreground="#FF45abff"
+                         Background="#FFDDDDDD"
+                         Foreground="#FF2995ff"
                          Height="30" 
                          HorizontalAlignment="Stretch"
                          Minimum="0"

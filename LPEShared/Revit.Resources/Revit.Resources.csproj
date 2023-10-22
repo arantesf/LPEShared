@@ -106,5 +106,11 @@
   <ItemGroup>
     <None Include="Images\icon-lpe-engenharia.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Images\AmbienteManagerLPE.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Images\logo-lpe-engenharia-AZUL.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

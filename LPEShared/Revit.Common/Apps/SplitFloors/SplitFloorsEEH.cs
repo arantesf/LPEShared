@@ -30,6 +30,8 @@ namespace Revit.Common
                 SelectAmbienteMVVM.MainView.SelectAll_CheckBox.IsEnabled = false;
                 SelectAmbienteMVVM.MainView.SelectPisos_Button.IsEnabled = false;
                 SelectAmbienteMVVM.MainView.Execute_Button.IsEnabled = false;
+                SelectAmbienteMVVM.MainView.DivideReinforcement_CheckBox.IsEnabled = false;
+
 
                 UIDocument uidoc = uiapp.ActiveUIDocument;
                 Document doc = uidoc.Document;
@@ -93,11 +95,24 @@ namespace Revit.Common
                     }
 
                     List<List<Element>> pisosAndReforços = new List<List<Element>>() { pisofloors, reforco };
-                    List<ElementId> principalFloors = new List<ElementId>();
+                    List<(Element Element, Solid Solid)> principalFloorsToJoin = new List<(Element Element, Solid Solid)>();
+                    List<ElementId> reinforcementFloorsToJoin = new List<ElementId>();
 
                     SelectAmbienteMVVM.MainView.ProgressBar.Maximum = pisosAndReforços.Count;
                     for (int i = 0; i < pisosAndReforços.Count; i++)
                     {
+                        if (!(bool)SelectAmbienteMVVM.MainView.DivideReinforcement_CheckBox.IsChecked)
+                        {
+                            for (int k = 1; k < pisosAndReforços.Count; k++)
+                            {
+                                reinforcementFloorsToJoin.AddRange(pisosAndReforços[k].Select(element => element.Id));
+                            }
+                            if (i != 0)
+                            {
+                                break;
+                            }
+                        }
+
                         List<Element> floors = pisosAndReforços[i];
 
                         List<ElementId> selectedFloors = SelectAmbienteMVVM.MainView.SelectedFloorsIds;
@@ -199,7 +214,7 @@ namespace Revit.Common
                                 }
                                 floorArrays.Append(curveArrayy);
 #else
-                            CurveArrArray floorArrays = (doc.GetElement(floor.SketchId) as Sketch).Profile;
+                                CurveArrArray floorArrays = (doc.GetElement(floor.SketchId) as Sketch).Profile;
 #endif
                                 foreach (CurveArray curveArray in floorArrays)
                                 {
@@ -230,19 +245,18 @@ namespace Revit.Common
 
                             SelectAmbienteMVVM.ProgressBarViewModel.ProgressBarValue = 1;
 
-
                             CurveArray curveArrayToCreateRoomBoundariesScaled = new CurveArray();
                             Transform transform10 = Transform.CreateTranslation(new XYZ(0, 0, 0)).ScaleBasis(10);
                             Transform transform1 = Transform.CreateTranslation(new XYZ(0, 0, 0)).ScaleBasis(0.1);
                             foreach (Curve curve in curveArrayToCreateRoomBoundaries)
                             {
-                                curveArrayToCreateRoomBoundariesScaled.Append(curve.CreateTransformed(transform10));    
+                                curveArrayToCreateRoomBoundariesScaled.Append(curve.CreateTransformed(transform10));
                             }
                             ModelCurveArray modelCurveArray = Utils.CreateRoomBoundaryLines(doc, level.Id, curveArrayToCreateRoomBoundariesScaled, deletarView);
                             List<Room> createdRooms = Utils.CreateRooms(doc, level);
 
                             SelectAmbienteMVVM.ProgressBarViewModel.ProgressBarValue = 2;
-                                
+
 
                             List<CurveArray> dividedFloorsCurveArrays = new List<CurveArray>();
                             List<(List<CurveLoop> CurveLoops, Curve CurveToIntersect)> dividedFloorsCurveLoops = new List<(List<CurveLoop>, Curve)>();
@@ -262,7 +276,7 @@ namespace Revit.Common
                                         break;
                                     }
                                 }
-                                
+
                                 if (intersect)
                                 {
                                     List<CurveLoop> curveLoops = new List<CurveLoop>();
@@ -314,6 +328,7 @@ namespace Revit.Common
                             int count = 0;
                             for (int j = 0; j < dividedFloorsCurveLoops.Count; j++)
                             {
+
                                 List<CurveLoop> curveLoops = dividedFloorsCurveLoops[j].CurveLoops;
                                 Curve CurveToIntersect = dividedFloorsCurveLoops[j].CurveToIntersect;
                                 SelectAmbienteMVVM.ProgressBarViewModel.ProgressBarValue += 1;
@@ -352,7 +367,7 @@ namespace Revit.Common
                                 }
 
                                 if (intersect)
-                                { 
+                                {
                                     if (openingsSolid != null && openingsSolid.IntersectWithCurve(curveToIntersectSolid, solidCurveIntersectionOptions).Any())
                                     {
                                         continue;
@@ -387,17 +402,11 @@ namespace Revit.Common
                                     {
                                         if (i == 0)
                                         {
-                                            principalFloors.Add(createdFloor.Id);
+                                            principalFloorsToJoin.Add((createdFloor, Utils.GetSolid(createdFloor)));
                                         }
                                         else
                                         {
-                                            Solid createdFloorSolid = Utils.GetSolid(createdFloor);
-                                            ElementIntersectsElementFilter filter = new ElementIntersectsElementFilter(createdFloor);
-                                            List<Element> intersectElements = new FilteredElementCollector(doc, principalFloors).WherePasses(filter).ToList();
-                                            foreach (Element intersectElement in intersectElements)
-                                            {
-                                                    Utils.JoinElements(doc, createdFloor, intersectElement);
-                                            }
+                                            reinforcementFloorsToJoin.Add(createdFloor.Id);
                                         }
                                     }
                                     Utils.SetParameter(createdFloor, "Piso em placas", 1);
@@ -411,10 +420,57 @@ namespace Revit.Common
 
                         }
                     }
+
+                    using (var trans = new Transaction(doc))
+                    {
+                        trans.Start("Internal Transaction");
+                        Utils.HideRevitWarnings(trans);
+
+                        SelectAmbienteMVVM.ProgressBarViewModel.ProgressBarValue = 0;
+                        SelectAmbienteMVVM.MainView.ProgressBar.Maximum = reinforcementFloorsToJoin.Count;
+                        int count = 0;
+
+                        foreach (var reinforcementFloorId in reinforcementFloorsToJoin)
+                        {
+                            SelectAmbienteMVVM.ProgressBarViewModel.ProgressBarValue += 1;
+                            count++;
+                            ExternalApplication.LPEApp.SelectAmbienteMVVM.ProgressBar_TextBlock.Text = $"Unindo pisos do ambiente \"{ambiente}\" ({count}/{reinforcementFloorsToJoin.Count})";
+                            Element reinforcementFloor = doc.GetElement(reinforcementFloorId);
+                            Solid createdFloorSolid = Utils.GetSolid(reinforcementFloor);
+                            List<Element> intersectElements = new List<Element>();
+                            foreach (var floor in principalFloorsToJoin)
+                            {
+                                try
+                                {
+                                    if (BooleanOperationsUtils.ExecuteBooleanOperation(createdFloorSolid, floor.Solid, BooleanOperationsType.Intersect).Volume > 0)
+                                    {
+                                        intersectElements.Add(floor.Element);
+                                    }
+                                }
+                                catch (Exception)
+                                {
+                                }
+                            }
+
+                            //ElementIntersectsElementFilter filter = new ElementIntersectsElementFilter(reinforcementFloor);
+                            //List<Element> intersectElements = new FilteredElementCollector(doc, principalFloorsToJoin).WherePasses(filter).ToList();
+                            foreach (Element intersectElement in intersectElements)
+                            {
+                                try
+                                {
+                                    JoinGeometryUtils.JoinGeometry(doc, reinforcementFloor, intersectElement);
+                                }
+                                catch (Exception)
+                                {
+                                }
+                            }
+                        }
+                        trans.Commit();
+                    }
+
                 }
                 transactionGroupMaster.Assimilate();
                 SelectAmbienteMVVM.MainView.Dispose();
-
 
             }
             catch (Exception ex)

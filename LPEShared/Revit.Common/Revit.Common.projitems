@@ -10,6 +10,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Apps\About\About.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Apps\AmbienteManager\AmbienteManagerUtils.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Apps\DimensionFloors\DimensionFloors.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Apps\DimensionFloors\DimensionFloorsEEH.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Apps\DimensionFloors\DimensionFloorsEC.cs" />
@@ -19,6 +20,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Apps\RestoreFloors\RestoreFloorsEC.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Apps\RestoreFloors\RestoreFloors.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Apps\RestoreFloors\RestoreFloorsEEH.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Apps\AmbienteManager\AmbienteManagerEEH.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Apps\AmbienteManager\AmbienteManagerEC.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Apps\SplitFloors\SelectFloorsEEH.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Apps\SplitFloors\SplitFloorsUIService.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Apps\SplitFloors\SplitFloorsEEH.cs" />
@@ -31,16 +34,23 @@
     <Compile Include="$(MSBuildThisFileDirectory)Apps\TagJoints\TagJoints.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Classes\GroupOfJoints.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ExternalApplication\ExternalApplication.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ValidationRules\StringValidationRule.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ValidationRules\DoubleValidationRule.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\AmbienteReinforcementViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\AmbienteViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Classes\CurveAndProjection.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utils\Utils.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ViewModels\EditVisibilityViewModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ViewModels\FullAmbienteViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\KeyScheduleElementViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\ProgressBarViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\ViewModelBase.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Windows\About.xaml.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Windows\SelectAmbienteMVVM.xaml.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Windows\SelectAmbienteReinforcementMVVM.xaml.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Views\AmbienteEditMVVM.xaml.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Views\Types.xaml.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Views\About.xaml.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Views\AmbienteManagerMVVM.xaml.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Views\SelectAmbienteMVVM.xaml.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Views\SelectAmbienteReinforcementMVVM.xaml.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)LPE-PisosEJuntas.addin">
@@ -54,15 +64,27 @@
     <Folder Include="$(MSBuildThisFileDirectory)ExternalApplication\" />
   </ItemGroup>
   <ItemGroup>
-    <Page Include="$(MSBuildThisFileDirectory)Windows\About.xaml">
+    <Page Include="$(MSBuildThisFileDirectory)Views\AmbienteEditMVVM.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="$(MSBuildThisFileDirectory)Windows\SelectAmbienteMVVM.xaml">
+    <Page Include="$(MSBuildThisFileDirectory)Views\Types.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="$(MSBuildThisFileDirectory)Windows\SelectAmbienteReinforcementMVVM.xaml">
+    <Page Include="$(MSBuildThisFileDirectory)Views\About.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="$(MSBuildThisFileDirectory)Views\AmbienteManagerMVVM.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="$(MSBuildThisFileDirectory)Views\SelectAmbienteMVVM.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="$(MSBuildThisFileDirectory)Views\SelectAmbienteReinforcementMVVM.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

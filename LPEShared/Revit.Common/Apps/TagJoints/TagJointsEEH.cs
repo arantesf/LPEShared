@@ -210,6 +210,7 @@ namespace Revit.Common
                                             {
                                                 tag.TagHeadPosition += XYZ.BasisY;
                                             }
+                                            break;
                                         }
                                     }
                                 }

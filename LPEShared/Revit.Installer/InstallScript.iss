@@ -3,7 +3,7 @@
 
 #define MyAppName "Plug-in Revit LPE"
 #define FolderName "LPE"
-#define MyAppVersion "1.1.0"
+#define MyAppVersion "1.2.0"
 #define MyAppPublisher "FCA"
 #define Revit2021 "\Autodesk\Revit\Addins\2021\"
 #define Revit2022 "\Autodesk\Revit\Addins\2022\"
@@ -38,14 +38,13 @@ Name: "brazilianportuguese"; MessagesFile: "compiler:Languages\BrazilianPortugue
 
 [Files]
 
-
-Source: "..\Revit.2021\bin\Release\*.dll"; DestDir: "{commonappdata}\{#Revit2021}\{#FolderName}"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "..\Revit.Common\LPE-PisosEJuntas.addin"; DestDir: "{commonappdata}\{#Revit2021}\"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "..\Revit.2022\bin\Release\*.dll"; DestDir: "{commonappdata}\{#Revit2022}\{#FolderName}"; Flags: ignoreversion recursesubdirs createallsubdirs
+; Source: "..\Revit.2021\bin\x64\Release\*.dll"; DestDir: "{commonappdata}\{#Revit2021}\{#FolderName}"; Flags: ignoreversion recursesubdirs createallsubdirs
+; Source: "..\Revit.Common\LPE-PisosEJuntas.addin"; DestDir: "{commonappdata}\{#Revit2021}\"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "..\Revit.2022\bin\x64\Release\*.dll"; DestDir: "{commonappdata}\{#Revit2022}\{#FolderName}"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "..\Revit.Common\LPE-PisosEJuntas.addin"; DestDir: "{commonappdata}\{#Revit2022}\"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "..\Revit.2023\bin\Release\*.dll"; DestDir: "{commonappdata}\{#Revit2023}\{#FolderName}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "..\Revit.2023\bin\x64\Release\*.dll"; DestDir: "{commonappdata}\{#Revit2023}\{#FolderName}"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "..\Revit.Common\LPE-PisosEJuntas.addin"; DestDir: "{commonappdata}\{#Revit2023}\"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "..\Revit.2024\bin\Release\*.dll"; DestDir: "{commonappdata}\{#Revit2024}\{#FolderName}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "..\Revit.2024\bin\x64\Release\*.dll"; DestDir: "{commonappdata}\{#Revit2024}\{#FolderName}"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "..\Revit.Common\LPE-PisosEJuntas.addin"; DestDir: "{commonappdata}\{#Revit2024}\"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 ; Source: "..\Revit.Common\PackageContents.xml"; DestDir: "{userappdata}\Autodesk\ApplicationPlugins\Revit.bundle\"; Flags: ignoreversion

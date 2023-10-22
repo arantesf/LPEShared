@@ -5,7 +5,9 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
              Height="130" Width="300">
-    <Grid>
+    <Grid
+        Background="#FF222933"
+        >
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"></ColumnDefinition>
             <ColumnDefinition Width="3*"></ColumnDefinition>
@@ -20,22 +22,27 @@
             VerticalAlignment="Center"
             Grid.Column="1">
             <TextBlock 
+                Foreground="White"
                 Text="Pisos e Juntas"
                 HorizontalAlignment="Center"
                 />
             <TextBlock 
+                Foreground="White"
                 HorizontalAlignment="Center"
-                Text="V1.1.0"
+                Text="V1.1.3"
                 />
             <TextBlock 
+                Foreground="White"
                 HorizontalAlignment="Center"
                 Text=""
                 />
             <TextBlock 
+                Foreground="White"
                 HorizontalAlignment="Center"
                 Text="LPE e FCA"
                 />
             <TextBlock 
+                Foreground="White"
                 HorizontalAlignment="Center"
                 Text="fernando.carantes@outlook.com"
                 />

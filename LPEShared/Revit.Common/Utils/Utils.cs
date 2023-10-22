@@ -8,15 +8,49 @@ using Autodesk.Revit.UI.Selection;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Media;
 using System.Xml.Linq;
 
 namespace Revit.Common
 {
+    [ValueConversion(typeof(bool), typeof(bool))]
+    public sealed class InverseBooleanToVisibilityConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            bool flag = false;
+            if (value is bool)
+            {
+                flag = (bool)value;
+            }
+            else if (value is bool?)
+            {
+                bool? flag2 = (bool?)value;
+                flag = flag2.HasValue && flag2.Value;
+            }
+
+            return (!flag) ? System.Windows.Visibility.Collapsed : System.Windows.Visibility.Visible;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is System.Windows.Visibility)
+            {
+                return (System.Windows.Visibility)value == System.Windows.Visibility.Visible;
+            }
+
+            return false;
+        }
+
+    }
+
     public class XYZComparer : IEqualityComparer<XYZ>
     {
         // Products are equal if their names and product numbers are equal.
@@ -132,7 +166,7 @@ namespace Revit.Common
             OK = 42
 
         }
-        public static OffsetVerifyResult VerifyOffset(Application app, Element joint, Curve offset, List<Element> joints, List<Curve> floorCurves)
+        public static OffsetVerifyResult VerifyOffset(Autodesk.Revit.ApplicationServices.Application app, Element joint, Curve offset, List<Element> joints, List<Curve> floorCurves)
         {
 
             bool offset1ep0OK = false;
@@ -251,10 +285,10 @@ namespace Revit.Common
         {
             using (var trans = new Transaction(doc))
             {
-                try
-                {
-                    trans.Start("Internal Transaction");
-                    HideRevitWarnings(trans);
+                //try
+                //{
+                trans.Start("Internal Transaction");
+                HideRevitWarnings(trans);
 #if Revit2021
                     CurveArray curveArray = new CurveArray();
                     foreach (var curveloop in curveLoops)
@@ -266,15 +300,15 @@ namespace Revit.Common
                     }
                     Floor createdFloor = doc.Create.NewFloor(curveArray,doc.GetElement(typeId) as FloorType, doc.GetElement(levelId) as Level, false);
 #else
-                    Floor createdFloor = Floor.Create(doc, curveLoops, typeId, levelId);
+                Floor createdFloor = Floor.Create(doc, curveLoops, typeId, levelId);
 #endif
-                    trans.Commit();
-                    return createdFloor;
-                }
-                catch (Exception)
-                {
-                    return null;
-                }
+                trans.Commit();
+                return createdFloor;
+                //}
+                //catch (Exception)
+                //{
+                //    return null;
+                //}
             }
         }
         public static void ChangeTypeId(Element element, ElementId newTypeId)
@@ -288,7 +322,7 @@ namespace Revit.Common
             }
         }
 
-        
+
         public static void JoinElements(Document doc, Element firstElement, Element secondElement)
         {
             using (var trans = new Transaction(doc))
@@ -569,58 +603,87 @@ namespace Revit.Common
                         }
                         else
                         {
+                            int realInt = -1;
+                        RedoCurveLoop:;
                             if (i == curveLoop.Count() - 1)
                             {
-                                List<Curve> otherCurves = new List<Curve>();
-                                otherCurves.AddRange(fixedCurveLoop);
-                                int count = fixedCurveLoop.Count();
-                                Curve nextCurve = fixedCurveLoop.ElementAt(0);
-                                fixedCurveLoop = new CurveLoop();
-                                XYZ initialPoint = curve.GetEndPoint(0);
-                                Curve fixedCurve = null;
-                                if (nextCurve is Arc)
+                                //if (realInt != -1)
+                                //{
+                                //    i = realInt;
+                                //}
+                                for (int j = 0; j < 10; j++)
                                 {
-                                    fixedCurve = Arc.Create(initialPoint, nextCurve.GetEndPoint(1), nextCurve.Evaluate(0.5, true));
-                                }
-                                else if (nextCurve is HermiteSpline)
-                                {
-                                    HermiteSpline spline = (HermiteSpline)nextCurve;
-                                    List<XYZ> newPoints = new List<XYZ>() { initialPoint };
-                                    newPoints.AddRange(spline.Tessellate().Skip(1));
-                                    fixedCurve = HermiteSpline.Create(newPoints, spline.IsPeriodic);
-                                }
-                                else
-                                {
-                                    fixedCurve = Line.CreateBound(initialPoint, nextCurve.GetEndPoint(1));
-                                }
-                                fixedCurveLoop.Append(fixedCurve);
-                                for (int j = 1; j < otherCurves.Count; j++)
-                                {
-                                    fixedCurveLoop.Append(otherCurves[j]);
+                                    List<Curve> otherCurves = new List<Curve>();
+                                    otherCurves.AddRange(fixedCurveLoop);
+                                    int count = fixedCurveLoop.Count();
+                                    Curve nextCurve = fixedCurveLoop.ElementAt(0 + j);
+                                    fixedCurveLoop = new CurveLoop();
+                                    XYZ initialPoint = curve.GetEndPoint(0);
+                                    if (initialPoint.DistanceTo(nextCurve.GetEndPoint(1)) < 0.0028)
+                                    {
+                                        continue;
+                                    }
+                                    Curve fixedCurve = null;
+                                    if (nextCurve is Arc)
+                                    {
+                                        fixedCurve = Arc.Create(initialPoint, nextCurve.GetEndPoint(1), nextCurve.Evaluate(0.5, true));
+                                    }
+                                    else if (nextCurve is HermiteSpline)
+                                    {
+                                        HermiteSpline spline = (HermiteSpline)nextCurve;
+                                        List<XYZ> newPoints = new List<XYZ>() { initialPoint };
+                                        newPoints.AddRange(spline.Tessellate().Skip(1));
+                                        fixedCurve = HermiteSpline.Create(newPoints, spline.IsPeriodic);
+                                    }
+                                    else
+                                    {
+                                        fixedCurve = Line.CreateBound(initialPoint, nextCurve.GetEndPoint(1));
+                                    }
+                                    fixedCurveLoop.Append(fixedCurve);
+                                    for (int k = 1 + j; k < otherCurves.Count; k++)
+                                    {
+                                        fixedCurveLoop.Append(otherCurves[k]);
+                                    }
+                                    break;
                                 }
                             }
                             else
                             {
-                                Curve nextCurve = curveLoop.ElementAt(i + 1);
-                                XYZ initialPoint = curve.GetEndPoint(0);
-                                Curve fixedCurve = null;
-                                if (nextCurve is Arc)
+                                for (int j = 0; j < 10; j++)
                                 {
-                                    fixedCurve = Arc.Create(initialPoint, nextCurve.GetEndPoint(1), nextCurve.Evaluate(0.5, true));
+                                    if (i + 1 + j > curveLoop.Count() - 1)
+                                    {
+                                        realInt = i;
+                                        i = curveLoop.Count() - 1;
+                                        goto RedoCurveLoop;
+                                    }
+                                    Curve nextCurve = curveLoop.ElementAt(i + 1 + j);
+                                    XYZ initialPoint = curve.GetEndPoint(0);
+                                    if (initialPoint.DistanceTo(nextCurve.GetEndPoint(1)) < 0.0028)
+                                    {
+                                        continue;
+                                    }
+                                    Curve fixedCurve = null;
+                                    if (nextCurve is Arc)
+                                    {
+                                        fixedCurve = Arc.Create(initialPoint, nextCurve.GetEndPoint(1), nextCurve.Evaluate(0.5, true));
+                                    }
+                                    else if (nextCurve is HermiteSpline)
+                                    {
+                                        HermiteSpline spline = (HermiteSpline)nextCurve;
+                                        List<XYZ> newPoints = new List<XYZ>() { initialPoint };
+                                        newPoints.AddRange(spline.Tessellate().Skip(1));
+                                        fixedCurve = HermiteSpline.Create(newPoints, spline.IsPeriodic);
+                                    }
+                                    else
+                                    {
+                                        fixedCurve = Line.CreateBound(initialPoint, nextCurve.GetEndPoint(1));
+                                    }
+                                    fixedCurveLoop.Append(fixedCurve);
+                                    i++;
+                                    i += j;
+                                    break;
                                 }
-                                else if (nextCurve is HermiteSpline)
-                                {
-                                    HermiteSpline spline = (HermiteSpline)nextCurve;
-                                    List<XYZ> newPoints = new List<XYZ>() { initialPoint };
-                                    newPoints.AddRange(spline.Tessellate().Skip(1));
-                                    fixedCurve = HermiteSpline.Create(newPoints, spline.IsPeriodic);
-                                }
-                                else
-                                {
-                                    fixedCurve = Line.CreateBound(initialPoint, nextCurve.GetEndPoint(1));
-                                }
-                                fixedCurveLoop.Append(fixedCurve);
-                                i++;
                             }
                         }
                     }
@@ -1683,6 +1746,20 @@ namespace Revit.Common
             return false;
         }
 
+        public static bool IsLineInsideOther(Curve smallCurve, Curve bigCurve)
+        {
+            if (smallCurve is Line && bigCurve is Line)
+            {
+                if (bigCurve.Distance(smallCurve.GetEndPoint(0)) < 0.01 && bigCurve.Distance(smallCurve.GetEndPoint(1)) < 0.01) 
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+
         public static bool DoesCurvesHaveSameEndPoints(Curve curve1, Curve curve2)
         {
             if (
@@ -2730,6 +2807,189 @@ namespace Revit.Common
             tx.Commit();
 
         }
+        public static CurveLoop SortCurveLoop(CurveLoop curveLoop)
+        {
+            CurveLoop newCurveLoop = new CurveLoop();
+
+            // Coleta o ponto mais extremo superior à esquerda para iniciar o curveLoop
+            List<XYZ> points = new List<XYZ>();
+            foreach (var curve in curveLoop)
+            {
+                points.Add(curve.GetEndPoint(0));
+                points.Add(curve.GetEndPoint(1));
+            }
+
+            var extremePointX = points.OrderBy(x => x.X).ThenByDescending(x => x.Y).First();
+
+            var extremePointsX = points.Where(x => Math.Round(x.X, 3) == Math.Round(extremePointX.X, 3));
+
+            var extremePoint = extremePointsX.Aggregate((x, y) => x.Y > y.Y ? x : y);
+
+            // Obtém a primeira curva com base no ponto mais extremo superior à esquerda coletado
+            Curve firstCurve = curveLoop.First(x => x.GetEndPoint(0).IsAlmostEqualTo(extremePoint));
+
+            List<Curve> curveLoopList = new List<Curve>();
+
+            List<Curve> newCurveLoopList = new List<Curve>();
+
+            foreach (var curve in curveLoop)
+            {
+                curveLoopList.Add(curve);
+            }
+
+            Curve firstCurveInCurveLoop = curveLoopList.First(x => x.GetEndPoint(0).IsAlmostEqualTo(firstCurve.GetEndPoint(0)) &&
+            x.GetEndPoint(1).IsAlmostEqualTo(firstCurve.GetEndPoint(1)));
+
+            int index = curveLoopList.IndexOf(firstCurveInCurveLoop);
+
+            for (int i = index; i < curveLoopList.Count; i++)
+            {
+                newCurveLoopList.Add(curveLoopList[i]);
+            }
+
+            for (int i = 0; i < index; i++)
+            {
+                newCurveLoopList.Add(curveLoopList[i]);
+            }
+
+            foreach (var curve in newCurveLoopList)
+            {
+                try
+                {
+                    newCurveLoop.Append(curve);
+                }
+                catch { }
+            }
+
+            return newCurveLoop;
+        }
+
+
+        public static CurveLoop JoinColinearCurves(Document doc, CurveLoop curveLoop, out bool repeat)
+        {
+            CurveLoop finalCurveLoop = new CurveLoop();
+            repeat = false;
+
+            CurveLoop sortedCLoop = SortCurveLoop(curveLoop);
+
+            foreach (Curve curve1 in sortedCLoop)
+            {
+                try
+                {
+                    int trigger = 0;
+
+                    XYZ sP1 = curve1.GetEndPoint(0);
+                    XYZ eP1 = curve1.GetEndPoint(1);
+                    Line line1 = null;
+                    Arc arc1 = null;
+                    XYZ p1 = null;
+                    XYZ xDir1 = null;
+                    XYZ yDir1 = null;
+
+                    if (curve1 is Line)
+                    {
+                        line1 = curve1 as Line;
+                        p1 = line1.Direction;
+                    }
+                    else if (curve1 is Arc)
+                    {
+                        arc1 = curve1 as Arc;
+                        xDir1 = arc1.XDirection;
+                        yDir1 = arc1.YDirection;
+                    }
+
+                    int index = 0;
+
+                    foreach (Curve curve2 in sortedCLoop)
+                    {
+                        try
+                        {
+                            XYZ sP2 = curve2.GetEndPoint(0);
+                            XYZ eP2 = curve2.GetEndPoint(1);
+                            Line line2 = null;
+                            Arc arc2 = null;
+                            XYZ p2 = null;
+                            XYZ xDir2 = null;
+                            XYZ yDir2 = null;
+
+                            if (curve2 is Line)
+                            {
+                                line2 = curve2 as Line;
+                                p2 = line2.Direction;
+                            }
+                            else if (curve2 is Arc)
+                            {
+                                arc2 = curve2 as Arc;
+                                xDir2 = arc2.XDirection;
+                                yDir2 = arc2.YDirection;
+                            }
+
+                            if (arc1 == null && arc2 == null)
+                            {
+                                double angleTo = p1.AngleTo(p2);
+                                bool startPointIsAlmostEqualTo = sP1.IsAlmostEqualTo(sP2);
+                                bool endPointIsAlmostEqualTo = eP1.IsAlmostEqualTo(eP2);
+                                bool isContinuous = eP1.IsAlmostEqualTo(sP2);
+
+                                if (p1.AngleTo(p2) < 0.0001 && !sP1.IsAlmostEqualTo(sP2) && !eP1.IsAlmostEqualTo(eP2) && eP1.IsAlmostEqualTo(sP2))
+                                {
+                                    trigger = 1;
+
+                                    repeat = true;
+
+                                    try
+                                    {
+                                        Curve newCurve = Line.CreateBound(sP1, eP2) as Curve;
+                                        finalCurveLoop.Append(newCurve);
+                                    }
+                                    catch { }
+
+                                    break;
+                                }
+                            }
+                            else if (arc1 != null && arc2 != null)
+                            {
+                                if (arc1.GetEndPoint(1).IsAlmostEqualTo(arc2.GetEndPoint(0)))
+                                {
+                                    trigger = 1;
+
+                                    repeat = true;
+
+                                    try
+                                    {
+                                        Arc newCurve = Arc.Create(arc1.GetEndPoint(0), arc2.GetEndPoint(1), arc1.GetEndPoint(1));
+                                        finalCurveLoop.Append(newCurve);
+                                    }
+                                    catch { }
+
+                                    break;
+                                }
+                            }
+                        }
+                        catch { }
+
+                        index++;
+                    }
+
+                    if (trigger == 0)
+                    {
+                        try
+                        {
+                            finalCurveLoop.Append(curve1);
+                        }
+                        catch { }
+                    }
+                }
+                catch { }
+            }
+
+            while (repeat == true)
+            {
+                finalCurveLoop = JoinColinearCurves(doc, finalCurveLoop, out repeat);
+            }
+
+            return finalCurveLoop;
+        }
 
 
         public static void SetPointsElevationsOfNewFloor(Floor oldFloor, Floor newFloor, double offset)
@@ -2767,6 +3027,16 @@ namespace Revit.Common
                 {
                     sse.ModifySubElement(newVertex, projectedPoint.Z - newVertex.Position.Z + offset);
                 }
+                else
+                {
+                    Curve intersectCurve = Line.CreateBound(newPoint + XYZ.BasisZ * +10000, newPoint + XYZ.BasisZ * -10000);
+                    SolidCurveIntersection intersection = GetSolid(oldFloor).IntersectWithCurve(intersectCurve, new SolidCurveIntersectionOptions());
+                    if (intersection.SegmentCount > 0)
+                    {
+                        projectedPoint = intersection.First().GetEndPoint(0);
+                        sse.ModifySubElement(newVertex, projectedPoint.Z - newVertex.Position.Z + offset);
+                    }
+                }
                 //}
                 //catch (Exception)
                 //{
@@ -2778,6 +3048,61 @@ namespace Revit.Common
             tx.Commit();
 
         }
+
+        public static void SetPointsElevationsOfNewFloor(List<Floor> oldFloors, Floor newFloor, double offset)
+        {
+            Transaction tx = new Transaction(newFloor.Document, "transatcion");
+#if Revit2021 || Revit2022 || Revit2023
+            SlabShapeEditor sse = newFloor.SlabShapeEditor;
+#else
+            SlabShapeEditor sse = newFloor.GetSlabShapeEditor();
+#endif
+            if (!sse.IsEnabled)
+            {
+                tx.Start("Enable Editor");
+                sse.Enable();
+                tx.Commit();
+            }
+
+
+
+            tx.Start("Change Points Elevations");
+            FailureHandlingOptions failOpt = tx.GetFailureHandlingOptions();
+            failOpt = tx.GetFailureHandlingOptions();
+            failOpt.SetFailuresPreprocessor(new Utils.FloorWarningsSwallower());
+            tx.SetFailureHandlingOptions(failOpt);
+
+
+            foreach (SlabShapeVertex newVertex in sse.SlabShapeVertices)
+            {
+                XYZ newPoint = newVertex.Position;
+
+                foreach (var oldFloor in oldFloors)
+                {
+                    XYZ projectedPoint = oldFloor.GetVerticalProjectionPoint(newPoint, FloorFace.Top);
+                    if (projectedPoint != null)
+                    {
+                        sse.ModifySubElement(newVertex, projectedPoint.Z - newVertex.Position.Z + offset);
+                        break;
+                    }
+                    else
+                    {
+                        Curve intersectCurve = Line.CreateBound(newPoint + XYZ.BasisZ * +10000, newPoint + XYZ.BasisZ * -10000);
+                        SolidCurveIntersection intersection = GetSolid(oldFloor).IntersectWithCurve(intersectCurve, new SolidCurveIntersectionOptions());
+                        if (intersection.SegmentCount > 0)
+                        {
+                            projectedPoint = intersection.First().GetEndPoint(0);
+                            sse.ModifySubElement(newVertex, projectedPoint.Z - newVertex.Position.Z + offset);
+                            break;
+                        }
+                    }
+                }
+            }
+
+            tx.Commit();
+
+        }
+
 
         public static void SetPreviousPointsElevationsToNewFloor(Floor oldFloor, Floor newFloor)
         {

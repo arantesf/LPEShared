@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RevitAddIns>
 	<AddIn Type="Application">
-		<Name>LPE Pisos e Juntas</Name>
+		<Name>Plugin Revit - LPE</Name>
 		<Assembly>LPE/LPE.dll</Assembly>
 		<FullClassName>Revit.Common.ExternalApplication</FullClassName>
 		<ClientId>b1f53203-6c37-4043-97c3-b65f8c43f500</ClientId>
