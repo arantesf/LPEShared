@@ -1,0 +1,92 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>c5d23e10-c3af-4ac2-8f80-9d4482d274b0</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>Revit.Common</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Apps\About\About.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Apps\AmbienteManager\AmbienteManagerUtils.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Apps\DimensionFloors\DimensionFloors.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Apps\DimensionFloors\DimensionFloorsEEH.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Apps\DimensionFloors\DimensionFloorsEC.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Apps\MeshReinforcement\MeshReinforcementEC.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Apps\MeshReinforcement\MeshReinforcementEEH.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Apps\MeshReinforcement\MeshReinforcement.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Apps\RestoreFloors\RestoreFloorsEC.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Apps\RestoreFloors\RestoreFloors.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Apps\RestoreFloors\RestoreFloorsEEH.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Apps\AmbienteManager\AmbienteManagerEEH.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Apps\AmbienteManager\AmbienteManagerEC.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Apps\SplitFloors\SelectFloorsEEH.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Apps\SplitFloors\SplitFloorsUIService.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Apps\SplitFloors\SplitFloorsEEH.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Apps\SplitFloors\SplitFloorsEC.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Apps\SplitJoints\SplitJoints.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Apps\SplitJoints\SplitJointsEC.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Apps\SplitJoints\SplitJointsEEH.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Apps\TagJoints\TagJointsEC.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Apps\TagJoints\TagJointsEEH.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Apps\TagJoints\TagJoints.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Classes\GroupOfJoints.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ExternalApplication\ExternalApplication.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ValidationRules\StringValidationRule.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ValidationRules\DoubleValidationRule.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ViewModels\AmbienteReinforcementViewModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ViewModels\AmbienteViewModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Classes\CurveAndProjection.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utils\Utils.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ViewModels\EditVisibilityViewModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ViewModels\FullAmbienteViewModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ViewModels\KeyScheduleElementViewModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ViewModels\ProgressBarViewModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ViewModels\ViewModelBase.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Views\AmbienteEditMVVM.xaml.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Views\Types.xaml.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Views\About.xaml.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Views\AmbienteManagerMVVM.xaml.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Views\SelectAmbienteMVVM.xaml.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Views\SelectAmbienteReinforcementMVVM.xaml.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)LPE-PisosEJuntas.addin">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="$(MSBuildThisFileDirectory)PackageContents.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="$(MSBuildThisFileDirectory)ExternalApplication\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="$(MSBuildThisFileDirectory)Views\AmbienteEditMVVM.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="$(MSBuildThisFileDirectory)Views\Types.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="$(MSBuildThisFileDirectory)Views\About.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="$(MSBuildThisFileDirectory)Views\AmbienteManagerMVVM.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="$(MSBuildThisFileDirectory)Views\SelectAmbienteMVVM.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="$(MSBuildThisFileDirectory)Views\SelectAmbienteReinforcementMVVM.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+</Project>

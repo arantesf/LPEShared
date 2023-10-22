@@ -1,0 +1,51 @@
+﻿<Window x:Class="Revit.Common.AboutMVVM"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             Height="130" Width="300">
+    <Grid
+        Background="#FF222933"
+        >
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="3*"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <Image
+            Grid.Column="0"
+            HorizontalAlignment="Right"
+            Source="/Revit.Resources;component/Images/logo-64.png" Width="64"
+            />
+        <StackPanel
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Grid.Column="1">
+            <TextBlock 
+                Foreground="White"
+                Text="Pisos e Juntas"
+                HorizontalAlignment="Center"
+                />
+            <TextBlock 
+                Foreground="White"
+                HorizontalAlignment="Center"
+                Text="V1.1.3"
+                />
+            <TextBlock 
+                Foreground="White"
+                HorizontalAlignment="Center"
+                Text=""
+                />
+            <TextBlock 
+                Foreground="White"
+                HorizontalAlignment="Center"
+                Text="LPE e FCA"
+                />
+            <TextBlock 
+                Foreground="White"
+                HorizontalAlignment="Center"
+                Text="fernando.carantes@outlook.com"
+                />
+        </StackPanel>
+    </Grid>
+</Window>
