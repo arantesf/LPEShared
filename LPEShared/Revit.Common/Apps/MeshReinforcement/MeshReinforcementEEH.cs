@@ -117,7 +117,7 @@ namespace Revit.Common
                         foreach (var floor in floors)
                         {
                             
-                            if (floor.LookupParameter("(s/n) Fibra").AsInteger() == 0)
+                            if (floor.LookupParameter("(s/n) Fibra").AsInteger() == 0 || floor.LookupParameter("Reforço de Tela").AsInteger() == 1)
                             {
                                 continue;
                             }
