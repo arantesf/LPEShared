@@ -40,18 +40,18 @@ namespace Revit.Common
                 List<string> selectedAmbientes = SelectAmbienteMVVM.MainView.AmbienteViewModels.Where(x => x.IsChecked).Select(x => x.Name).ToList();
 
                 Dictionary<string, List<Element>> groupedJointsByAmbiente = new FilteredElementCollector(doc)
-                .WhereElementIsNotElementType()
-                .OfCategory(BuiltInCategory.OST_StructuralFraming)
-                .Where(a => !a.Name.Contains("JPE") && !a.Name.EndsWith("JE") && selectedAmbientes.Contains(a.LookupParameter("Ambiente").AsString()))
-                .GroupBy(a => a.LookupParameter("Ambiente").AsString())
-                .ToDictionary(a => a.Key, a => a.ToList());
-
-                Dictionary<string, List<Element>> groupedFloorByAmbiente = new FilteredElementCollector(doc)
                     .WhereElementIsNotElementType()
-                    .OfCategory(BuiltInCategory.OST_Floors)
-                    .Where(a => a.LookupParameter("Reforço de Tela").AsInteger() == 0 && selectedAmbientes.Contains(a.LookupParameter("Ambiente").AsString()))
+                    .OfCategory(BuiltInCategory.OST_StructuralFraming)
+                    .Where(a => !a.Name.Contains("JPE") && !a.Name.EndsWith("JE") && selectedAmbientes.Contains(a.LookupParameter("Ambiente").AsString()))
                     .GroupBy(a => a.LookupParameter("Ambiente").AsString())
                     .ToDictionary(a => a.Key, a => a.ToList());
+
+                //Dictionary<string, List<Element>> groupedFloorByAmbiente = new FilteredElementCollector(doc)
+                //    .WhereElementIsNotElementType()
+                //    .OfCategory(BuiltInCategory.OST_Floors)
+                //    .Where(a => a.LookupParameter("Reforço de Tela").AsInteger() == 0 && selectedAmbientes.Contains(a.LookupParameter("Ambiente").AsString()))
+                //    .GroupBy(a => a.LookupParameter("Ambiente").AsString())
+                //    .ToDictionary(a => a.Key, a => a.ToList());
 
                 Dictionary<string, List<Element>> dividedGroupedJointsByAmbiente = new Dictionary<string, List<Element>>();
 
@@ -59,7 +59,7 @@ namespace Revit.Common
 
 
 
-                    TransactionGroup tg = new TransactionGroup(doc, "Divide Joints");
+                TransactionGroup tg = new TransactionGroup(doc, "Divide Joints");
                 tg.Start();
                 using (Transaction tx = new Transaction(doc, "Divide Joints"))
                 {
@@ -70,16 +70,16 @@ namespace Revit.Common
                         List<Curve> jointsCurves = joints.Select(a => Utils.GetCurveProjection((a.Location as LocationCurve).Curve)).ToList();
                         List<Curve> allCurves = new List<Curve>();
                         allCurves.AddRange(jointsCurves);
-                        List<Element> ambienteFloors = new List<Element>();
-                        try
-                        {
-                            ambienteFloors = groupedFloorByAmbiente[ambiente];
+                        //List<Element> ambienteFloors = new List<Element>();
+                        //try
+                        //{
+                        //    ambienteFloors = groupedFloorByAmbiente[ambiente];
 
-                        }
-                        catch (Exception)
-                        {
-                            continue;
-                        }
+                        //}
+                        //catch (Exception)
+                        //{
+                        //    continue;
+                        //}
                         dividedGroupedJointsByAmbiente.Add(ambienteJoints.Key, new List<Element>());
                         List<Curve> floorCurves = new List<Curve>();
                         List<ElementId> elementIdsToIsolate = new List<ElementId>();
@@ -168,7 +168,7 @@ namespace Revit.Common
             }
             catch (Exception ex)
             {
-                SelectAmbienteMVVM.MainView.Dispose(); 
+                SelectAmbienteMVVM.MainView.Dispose();
                 TaskDialog.Show("ATENÇÃO!", "Erro não mapeado, contate os desenvolvedores.\n\n" + ex.StackTrace);
                 throw;
             }

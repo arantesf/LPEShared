@@ -55,22 +55,23 @@ namespace Revit.Common
                     break;
 
                 case SelectAmbientMVVMExecuteCommand.SplitJoints:
-                    List<string> dividedAmbienteJoints = new FilteredElementCollector(ActiveDocument, uidoc.ActiveView.Id)
+                   ambientes = new FilteredElementCollector(ActiveDocument, uidoc.ActiveView.Id)
                     .WhereElementIsNotElementType()
                     .OfCategory(BuiltInCategory.OST_StructuralFraming)
-                    .Where(a => a.get_Parameter(BuiltInParameter.ALL_MODEL_INSTANCE_COMMENTS).HasValue && a.get_Parameter(BuiltInParameter.ALL_MODEL_INSTANCE_COMMENTS).AsString() != "")
+                    .Where(a => !a.get_Parameter(BuiltInParameter.ALL_MODEL_INSTANCE_COMMENTS).HasValue || a.get_Parameter(BuiltInParameter.ALL_MODEL_INSTANCE_COMMENTS).AsString() == "")
                     .Where(a => a.LookupParameter("Ambiente").HasValue)
                     .GroupBy(a => a.LookupParameter("Ambiente").AsString())
                     .Select(a => a.First().LookupParameter("Ambiente").AsString())
                     .ToList();
-                    ambientes = new FilteredElementCollector(ActiveDocument, uidoc.ActiveView.Id)
+
+                    /*ambientes = new FilteredElementCollector(ActiveDocument, uidoc.ActiveView.Id)
                     .WhereElementIsNotElementType()
                     .OfCategory(BuiltInCategory.OST_StructuralFraming)
                     .Where(a => a.LookupParameter("Ambiente").HasValue)
                     .Where(a => !dividedAmbienteJoints.Contains(a.LookupParameter("Ambiente").AsString()))
                     .GroupBy(a => a.LookupParameter("Ambiente").AsString())
                     .Select(a => a.First().LookupParameter("Ambiente").AsString())
-                    .ToList();
+                    .ToList();*/
                     ExecuteExternalEvent = ExternalEvent.Create(new SplitJointsEEH());
                     ExecuteButtonText = "DIVIDIR JUNTAS";
                     break;
@@ -96,7 +97,7 @@ namespace Revit.Common
                             ambientes.Add(jointAmbiente);
                         }
                     }
-                    ExecuteExternalEvent = ExternalEvent.Create(new RestoreFloorsEEH());
+                    ExecuteExternalEvent = ExternalEvent.Create(new RestoreJointsEEH());
                     ExecuteButtonText = "RESTAURAR PISOS";
                     break;
 
