@@ -29,7 +29,7 @@
             <TextBlock 
                 Foreground="White"
                 HorizontalAlignment="Center"
-                Text="V1.1.9"
+                Text="V1.1.10"
                 />
             <TextBlock 
                 Foreground="White"
