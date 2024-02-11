@@ -62,6 +62,9 @@
       <SpecificVersion>False</SpecificVersion>
       <Private>False</Private>
     </Reference>
+    <Reference Include="RevitAPIIFC">
+      <HintPath>..\..\..\..\..\..\..\Program Files\Autodesk\Revit 2022\RevitAPIIFC.dll</HintPath>
+    </Reference>
     <Reference Include="RevitAPIUI, Version=22.0.0.0, Culture=neutral, processorArchitecture=AMD64">
       <HintPath>..\packages\Revit_All_Main_Versions_API_x64.2022.0.0\lib\net48\RevitAPIUI.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>

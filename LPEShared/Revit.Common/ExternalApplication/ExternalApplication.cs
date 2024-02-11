@@ -35,19 +35,20 @@ namespace Revit.Common
         internal SelectAmbienteReinforcementMVVM SelectAmbienteReinforcementMVVM = null;
         internal AmbienteManagerMVVM AmbienteManagerMVVM = null;
 
-        internal void ShowAmbienteManagerUI(List<FullAmbienteViewModel> fullAmbienteViewModels)
+        internal void ShowAmbienteManagerUI(
+          Dictionary<FloorMatrizClass, List<FloorMatriz>> floorMatrizes,
+          List<FullAmbienteViewModel> fullAmbienteViewModels,
+          List<string> allMaterialNames,
+          Dictionary<MaterialClass, List<string>> materialsByClass)
         {
-            if (AmbienteManagerMVVM == null || AmbienteManagerMVVM.IsLoaded == false)
-            {
-                UIDocument uidoc = uiApp.ActiveUIDocument;
-                //INICIALIZANDO A JANELA E PASSANDO O EXTERNAL EVENT
-                AmbienteManagerMVVM = new AmbienteManagerMVVM(uidoc, fullAmbienteViewModels);
-                AmbienteManagerMVVM.Topmost = true;
-                if (AmbienteManagerMVVM.IsInitialized)
-                {
-                    AmbienteManagerMVVM.Show();
-                }
-            }
+            if (this.AmbienteManagerMVVM != null && this.AmbienteManagerMVVM.IsLoaded)
+                return;
+            UIDocument activeUiDocument = this.uiApp.ActiveUIDocument;
+            this.AmbienteManagerMVVM = new AmbienteManagerMVVM(floorMatrizes, fullAmbienteViewModels, allMaterialNames, materialsByClass);
+            this.AmbienteManagerMVVM.Topmost = true;
+            if (!this.AmbienteManagerMVVM.IsInitialized)
+                return;
+            this.AmbienteManagerMVVM.Show();
         }
 
         internal void ShowMeshReinforcementUI()

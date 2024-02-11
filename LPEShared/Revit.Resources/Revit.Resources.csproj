@@ -112,5 +112,11 @@
   <ItemGroup>
     <EmbeddedResource Include="Images\logo-lpe-engenharia-AZUL.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\down-arrow.png" />
+    <Resource Include="Images\minus-symbol.png" />
+    <Resource Include="Images\plus-symbol.png" />
+    <Resource Include="Images\up-arrow.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

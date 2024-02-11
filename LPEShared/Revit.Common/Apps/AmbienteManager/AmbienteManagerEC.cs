@@ -32,9 +32,16 @@ namespace Revit.Common
             Document doc = uidoc.Document;
 
             List<FullAmbienteViewModel> fullAmbienteViewModels = AmbienteManagerUtils.GetAmbientes(doc);
-
+            Dictionary<MaterialClass, List<string>> materialsByClass = AmbienteManagerUtils.GetMaterialsByClass(doc);
+            Dictionary<FloorMatrizClass, List<FloorMatriz>> floorMatrizes = AmbienteManagerUtils.GetFloorMatrizes(doc, materialsByClass);
+            List<string> allMaterialNames = new FilteredElementCollector(doc)
+                .WhereElementIsNotElementType()
+                .OfCategory(BuiltInCategory.OST_Materials)
+                .Select(x => x.Name)
+                .OrderBy(x => x)
+                .ToList();
             ExternalApplication.LPEApp.uiApp = uiapp;
-            ExternalApplication.LPEApp.ShowAmbienteManagerUI(fullAmbienteViewModels);
+            ExternalApplication.LPEApp.ShowAmbienteManagerUI(floorMatrizes, fullAmbienteViewModels, allMaterialNames, materialsByClass);
 
             return Result.Succeeded;
         }

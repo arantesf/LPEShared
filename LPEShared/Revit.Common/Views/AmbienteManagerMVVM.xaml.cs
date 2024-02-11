@@ -1,82 +1,96 @@
-﻿using Autodesk.Revit.DB;
+﻿// Decompiled with JetBrains decompiler
+// Type: Revit.Common.AmbienteManagerMVVM
+// Assembly: LPE, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+// MVID: 6E06EE1B-06C5-4A71-9629-ACF2EB60ECA2
+// Assembly location: C:\ProgramData\Autodesk\Revit\Addins\2024\LPE\LPE.dll
+
+using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
-using Revit.Common;
 using System;
+using System.CodeDom.Compiler;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Diagnostics;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Forms;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+using System.Windows.Markup;
 
 namespace Revit.Common
 {
-    public partial class AmbienteManagerMVVM : Window
+    public partial class AmbienteManagerMVVM : Window, IComponentConnector
     {
         public static AmbienteManagerMVVM MainView;
-        public bool ApplyChanges { get; set; } = false;
-        public ExternalEvent AddAmbienteExternalEvent { get; set; } = ExternalEvent.Create(new AddAmbienteEEH());
-        public ObservableCollection<FullAmbienteViewModel> AmbienteViewModels { get; set; } = new ObservableCollection<FullAmbienteViewModel>();
-        public List<FullAmbienteViewModel> AmbienteViewModelsToDelete { get; set; } = new List<FullAmbienteViewModel>();
-        public FullAmbienteViewModel SelectedFullAmbienteViewModel { get; set; }
-        public ListCollectionView AmbienteListCollectionView { get; set; }
-        public static ExternalEvent ApplyAmbientesExternalEvent { get; set; } = ExternalEvent.Create(new ApplyAmbientesEEH());
 
-        public AmbienteManagerMVVM(UIDocument uidoc, List<FullAmbienteViewModel> fullAmbienteViewModels)
+        public bool ApplyChanges { get; set; }
+
+        public ExternalEvent AddAmbienteExternalEvent { get; set; } = ExternalEvent.Create((IExternalEventHandler)new AddAmbienteEEH());
+
+        public ObservableCollection<FullAmbienteViewModel> AmbienteViewModels { get; set; } = new ObservableCollection<FullAmbienteViewModel>();
+
+        public List<FullAmbienteViewModel> AmbienteViewModelsToDelete { get; set; } = new List<FullAmbienteViewModel>();
+
+        public FullAmbienteViewModel SelectedFullAmbienteViewModel { get; set; }
+
+        public FullAmbienteViewModel SelectedFullAmbienteViewModelWithoutModify { get; set; }
+
+        public ListCollectionView AmbienteListCollectionView { get; set; }
+
+        public static ExternalEvent ApplyAmbientesExternalEvent { get; set; } = ExternalEvent.Create((IExternalEventHandler)new ApplyAmbientesEEH());
+
+        public Dictionary<FloorMatrizClass, List<FloorMatriz>> FloorMatrizes { get; set; } = new Dictionary<FloorMatrizClass, List<FloorMatriz>>();
+
+        public List<string> AllMaterialNames { get; set; } = new List<string>();
+
+        public Dictionary<MaterialClass, List<string>> MaterialsByClass { get; set; } = new Dictionary<MaterialClass, List<string>>();
+
+        public AmbienteManagerMVVM(
+          Dictionary<FloorMatrizClass, List<FloorMatriz>> floorMatrizes,
+          List<FullAmbienteViewModel> fullAmbienteViewModels,
+          List<string> allMaterialNames,
+          Dictionary<MaterialClass, List<string>> materialsByClass)
         {
-            Closing += OnWindowClosing;
-            MainView = this;
-            foreach (var fullAmbienteViewModel in fullAmbienteViewModels)
-            {
-                AmbienteViewModels.Add(fullAmbienteViewModel);
-            }
-            InitializeComponent();
+            this.Closing += new CancelEventHandler(this.OnWindowClosing);
+            this.MaterialsByClass = materialsByClass;
+            this.FloorMatrizes = floorMatrizes;
+            this.AllMaterialNames = allMaterialNames;
+            AmbienteManagerMVVM.MainView = this;
+            foreach (FullAmbienteViewModel ambienteViewModel in fullAmbienteViewModels)
+                this.AmbienteViewModels.Add(ambienteViewModel);
+            this.InitializeComponent();
         }
 
         public void OnWindowClosing(object sender, CancelEventArgs e)
         {
-            if (!ApplyChanges)
+            if (this.ApplyChanges)
+                return;
+            switch (System.Windows.Forms.MessageBox.Show("As alterações não serão salvas, tem certeza que deseja sair?", "Atenção!", MessageBoxButtons.YesNo))
             {
-                DialogResult dialogResult = System.Windows.Forms.MessageBox.Show("As alterações não serão salvas, tem certeza que deseja sair?", "Atenção!", MessageBoxButtons.YesNo);
-                if (dialogResult == System.Windows.Forms.DialogResult.Yes)
-                {
-
-                }
-                else if (dialogResult == System.Windows.Forms.DialogResult.No)
-                {
+                case System.Windows.Forms.DialogResult.No:
                     e.Cancel = true;
-                }
+                    break;
             }
         }
 
-
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            AmbienteListCollectionView = CollectionViewSource.GetDefaultView(AmbienteViewModels) as ListCollectionView;
-            AmbienteListCollectionView.SortDescriptions.Add(new SortDescription("TipoDePiso", ListSortDirection.Ascending));
-            Ambiente_DataGrid.ItemsSource = AmbienteListCollectionView;
+            this.AmbienteListCollectionView = CollectionViewSource.GetDefaultView((object)this.AmbienteViewModels) as ListCollectionView;
+            this.AmbienteListCollectionView.SortDescriptions.Add(new SortDescription("TipoDePiso", ListSortDirection.Ascending));
+            this.Ambiente_DataGrid.ItemsSource = (IEnumerable)this.AmbienteListCollectionView;
         }
 
         private void AddAmbiente_Button_Click(object sender, RoutedEventArgs e)
         {
-            var createWindow = new AmbienteEditMVVM(new FullAmbienteViewModel(null, null), true);
-            createWindow.Topmost = true;
-            createWindow.ShowDialog();
+            AmbienteEditMVVM ambienteEditMvvm = new AmbienteEditMVVM(new FullAmbienteViewModel((Element)null, (Element)null), true);
+            ambienteEditMvvm.Topmost = true;
+            ambienteEditMvvm.ShowDialog();
         }
 
         public void SetSameAmbienteItensDeDetalhe(FullAmbienteViewModel fullAmbienteViewModel)
         {
-            foreach (var ambienteViewModel in AmbienteViewModels)
+            foreach (FullAmbienteViewModel ambienteViewModel in (Collection<FullAmbienteViewModel>)this.AmbienteViewModels)
             {
                 if (ambienteViewModel.Ambiente == fullAmbienteViewModel.Ambiente)
                 {
@@ -98,83 +112,80 @@ namespace Revit.Common
 
         public void ApplyAddAmbiente(FullAmbienteViewModel fullAmbienteViewModel)
         {
-            SetSameAmbienteItensDeDetalhe(fullAmbienteViewModel);
-            AmbienteViewModels.Add(fullAmbienteViewModel);
+            this.SetSameAmbienteItensDeDetalhe(fullAmbienteViewModel);
+            this.AmbienteViewModels.Add(fullAmbienteViewModel);
         }
 
         public void ApplyEditAmbiente(FullAmbienteViewModel fullAmbienteViewModel)
         {
-            SetSameAmbienteItensDeDetalhe(fullAmbienteViewModel);
-            SelectedFullAmbienteViewModel = fullAmbienteViewModel;
+            this.SetSameAmbienteItensDeDetalhe(fullAmbienteViewModel);
+            this.SelectedFullAmbienteViewModel = fullAmbienteViewModel;
         }
 
         private void EditAmbiente_Button_Click(object sender, RoutedEventArgs e)
         {
-            if (Ambiente_DataGrid.SelectedIndex > -1)
-            {
-                var createWindow = new AmbienteEditMVVM(SelectedFullAmbienteViewModel, false);
-                createWindow.Topmost = true;
-                createWindow.ShowDialog();
-            }
+            if (this.Ambiente_DataGrid.SelectedIndex <= -1)
+                return;
+            this.SelectedFullAmbienteViewModelWithoutModify = this.SelectedFullAmbienteViewModel.Clone() as FullAmbienteViewModel;
+            AmbienteEditMVVM ambienteEditMvvm = new AmbienteEditMVVM(this.SelectedFullAmbienteViewModel, false);
+            ambienteEditMvvm.Topmost = true;
+            bool? nullable = ambienteEditMvvm.ShowDialog();
+            if (nullable.HasValue && nullable.Value)
+                return;
+            this.AmbienteViewModels[this.AmbienteViewModels.IndexOf(this.SelectedFullAmbienteViewModel)] = this.SelectedFullAmbienteViewModelWithoutModify;
         }
 
         private void ImportAmbiente_Button_Click(object sender, RoutedEventArgs e)
         {
-
         }
 
         private void DeleteAmbiente_Button_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                if (Ambiente_DataGrid.SelectedIndex > -1)
+                if (this.Ambiente_DataGrid.SelectedIndex <= -1)
+                    return;
+                FullAmbienteViewModel selectedItem = (FullAmbienteViewModel)this.Ambiente_DataGrid.SelectedItem;
+                if (selectedItem.Id != new ElementId(-1))
                 {
-                    FullAmbienteViewModel fullAmbienteViewModelToDelete = (FullAmbienteViewModel)Ambiente_DataGrid.SelectedItem;
-                    if (fullAmbienteViewModelToDelete.Id != new Autodesk.Revit.DB.ElementId(-1))
-                    {
-                        fullAmbienteViewModelToDelete.Action = Action.Delete;
-                        AmbienteViewModelsToDelete.Add(fullAmbienteViewModelToDelete);
-                    }
-                    AmbienteViewModels.Remove((FullAmbienteViewModel)Ambiente_DataGrid.SelectedItem);
+                    selectedItem.Action = Action.Delete;
+                    this.AmbienteViewModelsToDelete.Add(selectedItem);
                 }
+                this.AmbienteViewModels.Remove((FullAmbienteViewModel)this.Ambiente_DataGrid.SelectedItem);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
             }
         }
 
         private void DuplicateAmbiente_Button_Click(object sender, RoutedEventArgs e)
         {
-            if (Ambiente_DataGrid.SelectedIndex > -1)
-            {
-                FullAmbienteViewModel duplicatedFullAmbienteViewModel = (FullAmbienteViewModel)SelectedFullAmbienteViewModel.Clone();
-                duplicatedFullAmbienteViewModel.TipoDePiso += "(2)";
-                var createWindow = new AmbienteEditMVVM(duplicatedFullAmbienteViewModel, true)
-                {
-                    Topmost = true
-                };
-                createWindow.ShowDialog();
-            }
+            if (this.Ambiente_DataGrid.SelectedIndex <= -1)
+                return;
+            FullAmbienteViewModel fullAmbienteViewModels = (FullAmbienteViewModel)this.SelectedFullAmbienteViewModel.Clone();
+            fullAmbienteViewModels.TipoDePiso += "(2)";
+            AmbienteEditMVVM ambienteEditMvvm = new AmbienteEditMVVM(fullAmbienteViewModels, true);
+            ambienteEditMvvm.Topmost = true;
+            ambienteEditMvvm.ShowDialog();
         }
 
         private void DuplicateReforcoAmbiente_Button_Click(object sender, RoutedEventArgs e)
         {
-            if (Ambiente_DataGrid.SelectedIndex > -1)
-            {
-                FullAmbienteViewModel duplicatedFullAmbienteViewModel = (FullAmbienteViewModel)SelectedFullAmbienteViewModel.Clone();
-                duplicatedFullAmbienteViewModel.TipoDePiso += " - REFORÇO";
-                var createWindow = new AmbienteEditMVVM(duplicatedFullAmbienteViewModel, true)
-                {
-                    Topmost = true
-                };
-                createWindow.ShowDialog();
-            }
+            if (this.Ambiente_DataGrid.SelectedIndex <= -1)
+                return;
+            FullAmbienteViewModel fullAmbienteViewModels = (FullAmbienteViewModel)this.SelectedFullAmbienteViewModel.Clone();
+            fullAmbienteViewModels.TipoDePiso += " - REFORÇO";
+            AmbienteEditMVVM ambienteEditMvvm = new AmbienteEditMVVM(fullAmbienteViewModels, true);
+            ambienteEditMvvm.Topmost = true;
+            ambienteEditMvvm.ShowDialog();
         }
+
         private void Apply_Button_Click(object sender, RoutedEventArgs e)
         {
-            ApplyChanges = true;
-            ApplyAmbientesExternalEvent.Raise();
-            Close();
+            this.ApplyChanges = true;
+            AmbienteManagerMVVM.ApplyAmbientesExternalEvent.Raise();
+            this.Close();
         }
+
     }
 }

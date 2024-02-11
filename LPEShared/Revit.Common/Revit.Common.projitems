@@ -23,6 +23,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Apps\AmbienteManager\AmbienteManagerEEH.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Apps\AmbienteManager\AmbienteManagerEC.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Apps\SplitFloors\SelectFloorsEEH.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Apps\SplitFloors\SplitFloorsEEH - Copy.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Apps\SplitFloors\SplitFloorsUIService.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Apps\SplitFloors\SplitFloorsEEH.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Apps\SplitFloors\SplitFloorsEC.cs" />
@@ -40,9 +41,11 @@
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\AmbienteViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Classes\CurveAndProjection.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utils\Utils.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ViewModels\FloorMatriz.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\EditVisibilityViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\FullAmbienteViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\KeyScheduleElementViewModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ViewModels\LayerViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\ProgressBarViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\ViewModelBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Views\AmbienteEditMVVM.xaml.cs" />

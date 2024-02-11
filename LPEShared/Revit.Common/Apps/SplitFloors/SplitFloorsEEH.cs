@@ -68,28 +68,25 @@ namespace Revit.Common
                         .ToList();
 
                     CurveArray openingsCurveArray = new CurveArray();
+                    CurveArray reforcoOpeningsCurveArray = new CurveArray();
                     Solid openingsSolid = null;
                     if (openings.Any())
                     {
                         foreach (Opening opening in openings.Cast<Opening>())
                         {
-                            CurveArray curveArray = opening.BoundaryCurves;
-                            foreach (Curve curve in curveArray)
+                            CurveArray boundaryCurves = opening.BoundaryCurves;
+                            foreach (Curve curve in boundaryCurves)
                             {
-                                openingsCurveArray.Append(curve);
-                            }
-                            List<CurveLoop> openingCurveLoops = Utils.GetCurveLoopsByCurveArray(curveArray);
-                            if (openingCurveLoops.Any())
-                            {
-                                Solid openingSolidDown = GeometryCreationUtilities.CreateExtrusionGeometry(openingCurveLoops, -XYZ.BasisZ, 1000);
-                                if (openingsSolid == null)
-                                {
-                                    openingsSolid = openingSolidDown;
-                                }
+                                if (opening.Host.LookupParameter("Reforço de Tela").AsInteger() == 1)
+                                    reforcoOpeningsCurveArray.Append(curve);
                                 else
-                                {
-                                    openingsSolid = BooleanOperationsUtils.ExecuteBooleanOperation(openingsSolid, openingSolidDown, BooleanOperationsType.Union);
-                                }
+                                    openingsCurveArray.Append(curve);
+                            }
+                            List<CurveLoop> loopsByCurveArray = Utils.GetCurveLoopsByCurveArray(boundaryCurves);
+                            if (loopsByCurveArray.Any())
+                            {
+                                Solid openingSolidDown = GeometryCreationUtilities.CreateExtrusionGeometry(loopsByCurveArray, -XYZ.BasisZ, 1000);
+                                openingsSolid = openingsSolid == null ? openingSolidDown : BooleanOperationsUtils.ExecuteBooleanOperation(openingsSolid, openingSolidDown, BooleanOperationsType.Union);
                             }
                         }
                     }
@@ -104,13 +101,9 @@ namespace Revit.Common
                         if (!(bool)SelectAmbienteMVVM.MainView.DivideReinforcement_CheckBox.IsChecked)
                         {
                             for (int k = 1; k < pisosAndReforços.Count; k++)
-                            {
                                 reinforcementFloorsToJoin.AddRange(pisosAndReforços[k].Select(element => element.Id));
-                            }
                             if (i != 0)
-                            {
                                 break;
-                            }
                         }
 
                         List<Element> floors = pisosAndReforços[i];
@@ -167,24 +160,24 @@ namespace Revit.Common
                             }
                         }
 
-                        List<Solid> finalSolids = new List<Solid>();
-                        if (openingsSolid != null)
-                        {
-                            foreach (var solid in floorSolids)
-                            {
-                                try
-                                {
-                                    finalSolids.Add(BooleanOperationsUtils.ExecuteBooleanOperation(solid, openingsSolid, BooleanOperationsType.Difference));
-                                }
-                                catch (Exception)
-                                {
-                                }
-                            }
-                        }
-                        else
-                        {
-                            finalSolids = floorSolids;
-                        }
+                        //List<Solid> finalSolids = new List<Solid>();
+                        //if (openingsSolid != null)
+                        //{
+                        //    foreach (var solid in floorSolids)
+                        //    {
+                        //        try
+                        //        {
+                        //            finalSolids.Add(BooleanOperationsUtils.ExecuteBooleanOperation(solid, openingsSolid, BooleanOperationsType.Difference));
+                        //        }
+                        //        catch (Exception)
+                        //        {
+                        //        }
+                        //    }
+                        //}
+                        //else
+                        //{
+                        //    finalSolids = floorSolids;
+                        //}
 
                         if (floors.Any() && joints.Any())
                         {
@@ -193,8 +186,8 @@ namespace Revit.Common
                             ExternalApplication.LPEApp.SelectAmbienteMVVM.ProgressBar_TextBlock.Text = $"Preparando para dividir os pisos do ambiente \"{ambiente}\"";
 
                             CurveArray curveArrayToCreateRoomBoundaries = new CurveArray();
-                            TransactionGroup transactionGroup = new TransactionGroup(doc);
-                            transactionGroup.Start("transactionToRollBack");
+                            TransactionGroup transactionGroup2 = new TransactionGroup(doc);
+                            transactionGroup2.Start("transactionToRollBack");
 
                             List<Element> roomsToDelete = new FilteredElementCollector(doc, uidoc.ActiveView.Id)
                                 .WhereElementIsNotElementType()
@@ -268,7 +261,7 @@ namespace Revit.Common
                                 XYZ roomPointTrasnformed = transform1.OfPoint(roomPoint);
                                 Curve curveToIntersectSolid = Line.CreateBound(roomPointTrasnformed - XYZ.BasisZ * 10000, roomPointTrasnformed + XYZ.BasisZ * 10000);
                                 bool intersect = false;
-                                foreach (var finalSolid in finalSolids)
+                                foreach (var finalSolid in floorSolids)
                                 {
                                     if (finalSolid.IntersectWithCurve(curveToIntersectSolid, solidCurveIntersectionOptions).Any())
                                     {
@@ -317,12 +310,10 @@ namespace Revit.Common
                                 }
                             }
                             //Utils.DeleteElements(doc, new List<Element>() { deletarView });
-                            transactionGroup.RollBack();
-                            transactionGroup.Start("Dividir Pisos");
+                            transactionGroup2.RollBack();
+                            transactionGroup2.Start("Dividir Pisos");
 
                             SelectAmbienteMVVM.ProgressBarViewModel.ProgressBarValue = 3;
-
-
                             SelectAmbienteMVVM.ProgressBarViewModel.ProgressBarValue = 0;
                             SelectAmbienteMVVM.MainView.ProgressBar.Maximum = dividedFloorsCurveLoops.Count;
                             int count = 0;
@@ -330,48 +321,34 @@ namespace Revit.Common
                             {
 
                                 List<CurveLoop> curveLoops = dividedFloorsCurveLoops[j].CurveLoops;
-                                Curve CurveToIntersect = dividedFloorsCurveLoops[j].CurveToIntersect;
-                                SelectAmbienteMVVM.ProgressBarViewModel.ProgressBarValue += 1;
-                                count++;
-                                ExternalApplication.LPEApp.SelectAmbienteMVVM.ProgressBar_TextBlock.Text = $"Criando pisos do ambiente \"{ambiente}\" ({count}/{dividedFloorsCurveLoops.Count})";
-                                List<CurveLoop> orderedCurveLoops = curveLoops.OrderBy(curveLoop => curveLoop.GetExactLength()).ToList();
-                                XYZ secondVectorInMultiplication = -XYZ.BasisZ;
-                                if (curveLoops.First().IsCounterclockwise(XYZ.BasisZ))
+                                if (curveLoops.Any())
                                 {
-                                    secondVectorInMultiplication = XYZ.BasisZ;
-                                }
-
-                                //CurveLoop offsetCurveLoop = CurveLoop.CreateViaOffset(orderedCurveLoops.First(), -0.01, XYZ.BasisZ);
-                                //XYZ pointInsideCurveLoop = offsetCurveLoop.First().GetEndPoint(0);
-                                Line firstLine = (Line)curveLoops.First().FirstOrDefault(curve => curve is Line);
-                                if (firstLine == null)
-                                {
-                                    continue;
-                                }
-                                XYZ middlePoint = firstLine.Evaluate(0.5, true);
-                                XYZ pointInsideCurveLoop = middlePoint + firstLine.Direction.CrossProduct(secondVectorInMultiplication) * 0.01;
-
-
-                                List<CurveLoop> fixedSmallLinesCurveLoops = Utils.FixCurveLoopsSmallLines(orderedCurveLoops, 0.01);
-
-                                //Curve curveToIntersectSolid = Line.CreateBound(pointInsideCurveLoop - XYZ.BasisZ * 10000, pointInsideCurveLoop + XYZ.BasisZ * 10000);
-                                Curve curveToIntersectSolid = CurveToIntersect;
-                                bool intersect = false;
-                                foreach (var finalSolid in finalSolids)
-                                {
-                                    if (finalSolid.IntersectWithCurve(curveToIntersectSolid, solidCurveIntersectionOptions).Any())
+                                    Curve CurveToIntersect = dividedFloorsCurveLoops[j].CurveToIntersect;
+                                    SelectAmbienteMVVM.ProgressBarViewModel.ProgressBarValue += 1;
+                                    count++;
+                                    ExternalApplication.LPEApp.SelectAmbienteMVVM.ProgressBar_TextBlock.Text = $"Criando pisos do ambiente \"{ambiente}\" ({count}/{dividedFloorsCurveLoops.Count})";
+                                    List<CurveLoop> orderedCurveLoops = curveLoops.OrderBy(curveLoop => curveLoop.GetExactLength()).ToList();
+                                    XYZ secondVectorInMultiplication = -XYZ.BasisZ;
+                                    if (curveLoops.First().IsCounterclockwise(XYZ.BasisZ))
                                     {
-                                        intersect = true;
-                                        break;
+                                        secondVectorInMultiplication = XYZ.BasisZ;
                                     }
-                                }
 
-                                if (intersect)
-                                {
-                                    if (openingsSolid != null && openingsSolid.IntersectWithCurve(curveToIntersectSolid, solidCurveIntersectionOptions).Any())
+                                    //CurveLoop offsetCurveLoop = CurveLoop.CreateViaOffset(orderedCurveLoops.First(), -0.01, XYZ.BasisZ);
+                                    //XYZ pointInsideCurveLoop = offsetCurveLoop.First().GetEndPoint(0);
+                                    Line firstLine = (Line)curveLoops.First().FirstOrDefault(curve => curve is Line);
+                                    if (firstLine == null)
                                     {
                                         continue;
                                     }
+                                    XYZ middlePoint = firstLine.Evaluate(0.5, true);
+                                    XYZ pointInsideCurveLoop = middlePoint + firstLine.Direction.CrossProduct(secondVectorInMultiplication) * 0.01;
+
+
+                                    List<CurveLoop> fixedSmallLinesCurveLoops = Utils.FixCurveLoopsSmallLines(orderedCurveLoops, 0.01);
+
+                                    //Curve curveToIntersectSolid = Line.CreateBound(pointInsideCurveLoop - XYZ.BasisZ * 10000, pointInsideCurveLoop + XYZ.BasisZ * 10000);
+                                    Curve curveToIntersectSolid = CurveToIntersect;
                                     ElementId typeId = floors.First().GetTypeId();
                                     ElementId levelId = floors.First().LevelId;
                                     Floor createdFloor = Utils.CreateFloor(doc, fixedSmallLinesCurveLoops, typeId, levelId);
@@ -379,6 +356,7 @@ namespace Revit.Common
                                     {
                                         continue;
                                     }
+
                                     foreach (Floor existingFloor in floors.Cast<Floor>())
                                     {
                                         Solid existingFloorSolid = Utils.GetElementSolid(existingFloor);
@@ -391,10 +369,7 @@ namespace Revit.Common
 #else
                                             SlabShapeEditor slabShapeEditor = existingFloor.GetSlabShapeEditor();
 #endif
-                                            if (slabShapeEditor == null || slabShapeEditor.IsEnabled)
-                                            {
-                                                Utils.SetPointsElevationsOfNewFloor(existingFloor as Floor, createdFloor, 0);
-                                            }
+                                            Utils.SetPointsElevationsOfNewFloor(existingFloor as Floor, createdFloor, 0);
                                             break;
                                         }
                                     }
@@ -412,11 +387,12 @@ namespace Revit.Common
                                     Utils.SetParameter(createdFloor, "Piso em placas", 1);
 
                                 }
+
                             }
 
                             Utils.DeleteElements(doc, floors);
 
-                            transactionGroup.Assimilate();
+                            transactionGroup2.Assimilate();
 
                         }
                     }

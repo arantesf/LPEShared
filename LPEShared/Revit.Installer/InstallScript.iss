@@ -3,7 +3,7 @@
 
 #define MyAppName "Plug-in Revit LPE"
 #define FolderName "LPE"
-#define MyAppVersion "1.2.0"
+#define MyAppVersion "1.1.9"
 #define MyAppPublisher "FCA"
 #define Revit2021 "\Autodesk\Revit\Addins\2021\"
 #define Revit2022 "\Autodesk\Revit\Addins\2022\"
@@ -24,7 +24,7 @@ DisableDirPage=yes
 DefaultGroupName=LPE
 DisableProgramGroupPage=yes
 ; Uncomment the following line to run in non administrative install mode (install for current user only.)
-; PrivilegesRequired=lowest
+PrivilegesRequired=lowest
 ; Password=revit
 OutputDir=.\Output
 SetupIconFile=icon-lpe-engenharia.ico

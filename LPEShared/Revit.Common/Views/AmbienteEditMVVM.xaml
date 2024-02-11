@@ -1,771 +1,557 @@
 ﻿<Window x:Class="Revit.Common.AmbienteEditMVVM"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:common="clr-namespace:Revit.Common"
-        mc:Ignorable="d" 
-        DataContext="{Binding RelativeSource={RelativeSource Self}}"
-        Loaded="Window_Loaded"
-        WindowStartupLocation="CenterScreen"
-        MinHeight="600"
-        MinWidth="1000"
-        Width="1200" Height="600"
-        >
-    <Window.Resources>
+        Loaded="Window_Loaded" WindowStartupLocation="CenterScreen" MinWidth="1100" MinHeight="500"
+        Width="1100" SizeToContent="Height" DataContext="{Binding RelativeSource={RelativeSource Self}}">
+    <FrameworkElement.Resources>
         <BooleanToVisibilityConverter x:Key="b2v"/>
         <Style x:Key="Blue_Button" TargetType="{x:Type Button}">
-            <Setter Property="Background" Value="#FF0e538c"/>
-            <Setter Property="BorderBrush" Value="Black"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="FontWeight" Value="Normal"/>
+            <Setter Property="Control.Background" Value="#FF0e538c"/>
+            <Setter Property="Control.BorderBrush" Value="Black"/>
+            <Setter Property="Control.Foreground" Value="White"/>
+            <Setter Property="Control.FontWeight" Value="Normal"/>
             <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#FF000000"/>
-                    <Setter Property="Foreground" Value="#FF0e538c"/>
+                <Trigger Property="UIElement.IsMouseOver" Value="true">
+                    <Setter Property="Control.Background" Value="#FF000000"/>
+                    <Setter Property="Control.Foreground" Value="#FF0e538c"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
-    </Window.Resources>
-    <Grid
-        Background="#FFBBBBBB"
-        VerticalAlignment="Stretch"
-        >
+    </FrameworkElement.Resources>
+    <Grid Background="#FFAAAAAA" VerticalAlignment="Stretch">
         <Grid.RowDefinitions>
-            <RowDefinition Height="125"></RowDefinition>
-            <RowDefinition Height="Auto"></RowDefinition>
-            <RowDefinition Height="*"></RowDefinition>
-            <RowDefinition Height="50"></RowDefinition>
+            <RowDefinition Height="125"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="50"/>
         </Grid.RowDefinitions>
         <Grid Margin="10">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"></ColumnDefinition>
-                <ColumnDefinition Width="15"></ColumnDefinition>
-                <ColumnDefinition Width="200"></ColumnDefinition>
-                <ColumnDefinition Width="15"></ColumnDefinition>
-                <ColumnDefinition  Width="Auto"></ColumnDefinition>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="0"/>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="0"/>
+                <ColumnDefinition Width="200"/>
+                <ColumnDefinition Width="0"/>
+                <ColumnDefinition Width="3*"/>
             </Grid.ColumnDefinitions>
-            <Image
-                Grid.Column="0"
-                HorizontalAlignment="Right"
-                Margin="5"
-                Source="/Revit.Resources;component/Images/logo-lpe-engenharia-2.png" Width="100"
-                />
-            <GroupBox
-                Grid.Column="4"
-                BorderThickness="0.5"
-                Foreground="#FF222222"
-                FontWeight="Bold"
-                Header="TIPO DE PISO"
-                Margin="5,0"
-                VerticalAlignment="Center"
-                DataContext="{Binding SelectedFullAmbienteViewModel}"
-                >
-                <TextBox MinWidth="300" IsEnabled="False" Margin="10" Padding="5,2" VerticalContentAlignment="Center" TextAlignment="Center" Text="{Binding TipoDePiso, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Height="25"/>
+            <Image Grid.Column="0" HorizontalAlignment="Right" Margin="10"
+             Source="/Revit.Resources;component/Images/logo-lpe-engenharia-2.png" Width="100"/>
+            <GroupBox Grid.Column="6" BorderThickness="0" BorderBrush="#FF555555" FontSize="18" Foreground="#FF000000"
+                FontWeight="Normal" Header="TIPO DE PISO" VerticalAlignment="Center"
+                DataContext="{Binding SelectedFullAmbienteViewModel}">
+                <TextBox FontSize="14" MinWidth="300" TextWrapping="Wrap" IsEnabled="false" Margin="0" Padding="5,2"
+                 VerticalContentAlignment="Center" TextAlignment="Center" AcceptsReturn="true" MinHeight="30"
+                 Text="{Binding TipoDePiso, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
             </GroupBox>
-            <GroupBox
-                Header="SOLUÇÃO ESTRUTURAL*"
-                FontWeight="Bold"
-                Foreground="#FF222222"
-                BorderThickness="0.5"
-                Grid.Column="2"
-                VerticalAlignment="Center"
-                DataContext="{Binding SelectedFullAmbienteViewModel}"
-                >
-                <Border x:Name="StructuralSolution_Border" Margin="10" BorderBrush="Red" BorderThickness="1">
-                    <ComboBox SelectionChanged="StructuralSolution_Combobox_SelectionChanged" x:Name="StructuralSolution_Combobox"  SelectedItem="{Binding TipoDeSolucao}" VerticalContentAlignment="Center" FontWeight="Normal" ItemsSource="{Binding StructuralSolutions}"  Padding="10,0,0,0" Height="25"></ComboBox>
+            <GroupBox BorderThickness="0" BorderBrush="#FF555555" FontSize="18" Grid.Column="2" Foreground="#FF000000"
+                FontWeight="Normal" Header="AMBIENTE" VerticalAlignment="Center">
+                <Grid Margin="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="17*"/>
+                        <ColumnDefinition Width="91*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <StackPanel Margin="0" Grid.Row="0" Grid.ColumnSpan="2">
+                        <TextBox FontSize="14" TextWrapping="Wrap" Padding="5,2" VerticalContentAlignment="Center" Height="30"
+                     AcceptsReturn="true" Grid.Row="1" DataContext="{Binding SelectedFullAmbienteViewModel}"
+                     Text="{Binding Ambiente, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                        </TextBox>
+                    </StackPanel>
+                </Grid>
+            </GroupBox>
+            <GroupBox Header="SOLUÇÃO" FontWeight="Normal" Foreground="#FF000000" BorderThickness="0"
+                BorderBrush="#FF555555" FontSize="18" Grid.Column="4" VerticalAlignment="Center"
+                DataContext="{Binding SelectedFullAmbienteViewModel}">
+                <Border x:Name="StructuralSolution_Border" Margin="0" BorderThickness="1">
+                    <ComboBox SelectionChanged="StructuralSolution_Combobox_SelectionChanged"
+                    x:Name="StructuralSolution_Combobox" FontSize="14" VerticalContentAlignment="Center"
+                    FontWeight="Normal" Padding="10,0,0,0" Height="30" SelectedItem="{Binding TipoDeSolucao}"
+                    ItemsSource="{Binding StructuralSolutions}"/>
                 </Border>
             </GroupBox>
-
         </Grid>
-        <Grid
-            Margin="10,0,10,0"
-            Grid.Row="2"
-            Width="Auto"
-            HorizontalAlignment="Stretch"
-            >
-            <Border
-                CornerRadius="5"
-                BorderThickness="1"
-                BorderBrush="White"
-            >
-                <ScrollViewer
-                x:Name="ParametersScrollViewer"
-                VerticalScrollBarVisibility="Auto"
-                Visibility="Collapsed"
-                >
-                    <Grid
-                    Margin="5,5,5,10"
-                        DataContext="{Binding SelectedFullAmbienteViewModel}"
-                    >
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition>
-                                <ColumnDefinition.Style>
-                                    <Style TargetType="ColumnDefinition">
-                                        <Setter Property="Width" Value="*" />
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsColumn0Visible}" Value="False">
-                                                <Setter Property="Width" Value="0" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </ColumnDefinition.Style>
-                            </ColumnDefinition>
-                            <ColumnDefinition>
-                                <ColumnDefinition.Style>
-                                    <Style TargetType="ColumnDefinition">
-                                        <Setter Property="Width" Value="*" />
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsColumn1Visible}" Value="False">
-                                                <Setter Property="Width" Value="0" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </ColumnDefinition.Style>
-                            </ColumnDefinition>
-                            <ColumnDefinition>
-                                <ColumnDefinition.Style>
-                                    <Style TargetType="ColumnDefinition">
-                                        <Setter Property="Width" Value="*" />
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsColumn2Visible}" Value="False">
-                                                <Setter Property="Width" Value="0" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </ColumnDefinition.Style>
-                            </ColumnDefinition>
-                            <ColumnDefinition>
-                                <ColumnDefinition.Style>
-                                    <Style TargetType="ColumnDefinition">
-                                        <Setter Property="Width" Value="*" />
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsColumn3Visible}" Value="False">
-                                                <Setter Property="Width" Value="0" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </ColumnDefinition.Style>
-                            </ColumnDefinition>
-                            <ColumnDefinition>
-                                <ColumnDefinition.Style>
-                                    <Style TargetType="ColumnDefinition">
-                                        <Setter Property="Width" Value="*" />
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsColumn4Visible}" Value="False">
-                                                <Setter Property="Width" Value="0" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </ColumnDefinition.Style>
-                            </ColumnDefinition>
-                            
-                        </Grid.ColumnDefinitions>
-
-                        <StackPanel
-                            >
-                            <GroupBox
-                                BorderThickness="0.5"
-                            Grid.Column="0"
-                            Foreground="#FF222222"
-                            FontWeight="Bold"
-                            Header="IDENTIDADE"
-                            Margin="5,0"
-                            VerticalAlignment="Top"
-                            >
-                                <Grid Margin="5">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="17*"/>
-                                        <ColumnDefinition Width="91*"/>
-                                    </Grid.ColumnDefinitions>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto"></RowDefinition>
-                                        <RowDefinition Height="Auto"></RowDefinition>
-                                        <RowDefinition Height="Auto"></RowDefinition>
-                                        <RowDefinition Height="Auto"></RowDefinition>
-                                        <RowDefinition Height="Auto"></RowDefinition>
-                                    </Grid.RowDefinitions>
-                                    <StackPanel
-                                    Margin="5"
-                                    Grid.Row="0" Grid.ColumnSpan="2"
-                                    >
-                                        <TextBlock TextWrapping="Wrap" FontWeight="Normal"><Run Text="AMBIENTE*"/></TextBlock>
-                                        <TextBox TextWrapping="Wrap" Padding="5,2" VerticalContentAlignment="Center" Height="Auto" AcceptsReturn="True"  MinHeight="25" Grid.Row="1">
-                                            <TextBox.Text>
-                                                <Binding Path="Ambiente" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged" NotifyOnValidationError="True" ValidatesOnExceptions="True">
-                                                    <Binding.ValidationRules>
-                                                        <common:StringValidationRule/>
-                                                    </Binding.ValidationRules>
-                                                </Binding>
-                                            </TextBox.Text>
-                                        </TextBox>
-
-
-
-                                    </StackPanel>
-                                </Grid>
-                            </GroupBox>
-                            <GroupBox
-                            x:Name="Dimensoes_GroupBox"
-                            Grid.Row="1"
-                            BorderThickness="0.5"
-                            Foreground="#FF222222"
-                            FontWeight="Bold"
-                            Header="DIMENSÕES DA PLACA"
-                            Margin="5,0"
-                            >
-                                <Grid Margin="5">
-                                    <StackPanel Margin="5">
-                                        <TextBlock TextWrapping="Wrap" FontWeight="Normal"><Run Text="COMPRIMENTO PLACA [m]"/></TextBlock>
-                                        <TextBox Padding="5,2" VerticalContentAlignment="Center" Text="{Binding ComprimentoDaPlaca, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  Height="25" Grid.Row="1"/>
-                                        <TextBlock TextWrapping="Wrap" FontWeight="Normal"><Run Text="LARGURA PLACA [m]"/></TextBlock>
-                                        <TextBox Padding="5,2" VerticalContentAlignment="Center" Text="{Binding LarguraDaPlaca, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Height="25" Grid.Row="1"/>
-                                    </StackPanel>
-                                </Grid>
-                            </GroupBox>
-                            <GroupBox
-                            
-                            x:Name="EspacadorSoldado_GroupBox"
-                            Grid.Row="2"
-                            BorderThickness="0.5"
-                            Foreground="#FF222222"
-                            FontWeight="Bold"
-                            Header="ESPAÇADOR SOLDADO"
-                            Margin="5,0"
-                            >
-                                <Grid Margin="5">
-                                    <StackPanel Margin="5">
-                                        <TextBlock TextWrapping="Wrap" FontWeight="Normal">ESPAÇADOR SOLDADO</TextBlock>
-                                        <TextBox Padding="5,2" VerticalContentAlignment="Center" Text="{Binding HEspacadorSoldado, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Height="25" Grid.Row="1"></TextBox>
-                                    </StackPanel>
-                                </Grid>
-                            </GroupBox>
-                            <GroupBox
-                                
-                                x:Name="Tratamento_GroupBox"
-                                Grid.Row="1"
-                                BorderThickness="0.5"
-                                FontWeight="Bold"
-                                Foreground="#FF222222"
-                                Header="TRATAMENTO"
-                                Margin="5,0"
-                                >
-                                <Grid Margin="5">
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto"></RowDefinition>
-                                        <RowDefinition Height="Auto"></RowDefinition>
-                                    </Grid.RowDefinitions>
-                                    <CheckBox 
-                            x:Name="Tratamento_CheckBox"
-                            Margin="5"
-                                 
-                              FontWeight="Normal"
-                              Foreground="#FF222222"
-                        IsChecked="{Binding BoolTratamentoSuperficial, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                        VerticalAlignment="Center">
-                                        <ContentControl>
-                                            <TextBlock TextWrapping="Wrap">TRATAMENTO SUPERFICIAL</TextBlock>
-                                        </ContentControl>
-                                    </CheckBox>
-                                    <StackPanel
-                            Visibility="{Binding IsChecked,ElementName=Tratamento_CheckBox,Converter={StaticResource b2v}}"
-                            Margin="5"
-                            Grid.Row="1">
-                                        <TextBlock TextWrapping="Wrap"  FontWeight="Normal">TRATAMENTO SUPERFICIAL</TextBlock>
-                                        <TextBox TextWrapping="Wrap" Padding="5,2" VerticalContentAlignment="Center" Text="{Binding TratamentoSuperficial, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Height="Auto" AcceptsReturn="True"  MinHeight="25" Grid.Row="1"></TextBox>
-                                    </StackPanel>
-                                </Grid>
-                            </GroupBox>
-
-                        </StackPanel>
-                        <StackPanel
-                            Grid.Column="1"
-                            >
-                            <GroupBox
-                                Grid.Row="2"
-                                
-                                x:Name="Fibra_GroupBox"
-                                BorderThickness="0.5"
-                                FontWeight="Bold"
-                                Foreground="#FF222222"
-                                Header="FIBRA"
-                                Margin="5,0"
-                                >
-                                <Grid Margin="5">
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto"></RowDefinition>
-                                        <RowDefinition Height="Auto"></RowDefinition>
-                                    </Grid.RowDefinitions>
-                                    <CheckBox 
-                                        IsEnabled="False"
-                                        x:Name="Fibra_CheckBox"
-                                        Margin="5"
-                                        FontWeight="Normal"
-                                        Foreground="#FF222222"
-                                        IsChecked="{Binding BoolFibra, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                        VerticalAlignment="Center">
-                                        <ContentControl>
-                                            <TextBlock TextWrapping="Wrap">FIBRA</TextBlock>
-                                        </ContentControl>
-                                    </CheckBox>
-                                    <StackPanel
-                            Visibility="{Binding IsChecked,ElementName=Fibra_CheckBox,Converter={StaticResource b2v}}"
-                            Margin="5"
-                            Grid.Row="2">
-                                        <TextBlock TextWrapping="Wrap"  FontWeight="Normal">FIBRA</TextBlock>
-                                        <TextBox TextWrapping="Wrap" Padding="5,2" VerticalContentAlignment="Center" Text="{Binding Fibra, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Height="Auto" AcceptsReturn="True"  MinHeight="25" Grid.Row="1"></TextBox>
-                                        <TextBlock TextWrapping="Wrap"  FontWeight="Normal">DOSAGEM FIBRA</TextBlock>
-                                        <TextBox  Padding="5,2" VerticalContentAlignment="Center" Text="{Binding DosagemFibra, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Height="25" Grid.Row="1"></TextBox>
-                                        <TextBlock TextWrapping="Wrap"  FontWeight="Normal">FR1</TextBlock>
-                                        <TextBox TextWrapping="Wrap"  Padding="5,2" VerticalContentAlignment="Center" Text="{Binding FR1, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Height="Auto" AcceptsReturn="True"  MinHeight="25" Grid.Row="1"></TextBox>
-                                        <TextBlock TextWrapping="Wrap"  FontWeight="Normal">FR4</TextBlock>
-                                        <TextBox TextWrapping="Wrap" Padding="5,2" VerticalContentAlignment="Center" Text="{Binding FR4, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Height="Auto" AcceptsReturn="True"  MinHeight="25" Grid.Row="1"></TextBox>
-
-                                    </StackPanel>
-                                </Grid>
-                            </GroupBox>
-                            <GroupBox
-                                
-                                x:Name="TelaSuperior_GroupBox"
-                                BorderThickness="0.5"
-                                FontWeight="Bold"
-                                Foreground="#FF222222"
-                                Header="TELA SUPERIOR"
-                                Margin="5,0"
-                            >
-                                <Grid Margin="5">
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto"></RowDefinition>
-                                        <RowDefinition Height="Auto"></RowDefinition>
-                                    </Grid.RowDefinitions>
-                                    <CheckBox 
-                                        IsEnabled="False"
-                                    x:Name="TelaSuperior_Checkbox"
-                                    Click="TelaSuperior_Checkbox_Click"
-                                    Margin="5"
-                                    FontWeight="Normal"
-                                    Foreground="#FF222222"
-                                    IsChecked="{Binding BoolTelaSuperior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                    VerticalAlignment="Center">
-                                        <ContentControl>
-                                            <TextBlock TextWrapping="Wrap">TELA SUPERIOR</TextBlock>
-                                        </ContentControl>
-                                    </CheckBox>
-                                    <StackPanel
-                            Visibility="{Binding IsChecked,ElementName=TelaSuperior_Checkbox,Converter={StaticResource b2v}}"
-                            Margin="5"
-                            Grid.Row="1">
-                                        <TextBlock TextWrapping="Wrap"   FontWeight="Normal">TELA SUPERIOR</TextBlock>
-                                        <TextBox TextWrapping="Wrap"  Padding="5,2" VerticalContentAlignment="Center" Text="{Binding TelaSuperior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Height="Auto" AcceptsReturn="True"  MinHeight="25" Grid.Row="1"></TextBox>
-                                        <TextBlock TextWrapping="Wrap"  FontWeight="Normal">FINALIDADE TELA SUPERIOR</TextBlock>
-                                        <TextBox TextWrapping="Wrap"  Padding="5,2" VerticalContentAlignment="Center" Text="{Binding FinalidadeTelaSuperior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Height="Auto" AcceptsReturn="True"  MinHeight="25" Grid.Row="1"></TextBox>
-                                        <TextBlock TextWrapping="Wrap"  FontWeight="Normal">EMENDA TELA SUPERIOR</TextBlock>
-                                        <TextBox  Padding="5,2" VerticalContentAlignment="Center" Text="{Binding EmendaTelaSuperior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Height="25" Grid.Row="1"></TextBox>
-                                    </StackPanel>
-                                </Grid>
-                            </GroupBox>
-                            <GroupBox
-                                
-                                x:Name="TelaInferior_GroupBox"
-                                Grid.Row="1"
-                                BorderThickness="0.5"
-                                FontWeight="Bold"
-                                Foreground="#FF222222"
-                                Header="TELA INFERIOR"
-                                Margin="5,0"
-                                >   
-                                <Grid Margin="5">
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto"></RowDefinition>
-                                        <RowDefinition Height="Auto"></RowDefinition>
-                                    </Grid.RowDefinitions>
-                                    <CheckBox 
-                                        IsEnabled="False"
-                                    x:Name="TelaInferior_CheckBox"
-                                    Click="TelaInferior_Checkbox_Click"
-                                    Margin="5"
-                                    FontWeight="Normal"
-                                    Foreground="#FF222222"
-                                    IsChecked="{Binding BoolTelaInferior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                    VerticalAlignment="Center">
-                                        <ContentControl>
-                                            <TextBlock TextWrapping="Wrap">TELA INFERIOR</TextBlock>
-                                        </ContentControl>
-                                    </CheckBox>
-                                    <StackPanel
-                            Visibility="{Binding IsChecked,ElementName=TelaInferior_CheckBox,Converter={StaticResource b2v}}"
-                            Margin="5"
-                            Grid.Row="1">
-                                        <TextBlock TextWrapping="Wrap" FontWeight="Normal">TELA INFERIOR</TextBlock>
-                                        <TextBox TextWrapping="Wrap" Padding="5,2" VerticalContentAlignment="Center" Text="{Binding TelaInferior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Height="Auto" AcceptsReturn="True"  MinHeight="25" Grid.Row="1"></TextBox>
-                                        <TextBlock TextWrapping="Wrap" FontWeight="Normal">EMENDA TELA INFERIOR</TextBlock>
-                                        <TextBox  Padding="5,2" VerticalContentAlignment="Center" Text="{Binding EmendaTelaInferior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Height="25" Grid.Row="1"></TextBox>
-                                    </StackPanel>
-                                </Grid>
-                            </GroupBox>
-
-                        </StackPanel>
-                        <Grid
-                            Grid.Column="2"
-                            >   
+        <Border Margin="10,0,10,0" Grid.Row="2" Width="Auto" HorizontalAlignment="Stretch" BorderThickness="1"
+            BorderBrush="White" Background="#FFDDDDDD" MinHeight="350"
+            DataContext="{Binding SelectedFullAmbienteViewModel}">
+            <Grid Margin="5" Visibility="{Binding ParametersScrollVisible, Converter={StaticResource b2v}}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition>
+                        <FrameworkContentElement.Style>
+                            <Style TargetType="{x:Type ColumnDefinition}">
+                                <Setter Property="ColumnDefinition.Width" Value="3*"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsColumn0Visible}" Value="False">
+                                        <Setter Property="ColumnDefinition.Width" Value="0"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </FrameworkContentElement.Style>
+                    </ColumnDefinition>
+                    <ColumnDefinition>
+                        <FrameworkContentElement.Style>
+                            <Style TargetType="{x:Type ColumnDefinition}">
+                                <Setter Property="ColumnDefinition.Width" Value="*"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsColumn1Visible}" Value="False">
+                                        <Setter Property="ColumnDefinition.Width" Value="0"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </FrameworkContentElement.Style>
+                    </ColumnDefinition>
+                    <ColumnDefinition>
+                        <FrameworkContentElement.Style>
+                            <Style TargetType="{x:Type ColumnDefinition}">
+                                <Setter Property="ColumnDefinition.Width" Value="*"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsColumn2Visible}" Value="False">
+                                        <Setter Property="ColumnDefinition.Width" Value="0"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </FrameworkContentElement.Style>
+                    </ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <StackPanel>
+                    <GroupBox Margin="5" BorderThickness="0" BorderBrush="#FF555555" FontSize="18" Foreground="#FF000000"
+                    Visibility="{Binding IsRigid, Converter={StaticResource b2v}}">
+                        <Grid>
                             <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"></RowDefinition>
-                                <RowDefinition Height="Auto"></RowDefinition>
+                                <RowDefinition/>
+                                <RowDefinition/>
                             </Grid.RowDefinitions>
+                            <CheckBox Click="ProjBasico_Checkbox_Click" x:Name="ProjBasico_Checkbox" Grid.Row="0" FontWeight="Normal"
+                        Foreground="#FF000000" VerticalAlignment="Center" VerticalContentAlignment="Center">
+                                <ContentControl>
+                                    <TextBlock FontSize="18" TextWrapping="Wrap">PROJETO BÁSICO</TextBlock>
+                                </ContentControl>
+                            </CheckBox>
+                            <Grid Row="1"
+                    Visibility="{Binding IsChecked, ElementName=ProjBasico_Checkbox, Converter={StaticResource b2v}}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition/>
+                                    <ColumnDefinition Width="10"/>
+                                    <ColumnDefinition/>
+                                </Grid.ColumnDefinitions>
+                                <GroupBox x:Name="Dimensoes_GroupBox" Margin="5" Grid.Row="1" BorderThickness="0" BorderBrush="#FF555555"
+                          FontSize="18" Foreground="#FF000000" FontWeight="Normal">
+                                    <Grid>
+                                        <StackPanel Margin="0">
+                                            <TextBlock FontSize="14" TextWrapping="Wrap" FontWeight="Normal">
+                        <Run Text="COMPRIMENTO PLACA (m)"/>
+                                            </TextBlock>
+                                            <TextBox FontSize="14" Padding="5,2" VerticalContentAlignment="Center" Height="30" Grid.Row="1"
+                               Text="{Binding ComprimentoDaPlaca, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                            <TextBlock FontSize="14" TextWrapping="Wrap" FontWeight="Normal">
+                        <Run Text="LARGURA PLACA (m)"/>
+                                            </TextBlock>
+                                            <TextBox FontSize="14" Padding="5,2" VerticalContentAlignment="Center" Height="30" Grid.Row="1"
+                               Text="{Binding LarguraDaPlaca, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </GroupBox>
+                                <GroupBox x:Name="EspacadorSoldado_GroupBox" Margin="5" Grid.Row="1" Grid.Column="2" BorderThickness="0"
+                          BorderBrush="#FF555555" FontSize="18" Foreground="#FF000000" FontWeight="Normal"
+                          VerticalAlignment="Top">
+                                    <Grid>
+                                        <StackPanel Margin="0">
+                                            <TextBlock FontSize="14" TextWrapping="Wrap" FontWeight="Normal">
+                        ESPAÇADOR SOLDADO (cm)
+                                            </TextBlock>
+                                            <TextBox FontSize="14" Padding="5,2" VerticalContentAlignment="Center" Height="30" Grid.Row="1"
+                               Text="{Binding HEspacadorSoldado, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </GroupBox>
+                            </Grid>
                         </Grid>
-                        <StackPanel
-                            Grid.Column="3"
-                            >   
-                            <GroupBox
-                                
-                                x:Name="Espacadores_GroupBox"
-                                BorderThickness="0.5"
-                                FontWeight="Bold"
-                                Foreground="#FF222222"
-                                Header="ESPAÇADORES PARA TELA"
-                                Margin="5,0"
-                                >
-                                <Grid Margin="5">
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto"></RowDefinition>
-                                        <RowDefinition Height="Auto"></RowDefinition>
-                                        <RowDefinition Height="Auto"></RowDefinition>
-                                        <RowDefinition Height="Auto"></RowDefinition>
-                                    </Grid.RowDefinitions>
-                                    <CheckBox 
-                                    x:Name="EspacadorSuperior_CheckBox"
-                                    Margin="5"
-                                    FontWeight="Normal"
-                                    Foreground="#FF222222"
-                                    IsEnabled="False"
-                                    IsChecked="{Binding BoolEspacadorSuperior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                    VerticalAlignment="Center">
-                                        <ContentControl>
-                                            <TextBlock TextWrapping="Wrap">ESPAÇADOR SUPERIOR</TextBlock>
-                                        </ContentControl>
-                                    </CheckBox>
-                                    <StackPanel
-                            Visibility="{Binding IsChecked,ElementName=EspacadorSuperior_CheckBox,Converter={StaticResource b2v}}"
-                            Margin="5"
-                            Grid.Row="1"
-                            >
-                                        <TextBlock TextWrapping="Wrap"  FontWeight="Normal">ALTURA ESPAÇADOR SUPERIOR "W" (cm)</TextBlock>
-                                        <TextBox Padding="5,2" VerticalContentAlignment="Center" Text="{Binding HEspacadorSuperior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Height="25" Grid.Row="1"></TextBox>
-                                    </StackPanel>
-                                    <CheckBox 
-                                    x:Name="EspacadorInferior_CheckBox"
-                                    IsEnabled="False"
-                                    Margin="5"
-                                    FontWeight="Normal"
-                                    Grid.Row="2"
-                                    Foreground="#FF222222"
-                                    IsChecked="{Binding BoolEspacadorInferior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                    VerticalAlignment="Center">
-                                        <ContentControl>
-                                            <TextBlock TextWrapping="Wrap">ESPAÇADOR INFERIOR</TextBlock>
-                                        </ContentControl>
-                                    </CheckBox>
-                                    <StackPanel
-                            Visibility="{Binding IsChecked,ElementName=EspacadorInferior_CheckBox,Converter={StaticResource b2v}}"
-                            Margin="5"
-                            Grid.Row="3">
-                                        <TextBlock TextWrapping="Wrap"  FontWeight="Normal">ALTURA ESPAÇADOR INFERIOR (cm)</TextBlock>
-                                        <TextBox Padding="5,2" VerticalContentAlignment="Center" Text="{Binding HEspacadorInferior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Height="25" Grid.Row="1"></TextBox>
-                                    </StackPanel>
-                                </Grid>
-                            </GroupBox>
-
-                            <GroupBox
-                                
-                                x:Name="VeiculosPesados_GroupBox"
-                                Grid.Row="2"
-                                BorderThickness="0.5"
-                                Foreground="#FF222222"
-                                FontWeight="Bold"
-                                Header="VEÍCULOS PESADOS"
-                                Margin="5,0"
-                                >
-                                <Grid
-                                    Margin="5">
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto"></RowDefinition>
-                                        <RowDefinition Height="Auto"></RowDefinition>
-                                    </Grid.RowDefinitions>
-                                    <CheckBox 
-                            x:Name="VeiculosPesados_CheckBox"
-                            Margin="5"
-                              FontWeight="Normal"
-                              Foreground="#FF222222"
-                        IsChecked="{Binding BoolLPEVeiculosPesados, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                        VerticalAlignment="Center">
-                                        <ContentControl>
-                                            <TextBlock TextWrapping="Wrap">VEÍCULOS PESADOS</TextBlock>
-                                        </ContentControl>
-                                    </CheckBox>
-                                    <StackPanel
-                                        Margin="5"
-                                        Grid.Row="1">   
-                                        <TextBlock TextWrapping="Wrap"  FontWeight="Normal">LPE CARGA</TextBlock>
-                                        <TextBox TextWrapping="Wrap" Padding="5,2" VerticalContentAlignment="Center" Text="{Binding LPECarga, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,5" Height="Auto" AcceptsReturn="True"  MinHeight="25" Grid.Row="1"></TextBox>
-                                    </StackPanel>
-                                </Grid>
-                            </GroupBox>
-                        </StackPanel>
-                        <GroupBox
-                            x:Name="Reforco_GroupBox"
-                            Grid.Column="2"
-                            BorderThickness="0.5"
-                            Foreground="#FF222222"
-                            FontWeight="Bold"
-                            Header="REFORÇO DE TELA"
-                            Margin="5,0"
-                            VerticalAlignment="Top"
-                            >
-                            <Grid Margin="5">
+                    </GroupBox>
+                    <GroupBox x:Name="PisoMatriz_GroupBox" Margin="5" BorderThickness="0" BorderBrush="#FF555555" FontSize="18"
+                    Grid.Column="0" Header="PISO MATRIZ" VerticalAlignment="Top">
+                        <ComboBox SelectionChanged="FloorMatriz_SelectionChanged" FontSize="14" Margin="5"
+                      VerticalContentAlignment="Center" FontWeight="Normal" Padding="10,0,0,0" Height="30"
+                      DisplayMemberPath="FloorName"
+                      ItemsSource="{Binding FloorMatrizes, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                      SelectedItem="{Binding SelectedfloorMatriz, UpdateSourceTrigger=PropertyChanged}"/>
+                    </GroupBox>
+                    <GroupBox x:Name="Camadas_DataGrid" Margin="5" Grid.Column="0" BorderThickness="0" BorderBrush="#FF555555"
+                    FontSize="18" Foreground="#FF000000" Header="CAMADAS" VerticalAlignment="Top">
+                        <Grid x:Name="PlatibandaLevels_Grid" Row="3" ColumnSpan="2" VerticalAlignment="Top" Visibility="Visible"
+                  Margin="5">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <DataGrid CellEditEnding="Layers_DataGrid_CellEditEnding" x:Name="Layers_DataGrid"
+                        AutoGenerateColumns="false" BorderBrush="#222222" BorderThickness="1" CanUserAddRows="false"
+                        CanUserDeleteRows="false" CanUserReorderColumns="false" CanUserResizeColumns="false"
+                        CanUserResizeRows="false" CanUserSortColumns="false" FontSize="14" MinHeight="110"
+                        HorizontalGridLinesBrush="#FFB9B9B9" SelectionUnit="FullRow" HeadersVisibility="Column"
+                        VerticalAlignment="Stretch" VerticalGridLinesBrush="#FFB9B9B9"
+                        VirtualizingPanel.VirtualizationMode="Standard">
+                                <DataGrid.ColumnHeaderStyle>
+                                    <Style TargetType="{x:Type DataGridColumnHeader}">
+                                        <Setter Property="Control.Background" Value="#FF0e538c"/>
+                                        <Setter Property="Control.HorizontalContentAlignment" Value="Center"/>
+                                        <Setter Property="Control.Foreground" Value="White"/>
+                                        <Setter Property="Control.FontStyle" Value="Normal"/>
+                                        <Setter Property="FrameworkElement.Height" Value="25"/>
+                                        <Setter Property="DataGridColumnHeader.SeparatorBrush" Value="Black"/>
+                                        <Setter Property="FrameworkElement.Margin" Value="0,0,1,0"/>
+                                        <Setter Property="DataGridColumnHeader.SeparatorVisibility" Value="Visible"/>
+                                        <Setter Property="Control.BorderBrush" Value="#FF707070"/>
+                                        <Setter Property="Control.FontWeight" Value="nORMAL"/>
+                                        <Setter Property="UIElement.IsEnabled" Value="{Binding IsEnabled}"/>
+                                    </Style>
+                                </DataGrid.ColumnHeaderStyle>
+                                <FrameworkElement.Resources>
+                                    <Style TargetType="{x:Type DataGridRow}">
+                                        <Setter Property="UIElement.IsEnabled" Value="{Binding IsEnabled}"/>
+                                        <Style.Triggers>
+                                            <Trigger Property="UIElement.IsEnabled" Value="false">
+                                                <Setter Property="Control.Background" Value="#FF000000"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                    <Style TargetType="{x:Type DataGridColumnHeader}">
+                                        <Setter Property="Control.HorizontalContentAlignment" Value="Center"/>
+                                        <Setter Property="Control.VerticalContentAlignment" Value="Center"/>
+                                        <Setter Property="DataGridColumnHeader.SeparatorVisibility" Value="Visible"/>
+                                        <Setter Property="Control.FontWeight" Value="SemiBold"/>
+                                        <Setter Property="Control.Background" Value="#FFB9B9B9"/>
+                                        <Setter Property="Control.FontStyle" Value="Normal"/>
+                                        <Setter Property="Control.FontFamily" Value="Segoe UI"/>
+                                        <Setter Property="FrameworkElement.Height" Value="25"/>
+                                        <Setter Property="DataGridColumnHeader.SeparatorBrush" Value="#FFC1C1C1"/>
+                                        <Setter Property="Control.Foreground" Value="Black"/>
+                                    </Style>
+                                </FrameworkElement.Resources>
+                                <DataGrid.Columns>
+                                    <DataGridTemplateColumn Width="200" Header="Tipo">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <ComboBox x:Name="LayerType_Combobox" VerticalContentAlignment="Center" FontSize="14" FontWeight="Normal"
+                                  HorizontalAlignment="Stretch"
+                                  ItemsSource="{Binding CamadaTipos, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                  SelectedItem="{Binding SelectedCamadaTipo, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Width="2*" Header="Material">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <ComboBox FontSize="14" VerticalContentAlignment="Center" FontWeight="Normal" HorizontalAlignment="Stretch"
+                                  ItemsSource="{Binding PossibleMaterials, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                  SelectedItem="{Binding SelectedMaterial, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTextColumn Header="H (cm)" x:Name="offsetName" Width="60" Foreground="Black"
+                                      Binding="{Binding Path=Width, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                        <DataGridBoundColumn.ElementStyle>
+                                            <Style TargetType="{x:Type TextBlock}">
+                                                <Setter Property="TextBlock.TextAlignment" Value="Center"/>
+                                                <Setter Property="FrameworkElement.VerticalAlignment" Value="Center"/>
+                                                <Setter Property="TextBlock.FontFamily" Value="Segoe UI"/>
+                                                <Setter Property="TextBlock.FontWeight" Value="Normal"/>
+                                            </Style>
+                                        </DataGridBoundColumn.ElementStyle>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Header="Tag" x:Name="Tag" Width="180" Foreground="Black"
+                                      Binding="{Binding Path=Tag, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                        <DataGridBoundColumn.ElementStyle>
+                                            <Style TargetType="{x:Type TextBlock}">
+                                                <Setter Property="TextBlock.TextWrapping" Value="Wrap"/>
+                                                <Setter Property="TextBlock.TextAlignment" Value="Center"/>
+                                                <Setter Property="FrameworkElement.VerticalAlignment" Value="Center"/>
+                                            </Style>
+                                        </DataGridBoundColumn.ElementStyle>
+                                        <DataGridBoundColumn.EditingElementStyle>
+                                            <Style TargetType="{x:Type TextBox}">
+                                                <Setter Property="TextBox.TextWrapping" Value="Wrap"/>
+                                                <Setter Property="TextBoxBase.AcceptsReturn" Value="true"/>
+                                            </Style>
+                                        </DataGridBoundColumn.EditingElementStyle>
+                                    </DataGridTextColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                            <StackPanel Width="20" Grid.Column="1" Grid.Row="2" Margin="10,0,0,0">
+                                <Button Click="LayerUP_Button_Click" x:Name="LayerUp_Button" Background="Transparent" BorderThickness="0"
+                        Height="25" Margin="0,0,0,5">
+                                    <Image RenderOptions.BitmapScalingMode="NearestNeighbor"
+                         Source="/Revit.Resources;component/Images/up-arrow.png" Width="16"/>
+                                </Button>
+                                <Button Click="LayerDown_Button_Click" x:Name="LayerDown_Button" Background="Transparent"
+                        BorderThickness="0" Height="25" Margin="0,0,0,5">
+                                    <Image RenderOptions.BitmapScalingMode="NearestNeighbor"
+                         Source="/Revit.Resources;component/Images/down-arrow.png" Width="16"/>
+                                </Button>
+                                <Button Click="AddLayer_Button_Click" x:Name="AddLayer_Button" Background="Transparent" BorderThickness="0"
+                        Height="25" Margin="0,0,0,5">
+                                    <Image RenderOptions.BitmapScalingMode="NearestNeighbor"
+                         Source="/Revit.Resources;component/Images/plus-symbol.png" Width="16"/>
+                                </Button>
+                                <Button Click="RemoveLayer_Button_Click" x:Name="RemoveLayer_Button" Background="Transparent"
+                        BorderThickness="0" Height="25" Margin="0,0,0,0">
+                                    <Image RenderOptions.BitmapScalingMode="NearestNeighbor"
+                         Source="/Revit.Resources;component/Images/minus-symbol.png" Width="16"/>
+                                </Button>
+                            </StackPanel>
+                        </Grid>
+                    </GroupBox>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width="20"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <GroupBox x:Name="VeiculosPesados_GroupBox" Margin="5" Grid.Column="0" BorderThickness="0"
+                      BorderBrush="#FF555555" FontSize="18" Foreground="#FF000000" FontWeight="Normal">
+                            <Grid Margin="0">
                                 <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"></RowDefinition>
-                                    <RowDefinition Height="Auto"></RowDefinition>
-                                    <RowDefinition Height="Auto"></RowDefinition>
-                                    <RowDefinition Height="Auto"></RowDefinition>
-                                    <RowDefinition Height="Auto"></RowDefinition>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
-                                <CheckBox 
-                                        x:Name="ReforcoTela_CheckBox"
-                                Click="ReforcoTela_CheckBox_Click"
-                                        Margin="5"
-                                        FontWeight="Normal"
-                                        Foreground="#FF222222"
-                                        IsChecked="{Binding BoolReforcoDeTela, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                        VerticalAlignment="Center">
+                                <CheckBox x:Name="VeiculosPesados_CheckBox" FontWeight="Normal" Foreground="#FF000000"
+                          VerticalAlignment="Center" VerticalContentAlignment="Center"
+                          IsChecked="{Binding BoolLPEVeiculosPesados, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                                     <ContentControl>
-                                        <TextBlock TextWrapping="Wrap">REFORÇO DE TELA</TextBlock>
+                                        <TextBlock FontSize="18" TextWrapping="Wrap">VEÍCULOS PESADOS</TextBlock>
                                     </ContentControl>
                                 </CheckBox>
-                                <CheckBox 
-                                x:Name="ReforcoTelaSuperior_CheckBox"
-                                Grid.Row="1"
-                                Margin="5"
-                                Click="TelaSuperior_Checkbox_Click"
-                                FontWeight="Normal"
-                                Foreground="#FF222222"
-                                Visibility="{Binding IsChecked,ElementName=ReforcoTela_CheckBox,Converter={StaticResource b2v}}"
-                                IsChecked="{Binding BoolReforcoTelaSuperior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                VerticalAlignment="Center">
-                                    <ContentControl>
-                                        <TextBlock TextWrapping="Wrap">REFORÇO TELA SUPERIOR</TextBlock>
-                                    </ContentControl>
-                                </CheckBox>
-                                <StackPanel
-                            Visibility="{Binding IsChecked,ElementName=ReforcoTelaSuperior_CheckBox,Converter={StaticResource b2v}}"
-                            Margin="5"
-                            Grid.Row="2">
-                                    <TextBlock TextWrapping="Wrap"  FontWeight="Normal">REFORÇO TELA SUPERIOR</TextBlock>
-                                    <TextBox TextWrapping="Wrap" Padding="5,2" VerticalContentAlignment="Center" Text="{Binding ReforcoTelaSuperior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Height="Auto" AcceptsReturn="True"  MinHeight="25" Grid.Row="1"></TextBox>
-                                    <TextBlock TextWrapping="Wrap" FontWeight="Normal">EMENDA REFORÇO TELA SUPERIOR</TextBlock>
-                                    <TextBox Padding="5,2" VerticalContentAlignment="Center" Text="{Binding EmendaReforcoTelaSuperior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Height="25" Grid.Row="1"></TextBox>
-                                    <TextBlock TextWrapping="Wrap" FontWeight="Normal">FINALIDADE REFORÇO TELA SUPERIOR</TextBlock>
-                                    <TextBox TextWrapping="Wrap" Padding="5,2" VerticalContentAlignment="Center" Text="{Binding FinalidadeReforcoTelaSuperior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Height="Auto" AcceptsReturn="True"  MinHeight="25" Grid.Row="1"></TextBox>
-                                </StackPanel>
-                                <CheckBox 
-                                x:Name="ReforcoTelaInferior_CheckBox"
-                                Visibility="{Binding IsChecked,ElementName=ReforcoTela_CheckBox,Converter={StaticResource b2v}}"
-                                Margin="5"
-                                FontWeight="Normal"
-                                Foreground="#FF222222"
-                                Click="TelaInferior_Checkbox_Click"
-                                IsChecked="{Binding BoolReforcoTelaInferior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                VerticalAlignment="Center"
-                                Grid.Row="3">
-                                    <ContentControl>
-                                        <TextBlock TextWrapping="Wrap">REFORÇO TELA INFERIOR</TextBlock>
-                                    </ContentControl>
-                                </CheckBox>
-                                <StackPanel
-                            Visibility="{Binding IsChecked,ElementName=ReforcoTelaInferior_CheckBox,Converter={StaticResource b2v}}"
-                            Margin="5"
-                            Grid.Row="4">
-                                    <TextBlock TextWrapping="Wrap"  FontWeight="Normal">REFORÇO TELA INFERIOR</TextBlock>
-                                    <TextBox TextWrapping="Wrap" Padding="5,2" VerticalContentAlignment="Center" Text="{Binding ReforcoTelaInferior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Height="Auto" AcceptsReturn="True"  MinHeight="25" Grid.Row="1"></TextBox>
-                                    <TextBlock TextWrapping="Wrap" FontWeight="Normal">EMENDA REFORÇO TELA INFERIOR</TextBlock>
-                                    <TextBox Padding="5,2" VerticalContentAlignment="Center" Text="{Binding EmendaReforcoTelaInferior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Height="25" Grid.Row="1"></TextBox>
-                                    <TextBlock TextWrapping="Wrap" FontWeight="Normal">FINALIDADE REFORÇO TELA INFERIOR</TextBlock>
-                                    <TextBox TextWrapping="Wrap" Padding="5,2" VerticalContentAlignment="Center" Text="{Binding FinalidadeReforcoTelaInferior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Height="Auto" AcceptsReturn="True"  MinHeight="25" Grid.Row="1"></TextBox>
+                                <StackPanel Margin="5" Grid.Row="1">
+                                    <TextBlock FontSize="14" TextWrapping="Wrap" FontWeight="Normal">LPE CARGA</TextBlock>
+                                    <TextBox FontSize="14" TextWrapping="Wrap" Padding="5,2" VerticalContentAlignment="Center" Margin="0,0,0,5"
+                           Height="Auto" AcceptsReturn="true" MinHeight="30" Grid.Row="1"
+                           Text="{Binding LPECarga, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                                 </StackPanel>
                             </Grid>
                         </GroupBox>
-                        <GroupBox
-                            x:Name="Camadas_GroupBox"
-                            Grid.Column="4"
-                            BorderThickness="0.5"
-                            Foreground="#FF222222"
-                            FontWeight="Bold"
-                            Header="CAMADAS"
-                            Margin="5,0"
-                            VerticalAlignment="Top"
-                        >
-                            <StackPanel Margin="5">
-                                <StackPanel 
-                                    x:Name="CamadaConcreto_StackPanel"
-                                    Margin="5">
-                                    <StackPanel x:Name="ConcretoTelaTipo_Combobox">
-                                        <TextBlock TextWrapping="Wrap"  FontWeight="Normal">TIPO CONCRETO</TextBlock>
-                                        <ComboBox  VerticalContentAlignment="Center" FontWeight="Normal" Padding="10,0,0,0" Height="25" ItemsSource="{Binding ConcretoTypes}" SelectedItem="{Binding SelectedConcretoType, UpdateSourceTrigger=PropertyChanged}"></ComboBox>
-                                    </StackPanel>
-                                    <StackPanel x:Name="ConcretoFibraTipo_Combobox">
-                                        <TextBlock TextWrapping="Wrap"  FontWeight="Normal">TIPO CONCRETO</TextBlock>
-                                        <ComboBox  VerticalContentAlignment="Center" FontWeight="Normal" Padding="10,0,0,0" Height="25" ItemsSource="{Binding ConcretoTypes}" SelectedItem="{Binding SelectedConcretoType, UpdateSourceTrigger=PropertyChanged}"></ComboBox>
-                                    </StackPanel>
-                                    <TextBlock TextWrapping="Wrap" FontWeight="Normal"><Run Text="H CONCRETO"/></TextBlock>
-                                    <TextBox Padding="5,2" VerticalContentAlignment="Center"  Height="25" Grid.Row="1">
-                                        <TextBox.Text>
-                                            <Binding Path="HConcreto" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged">
-                                                <Binding.ValidationRules>
-                                                    <common:DoubleValidationRule/>
-                                                </Binding.ValidationRules>
-                                            </Binding>
-                                        </TextBox.Text>
-                                    </TextBox>
-                                    <TextBlock TextWrapping="Wrap"  FontWeight="Normal">TAG CONCRETO</TextBlock>
-                                    <TextBox TextWrapping="Wrap" Padding="5,2" VerticalContentAlignment="Center" Text="{Binding TagConcreto, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Height="Auto" MinHeight="25" AcceptsReturn="True" Grid.Row="1"></TextBox>
-                                    <TextBlock TextWrapping="Wrap"  FontWeight="Normal">MATERIAL CONCRETO</TextBlock>
-                                    <ComboBox x:Name="ConcretoMaterial_Combobox" VerticalContentAlignment="Center" FontWeight="Normal" Padding="10,0,0,0" Height="25" ItemsSource="{Binding ConcretoMaterials}" SelectedItem="{Binding SelectedConcretoMaterial, UpdateSourceTrigger=PropertyChanged}"></ComboBox>
-                                </StackPanel>
-                                <StackPanel 
-                                    x:Name="CamadaIntertravado_StackPanel"
-                                    Margin="5">
-                                    <TextBlock TextWrapping="Wrap"  FontWeight="Normal">TIPO INTERTRAVADO</TextBlock>
-                                    <ComboBox x:Name="IntertravadoTipo_Combobox" VerticalContentAlignment="Center" FontWeight="Normal" Padding="10,0,0,0" Height="25" ItemsSource="{Binding IntertravadoTypes}" SelectedItem="{Binding SelectedIntertravadoType, UpdateSourceTrigger=PropertyChanged}"></ComboBox>
-                                    <TextBlock TextWrapping="Wrap" FontWeight="Normal"><Run Text="H INTERTRAVADO"/></TextBlock>
-                                    <TextBox Padding="5,2" VerticalContentAlignment="Center"  Height="25" Grid.Row="1">
-                                        <TextBox.Text>
-                                            <Binding Path="HConcreto" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged">
-                                                <Binding.ValidationRules>
-                                                    <common:DoubleValidationRule/>
-                                                </Binding.ValidationRules>
-                                            </Binding>
-                                        </TextBox.Text>
-                                    </TextBox>
-                                    <TextBlock TextWrapping="Wrap"  FontWeight="Normal">MATERIAL INTERTRAVADO</TextBlock>
-                                    <ComboBox x:Name="IntertravadoMaterial_Combobox" VerticalContentAlignment="Center" FontWeight="Normal" Padding="10,0,0,0" Height="25" ItemsSource="{Binding IntertravadoMaterials}" SelectedItem="{Binding SelectedIntertravadoMaterial, UpdateSourceTrigger=PropertyChanged}"></ComboBox>
-                                </StackPanel>
-                                <StackPanel 
-                                    x:Name="CamadaAsfalto_StackPanel"
-                                    Margin="5">
-                                    <TextBlock TextWrapping="Wrap"  FontWeight="Normal">TIPO ASFALTO</TextBlock>
-                                    <ComboBox x:Name="AsfaltoTipo_Combobox" VerticalContentAlignment="Center" FontWeight="Normal" Padding="10,0,0,0" Height="25" ItemsSource="{Binding AsfaltoTypes}" SelectedItem="{Binding SelectedAsfaltoType, UpdateSourceTrigger=PropertyChanged}"></ComboBox>
-                                    <TextBlock TextWrapping="Wrap" FontWeight="Normal"><Run Text="H ASFALTO"/></TextBlock>
-                                    <TextBox Padding="5,2" VerticalContentAlignment="Center"  Height="25" Grid.Row="1">
-                                        <TextBox.Text>
-                                            <Binding Path="HConcreto" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged">
-                                                <Binding.ValidationRules>
-                                                    <common:DoubleValidationRule/>
-                                                </Binding.ValidationRules>
-                                            </Binding>
-                                        </TextBox.Text>
-                                    </TextBox>
-                                    <TextBlock TextWrapping="Wrap"  FontWeight="Normal">MATERIAL ASFALTO</TextBlock>
-                                    <ComboBox x:Name="AsfaltoMaterial_Combobox" VerticalContentAlignment="Center" FontWeight="Normal" Padding="10,0,0,0" Height="25" ItemsSource="{Binding AsfaltoMaterials}" SelectedItem="{Binding SelectedAsfaltoMaterial, UpdateSourceTrigger=PropertyChanged}"></ComboBox>
-                                </StackPanel>
-
-                                <CheckBox 
-                                    x:Name="SubBase_CheckBox"
-                                    Margin="5"
-                                    FontWeight="Normal"
-                                    Foreground="#FF222222"
-                                    IsChecked="{Binding CBSubBase, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                    VerticalAlignment="Center" 
-                                    HorizontalAlignment="Left">
+                        <GroupBox x:Name="Tratamento_GroupBox" Margin="5" Grid.Column="2" BorderThickness="0" BorderBrush="#FF555555"
+                      FontSize="18" FontWeight="Normal" Foreground="#FF000000">
+                            <Grid Margin="0">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <CheckBox x:Name="Tratamento_CheckBox" FontWeight="Normal" Foreground="#FF000000" VerticalAlignment="Center"
+                          VerticalContentAlignment="Center"
+                          IsChecked="{Binding BoolTratamentoSuperficial, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                                     <ContentControl>
-                                        <TextBlock TextWrapping="Wrap">SUB BASE</TextBlock>
+                                        <TextBlock FontSize="18" TextWrapping="Wrap">
+                      TRATAMENTO SUPERFICIAL
+                                        </TextBlock>
                                     </ContentControl>
                                 </CheckBox>
-                                <StackPanel
-                                    x:Name="CamadaSubbase_StackPanel"
-                                    Visibility="{Binding IsChecked,ElementName=SubBase_CheckBox,Converter={StaticResource b2v}}"    
-                                    Margin="5"
-                                    Grid.Row="1">
-
-                                    <TextBlock TextWrapping="Wrap" Visibility="{Binding IsChecked,ElementName=SubBase_CheckBox,Converter={StaticResource b2v}}" FontWeight="Normal">H SUB BASE</TextBlock>
-                                    <TextBox Visibility="{Binding IsChecked,ElementName=SubBase_CheckBox,Converter={StaticResource b2v}}" IsEnabled="{Binding ElementName=SubBase_CheckBox, Path=IsChecked}" Padding="5,2" VerticalContentAlignment="Center" Text="{Binding HSubBase, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Height="25" Grid.Row="1"></TextBox>
-                                    <TextBlock TextWrapping="Wrap" Visibility="{Binding IsChecked,ElementName=SubBase_CheckBox,Converter={StaticResource b2v}}" FontWeight="Normal">TAG SUB BASE</TextBlock>
-                                    <TextBox Visibility="{Binding IsChecked,ElementName=SubBase_CheckBox,Converter={StaticResource b2v}}" TextWrapping="Wrap" Padding="5,2" VerticalContentAlignment="Center" Text="{Binding TagSubBase, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Height="Auto" AcceptsReturn="True"  MinHeight="25" Grid.Row="1"></TextBox>
-                                    <CheckBox 
-                                    Margin="0,5"
-                                    x:Name="BaseGenerica_CheckBox"
-                                    FontWeight="Normal"
-                                    Foreground="#FF222222"
-                                    HorizontalAlignment="Left"
-                                    Visibility="{Binding IsChecked,ElementName=SubBase_CheckBox,Converter={StaticResource b2v}}"
-                                    IsChecked="{Binding CBBaseGenerica, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                    VerticalAlignment="Center"
-                                  >
-                                        <ContentControl>
-                                            <TextBlock TextWrapping="Wrap">BASE GENÉRICA</TextBlock>
-                                        </ContentControl>
-                                    </CheckBox>
-                                    <TextBlock TextWrapping="Wrap" Visibility="{Binding IsChecked,ElementName=BaseGenerica_CheckBox,Converter={StaticResource b2v}}" FontWeight="Normal">TAG BASE GENÉRICA</TextBlock>
-                                    <TextBox Visibility="{Binding IsChecked,ElementName=BaseGenerica_CheckBox,Converter={StaticResource b2v}}" TextWrapping="Wrap" Padding="5,2" VerticalContentAlignment="Center" Text="{Binding TagBaseGenerica, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  Height="Auto" AcceptsReturn="True"  MinHeight="25" Grid.Row="1"></TextBox>
+                                <StackPanel Margin="5" Grid.Row="1"
+                            Visibility="{Binding IsChecked, ElementName=Tratamento_CheckBox, Converter={StaticResource b2v}}">
+                                    <TextBox FontSize="14" TextWrapping="Wrap" Padding="5,2" VerticalContentAlignment="Center" Height="Auto"
+                           AcceptsReturn="true" MinHeight="30" Grid.Row="1"
+                           Text="{Binding TratamentoSuperficial, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                                 </StackPanel>
-                                <CheckBox 
-                                    x:Name="ReforcoSubleito_CheckBox"
-                                    Margin="5"
-                                    FontWeight="Normal"
-                                    Foreground="#FF222222"
-                                    Grid.Row="2"
-                                    IsChecked="{Binding CBRefSubleito, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                    VerticalAlignment="Center">
-                                    <ContentControl>
-                                        <TextBlock TextWrapping="Wrap">REFORÇO DO SUBLEITO</TextBlock>
-                                    </ContentControl>
-                                </CheckBox>
-                                <StackPanel
-                                    x:Name="CamadaReforcoSubleito_StackPanel"
-                                    Visibility="{Binding IsChecked,ElementName=ReforcoSubleito_CheckBox,Converter={StaticResource b2v}}"
-                                    Margin="5"
-                                    Grid.Row="3">
-                                    <TextBlock TextWrapping="Wrap"  FontWeight="Normal">ALTURA DO REFORÇO DO SUBLEITO</TextBlock>
-                                    <TextBox Padding="5,2" VerticalContentAlignment="Center" Text="{Binding HRefSubleito, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Height="25" Grid.Row="1"></TextBox>
-                                    <TextBlock TextWrapping="Wrap" FontWeight="Normal">TAG REFORÇO DO SUBLEITO</TextBlock>
-                                    <TextBox TextWrapping="Wrap" Padding="5,2" VerticalContentAlignment="Center" Text="{Binding TagRefSubleito, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  Height="Auto" MinHeight="25" AcceptsReturn="True"  Grid.Row="1"></TextBox>
-                                </StackPanel>
-                                <CheckBox 
-                        x:Name="Subleito_CheckBox"
-                        Margin="5"
-                                  FontWeight="Normal"
-                                  Foreground="#FF222222"
-                              Grid.Row="4"
-                        IsChecked="{Binding CBSubleito, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                            VerticalAlignment="Center">
-                                    <ContentControl>
-                                        <TextBlock TextWrapping="Wrap">SUBLEITO</TextBlock>
-                                    </ContentControl>
-                                </CheckBox>
-                                <StackPanel
-                                    x:Name="CamadaSubleito_StackPanel"
-                                    Visibility="{Binding IsChecked,ElementName=Subleito_CheckBox,Converter={StaticResource b2v}}"
-                                    Margin="5"
-                                    Grid.Row="5">
-                                    <TextBlock TextWrapping="Wrap" FontWeight="Normal">TAG SUBLEITO</TextBlock>
-                                    <TextBox TextWrapping="Wrap" IsEnabled="{Binding ElementName=Subleito_CheckBox, Path=IsChecked}" Padding="5,2" VerticalContentAlignment="Center" Text="{Binding TagSubleito, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Height="Auto" MinHeight="25" AcceptsReturn="True"  Grid.Row="1"></TextBox>
-                                </StackPanel>
-                            </StackPanel>
+                            </Grid>
                         </GroupBox>
                     </Grid>
-                </ScrollViewer>
-
-            </Border>
-        </Grid>
-        <Button 
-            x:Name="Execute_Button"
-            Click="ApplyNewAmbiente_Button_Click"
-            Content="APLICAR ALTERAÇÕES"
-            Grid.Row="3"
-            VerticalAlignment="Center"
-            HorizontalAlignment="Right"
-            Width="200"
-            Height="25"
-            Margin="10"
-            Style="{StaticResource Blue_Button}"
-            />
+                </StackPanel>
+                <StackPanel Grid.Column="1">
+                    <GroupBox x:Name="Fibra_GroupBox" Margin="5" Grid.Row="2" BorderThickness="0" BorderBrush="#FF555555"
+                    FontSize="18" FontWeight="Normal" Foreground="#FF000000"
+                    Visibility="{Binding FibraIsVisible, Converter={StaticResource b2v}}">
+                        <Grid Margin="0">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <CheckBox x:Name="Fibra_CheckBox" IsEnabled="false" FontWeight="Normal" Foreground="#FF000000"
+                        VerticalAlignment="Center" VerticalContentAlignment="Center"
+                        IsChecked="{Binding BoolFibra, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                <ContentControl>
+                                    <TextBlock FontSize="18" TextWrapping="Wrap">FIBRA</TextBlock>
+                                </ContentControl>
+                            </CheckBox>
+                            <StackPanel Margin="5" Grid.Row="2"
+                          Visibility="{Binding IsChecked, ElementName=Fibra_CheckBox, Converter={StaticResource b2v}}">
+                                <TextBlock FontSize="14" TextWrapping="Wrap" FontWeight="Normal">FIBRA</TextBlock>
+                                <TextBox FontSize="14" TextWrapping="Wrap" Padding="5,2" VerticalContentAlignment="Center" Height="Auto"
+                         AcceptsReturn="true" MinHeight="30" Grid.Row="1"
+                         Text="{Binding Fibra, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                <TextBlock FontSize="14" TextWrapping="Wrap" FontWeight="Normal">
+                  DOSAGEM FIBRA (kg/m³)
+                                </TextBlock>
+                                <TextBox FontSize="14" Padding="5,2" VerticalContentAlignment="Center" Height="30" Grid.Row="1"
+                         Text="{Binding DosagemFibra, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                <TextBlock FontSize="14" TextWrapping="Wrap" FontWeight="Normal">FR1 (MPa)</TextBlock>
+                                <TextBox FontSize="14" TextWrapping="Wrap" Padding="5,2" VerticalContentAlignment="Center" Height="Auto"
+                         AcceptsReturn="true" MinHeight="30" Grid.Row="1"
+                         Text="{Binding FR1, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                <TextBlock FontSize="14" TextWrapping="Wrap" FontWeight="Normal">FR4 (MPa)</TextBlock>
+                                <TextBox FontSize="14" TextWrapping="Wrap" Padding="5,2" VerticalContentAlignment="Center" Height="Auto"
+                         AcceptsReturn="true" MinHeight="30" Grid.Row="1"
+                         Text="{Binding FR4, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                            </StackPanel>
+                        </Grid>
+                    </GroupBox>
+                    <GroupBox x:Name="TelaSuperior_GroupBox" Margin="5" BorderThickness="0" BorderBrush="#FF555555" FontSize="18"
+                    FontWeight="Normal" Foreground="#FF000000"
+                    Visibility="{Binding TelaSuperiorIsVisible, Converter={StaticResource b2v}}">
+                        <Grid Margin="0">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <CheckBox Click="TelaSuperior_Checkbox_Click" x:Name="TelaSuperior_Checkbox" FontWeight="Normal"
+                        Foreground="#FF000000" VerticalAlignment="Center" VerticalContentAlignment="Center"
+                        IsEnabled="{Binding TelaSuperiorIsEnable, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        IsChecked="{Binding BoolTelaSuperior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                <ContentControl>
+                                    <TextBlock FontSize="18" TextWrapping="Wrap">TELA SUPERIOR</TextBlock>
+                                </ContentControl>
+                            </CheckBox>
+                            <StackPanel Margin="5" Grid.Row="1"
+                          Visibility="{Binding IsChecked, ElementName=TelaSuperior_Checkbox, Converter={StaticResource b2v}}">
+                                <TextBlock FontSize="14" TextWrapping="Wrap" FontWeight="Normal">TELA SUPERIOR</TextBlock>
+                                <TextBox FontSize="14" TextWrapping="Wrap" Padding="5,2" VerticalContentAlignment="Center" Height="Auto"
+                         AcceptsReturn="true" MinHeight="30" Grid.Row="1"
+                         Text="{Binding TelaSuperior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                <TextBlock FontSize="14" TextWrapping="Wrap" FontWeight="Normal">
+                  FINALIDADE TELA SUPERIOR
+                                </TextBlock>
+                                <TextBox FontSize="14" TextWrapping="Wrap" Padding="5,2" VerticalContentAlignment="Center" Height="Auto"
+                         AcceptsReturn="true" MinHeight="30" Grid.Row="1"
+                         Text="{Binding FinalidadeTelaSuperior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                <TextBlock FontSize="14" TextWrapping="Wrap" FontWeight="Normal">
+                  EMENDA TELA SUPERIOR
+                                </TextBlock>
+                                <TextBox FontSize="14" Padding="5,2" VerticalContentAlignment="Center" Height="30" Grid.Row="1"
+                         Text="{Binding EmendaTelaSuperior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                            </StackPanel>
+                        </Grid>
+                    </GroupBox>
+                    <GroupBox x:Name="TelaInferior_GroupBox" Margin="5" Grid.Row="1" BorderThickness="0" BorderBrush="#FF555555"
+                    FontSize="18" FontWeight="Normal" Foreground="#FF000000"
+                    Visibility="{Binding TelaInferiorIsVisible, Converter={StaticResource b2v}}">
+                        <Grid Margin="0">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <CheckBox Click="TelaInferior_Checkbox_Click" x:Name="TelaInferior_CheckBox" IsEnabled="false"
+                        FontWeight="Normal" Foreground="#FF000000" VerticalAlignment="Center"
+                        VerticalContentAlignment="Center"
+                        IsChecked="{Binding BoolTelaInferior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                <ContentControl>
+                                    <TextBlock FontSize="18" TextWrapping="Wrap">TELA INFERIOR</TextBlock>
+                                </ContentControl>
+                            </CheckBox>
+                            <StackPanel Margin="5" Grid.Row="1"
+                          Visibility="{Binding IsChecked, ElementName=TelaInferior_CheckBox, Converter={StaticResource b2v}}">
+                                <TextBlock FontSize="14" TextWrapping="Wrap" FontWeight="Normal">TELA INFERIOR</TextBlock>
+                                <TextBox FontSize="14" TextWrapping="Wrap" Padding="5,2" VerticalContentAlignment="Center" Height="Auto"
+                         AcceptsReturn="true" MinHeight="30" Grid.Row="1"
+                         Text="{Binding TelaInferior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                <TextBlock FontSize="14" TextWrapping="Wrap" FontWeight="Normal">
+                  EMENDA TELA INFERIOR
+                                </TextBlock>
+                                <TextBox FontSize="14" Padding="5,2" VerticalContentAlignment="Center" Height="30" Grid.Row="1"
+                         Text="{Binding EmendaTelaInferior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                            </StackPanel>
+                        </Grid>
+                    </GroupBox>
+                </StackPanel>
+                <GroupBox x:Name="Reforco_GroupBox" Margin="5" Grid.Column="2" BorderThickness="0" BorderBrush="#FF555555"
+                  FontSize="18" Foreground="#FF000000" FontWeight="Normal" VerticalAlignment="Top"
+                  Visibility="{Binding ReforcoIsVisible, Converter={StaticResource b2v}}">
+                    <Grid Margin="0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <CheckBox Click="ReforcoTela_CheckBox_Click" x:Name="ReforcoTela_CheckBox" FontWeight="Normal"
+                      Foreground="#FF000000" VerticalAlignment="Center" VerticalContentAlignment="Center"
+                      IsChecked="{Binding BoolReforcoDeTela, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                            <ContentControl>
+                                <TextBlock FontSize="18" TextWrapping="Wrap">REFORÇO DE TELA</TextBlock>
+                            </ContentControl>
+                        </CheckBox>
+                        <CheckBox Click="TelaSuperior_Checkbox_Click" x:Name="ReforcoTelaSuperior_CheckBox" Grid.Row="1" Margin="5"
+                      FontWeight="Normal" Foreground="#FF000000" VerticalAlignment="Center"
+                      Visibility="{Binding IsChecked, ElementName=ReforcoTela_CheckBox, Converter={StaticResource b2v}}"
+                      IsChecked="{Binding BoolReforcoTelaSuperior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                            <ContentControl>
+                                <TextBlock FontSize="14" TextWrapping="Wrap">
+                  REFORÇO TELA SUPERIOR
+                                </TextBlock>
+                            </ContentControl>
+                        </CheckBox>
+                        <StackPanel Margin="5" Grid.Row="2"
+                        Visibility="{Binding IsChecked, ElementName=ReforcoTelaSuperior_CheckBox, Converter={StaticResource b2v}}">
+                            <TextBlock FontSize="14" TextWrapping="Wrap" FontWeight="Normal">
+                REFORÇO TELA SUPERIOR
+                            </TextBlock>
+                            <TextBox FontSize="14" TextWrapping="Wrap" Padding="5,2" VerticalContentAlignment="Center" Height="Auto"
+                       AcceptsReturn="true" MinHeight="30" Grid.Row="1"
+                       Text="{Binding ReforcoTelaSuperior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock FontSize="14" TextWrapping="Wrap" FontWeight="Normal">
+                EMENDA REFORÇO TELA SUPERIOR
+                            </TextBlock>
+                            <TextBox FontSize="14" Padding="5,2" VerticalContentAlignment="Center" Height="30" Grid.Row="1"
+                       Text="{Binding EmendaReforcoTelaSuperior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock FontSize="14" TextWrapping="Wrap" FontWeight="Normal">
+                FINALIDADE REFORÇO TELA SUPERIOR
+                            </TextBlock>
+                            <TextBox FontSize="14" TextWrapping="Wrap" Padding="5,2" VerticalContentAlignment="Center" Height="Auto"
+                       AcceptsReturn="true" MinHeight="30" Grid.Row="1"
+                       Text="{Binding FinalidadeReforcoTelaSuperior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                        </StackPanel>
+                        <CheckBox Click="TelaInferior_Checkbox_Click" x:Name="ReforcoTelaInferior_CheckBox" Margin="5"
+                      FontWeight="Normal" Foreground="#FF000000" VerticalAlignment="Center" Grid.Row="3"
+                      Visibility="{Binding IsChecked, ElementName=ReforcoTela_CheckBox, Converter={StaticResource b2v}}"
+                      IsChecked="{Binding BoolReforcoTelaInferior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                            <ContentControl>
+                                <TextBlock FontSize="14" TextWrapping="Wrap">
+                  REFORÇO TELA INFERIOR
+                                </TextBlock>
+                            </ContentControl>
+                        </CheckBox>
+                        <StackPanel Margin="5" Grid.Row="4"
+                        Visibility="{Binding IsChecked, ElementName=ReforcoTelaInferior_CheckBox, Converter={StaticResource b2v}}">
+                            <TextBlock FontSize="14" TextWrapping="Wrap" FontWeight="Normal">
+                REFORÇO TELA INFERIOR
+                            </TextBlock>
+                            <TextBox FontSize="14" TextWrapping="Wrap" Padding="5,2" VerticalContentAlignment="Center" Height="Auto"
+                       AcceptsReturn="true" MinHeight="30" Grid.Row="1"
+                       Text="{Binding ReforcoTelaInferior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock FontSize="14" TextWrapping="Wrap" FontWeight="Normal">
+                EMENDA REFORÇO TELA INFERIOR
+                            </TextBlock>
+                            <TextBox FontSize="14" Padding="5,2" VerticalContentAlignment="Center" Height="30" Grid.Row="1"
+                       Text="{Binding EmendaReforcoTelaInferior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock FontSize="14" TextWrapping="Wrap" FontWeight="Normal">
+                FINALIDADE REFORÇO TELA INFERIOR
+                            </TextBlock>
+                            <TextBox FontSize="14" TextWrapping="Wrap" Padding="5,2" VerticalContentAlignment="Center" Height="Auto"
+                       AcceptsReturn="true" MinHeight="30" Grid.Row="1"
+                       Text="{Binding FinalidadeReforcoTelaInferior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                        </StackPanel>
+                    </Grid>
+                </GroupBox>
+            </Grid>
+        </Border>
+        <Button Click="ApplyNewAmbiente_Button_Click" x:Name="Execute_Button" Content="APLICAR ALTERAÇÕES"
+            Grid.Row="3" VerticalAlignment="Center" HorizontalAlignment="Right" FontSize="13" Width="200"
+            Height="25" Margin="10" IsDefault="true" Style="{StaticResource Blue_Button}"/>
     </Grid>
 </Window>
