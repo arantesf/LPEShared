@@ -52,15 +52,12 @@ namespace Revit.Common
 
                     foreach (var stringAmbiente in checkedAmbientesNames)
                     {
-                        #region Floors
-
-
-                            List<Element> ambienteFloors = new FilteredElementCollector(doc)
-                                .WhereElementIsNotElementType()
-                                .OfCategory(BuiltInCategory.OST_Floors)
-                                .Where(a => a.LookupParameter("Ambiente").AsString() == stringAmbiente)
-                                .Where(a => a.LookupParameter("Reforço de Tela").AsInteger() == 0)
-                                .ToList();
+                        List<Element> ambienteFloors = new FilteredElementCollector(doc)
+                            .WhereElementIsNotElementType()
+                            .OfCategory(BuiltInCategory.OST_Floors)
+                            .Where(a => a.LookupParameter("Ambiente").AsString() == stringAmbiente)
+                            .Where(a => a.LookupParameter("Reforço de Tela").AsInteger() == 0)
+                            .ToList();
 
                         Dictionary<XYZ, List<Element>> sameSlopeFloors = new Dictionary<XYZ, List<Element>>();
                         for (int i = 0; i < ambienteFloors.Count; i++)
@@ -303,58 +300,6 @@ namespace Revit.Common
                             SelectAmbienteMVVM.ProgressBarViewModel.ProgressBarValue += 1;
 
                         }
-                        #endregion
-
-                        #region Joints
-
-                        SelectAmbienteMVVM.ProgressBarViewModel.ProgressBarValue = 0;
-                        SelectAmbienteMVVM.MainView.ProgressBar.Maximum = 2;
-                        ExternalApplication.LPEApp.SelectAmbienteMVVM.ProgressBar_TextBlock.Text = $"Restaurando juntas do ambiente \"{stringAmbiente}\"...";
-
-                        Dictionary<string, List<Element>> GUIDGroupedJoints = new Dictionary<string, List<Element>>();
-                        List<Element> joints = new FilteredElementCollector(doc)
-                            .WhereElementIsNotElementType()
-                            .OfCategory(BuiltInCategory.OST_StructuralFraming)
-                            .Where(a => a.LookupParameter("Ambiente").AsString() == stringAmbiente)
-                            .ToList();
-
-                        foreach (Element joint in joints)
-                        {
-                            string guid = joint.get_Parameter(BuiltInParameter.ALL_MODEL_INSTANCE_COMMENTS).AsString();
-                            if (string.IsNullOrEmpty(guid))
-                            {
-                                continue;
-                            }
-                            if (GUIDGroupedJoints.ContainsKey(guid))
-                            {
-                                GUIDGroupedJoints[guid].Add(joint);
-                            }
-                            else
-                            {
-                                GUIDGroupedJoints.Add(guid, new List<Element>() { joint });
-                            }
-                        }
-                        SelectAmbienteMVVM.ProgressBarViewModel.ProgressBarValue += 1;
-
-                        tx.Start();
-                        foreach (string guid in GUIDGroupedJoints.Keys)
-                        {
-                            Curve curve = Utils.JoinCurves(GUIDGroupedJoints[guid].Select(a => (a.Location as LocationCurve).Curve).ToList());
-                            try
-                            {
-                                FamilyInstance newJoint = doc.Create.NewFamilyInstance(curve, (GUIDGroupedJoints[guid][0] as FamilyInstance).Symbol, doc.GetElement((GUIDGroupedJoints[guid][0] as FamilyInstance).LevelId) as Level, Autodesk.Revit.DB.Structure.StructuralType.Beam);
-                            }
-                            catch (Exception)
-                            {
-
-                            }
-                            doc.Delete(GUIDGroupedJoints[guid].Select(a => a.Id).ToList());
-                        }
-                        tx.Commit();
-
-                        SelectAmbienteMVVM.ProgressBarViewModel.ProgressBarValue += 1;
-
-                        #endregion
                     }
 
                     tg.Assimilate();
@@ -363,7 +308,7 @@ namespace Revit.Common
             }
             catch (Exception ex)
             {
-                SelectAmbienteMVVM.MainView.Dispose(); 
+                SelectAmbienteMVVM.MainView.Dispose();
                 TaskDialog.Show("ATENÇÃO!", "Erro não mapeado, contate os desenvolvedores.\n\n" + ex.StackTrace);
                 throw;
             }

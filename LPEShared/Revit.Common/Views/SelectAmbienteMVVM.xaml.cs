@@ -84,23 +84,19 @@ namespace Revit.Common
                         .GroupBy(a => a.LookupParameter("Ambiente").AsString())
                         .Select(a => a.First().LookupParameter("Ambiente").AsString())
                         .ToList();
-                    List<string> jointAmbientes = new FilteredElementCollector(ActiveDocument, uidoc.ActiveView.Id)
+                    ExecuteExternalEvent = ExternalEvent.Create(new RestoreFloorsEEH());
+                    ExecuteButtonText = "RESTAURAR PISOS";
+                    break;
+                case SelectAmbientMVVMExecuteCommand.RestoreJoints:
+                    ambientes = new FilteredElementCollector(ActiveDocument, uidoc.ActiveView.Id)
                         .WhereElementIsNotElementType()
                         .OfCategory(BuiltInCategory.OST_StructuralFraming)
                         .GroupBy(a => a.LookupParameter("Ambiente").AsString())
                         .Select(a => a.First().LookupParameter("Ambiente").AsString())
                         .ToList();
-                    foreach (string jointAmbiente in jointAmbientes)
-                    {
-                        if (!ambientes.Contains(jointAmbiente))
-                        {
-                            ambientes.Add(jointAmbiente);
-                        }
-                    }
                     ExecuteExternalEvent = ExternalEvent.Create(new RestoreJointsEEH());
-                    ExecuteButtonText = "RESTAURAR PISOS";
+                    ExecuteButtonText = "RESTAURAR JUNTAS";
                     break;
-
                 case SelectAmbientMVVMExecuteCommand.TagJoints:
                     ambientes = new FilteredElementCollector(ActiveDocument, uidoc.ActiveView.Id)
                         .WhereElementIsNotElementType()
@@ -189,11 +185,11 @@ namespace Revit.Common
         }
     }
     public enum SelectAmbientMVVMExecuteCommand
-
     {
         SplitFloors,
         SplitJoints,
         RestoreFloors,
+        RestoreJoints,
         TagJoints,
         DimensionFloors
     }

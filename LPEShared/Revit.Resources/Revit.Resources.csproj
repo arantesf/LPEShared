@@ -118,5 +118,8 @@
     <Resource Include="Images\plus-symbol.png" />
     <Resource Include="Images\up-arrow.png" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Images\RestaurarJuntasLPE.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

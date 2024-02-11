@@ -98,6 +98,22 @@ namespace Revit.Common
             }
         }
 
+        internal void ShowRestoreJointsUI()
+        {
+            if (SelectAmbienteMVVM == null || SelectAmbienteMVVM.IsLoaded == false)
+            {
+                UIDocument uidoc = uiApp.ActiveUIDocument;
+
+                //INICIALIZANDO A JANELA E PASSANDO O EXTERNAL EVENT
+                SelectAmbienteMVVM = new SelectAmbienteMVVM(uidoc, SelectAmbientMVVMExecuteCommand.RestoreJoints);
+                SelectAmbienteMVVM.Topmost = true;
+                if (SelectAmbienteMVVM.IsInitialized)
+                {
+                    SelectAmbienteMVVM.Show();
+                }
+            }
+        }
+
         internal void ShowDimensionFloorsUI()
         {
             if (SelectAmbienteMVVM == null || SelectAmbienteMVVM.IsLoaded == false)
@@ -163,7 +179,7 @@ namespace Revit.Common
                 // tab already exists
             }
             RibbonPanel pisosEJuntasPanel = application.CreateRibbonPanel(tabName, "Pisos e Juntas");
-            RibbonPanel ambientesPanel = application.CreateRibbonPanel(tabName, "Ambientes");
+            //RibbonPanel ambientesPanel = application.CreateRibbonPanel(tabName, "Ambientes");
             RibbonPanel sobrePanel = application.CreateRibbonPanel(tabName, "Sobre");
 
             //////////// SPLIT FLOORS ////////////
@@ -220,14 +236,23 @@ namespace Revit.Common
                 LargeImage = ResourceImage.GetIcon("RestaurarPisosLPE.png")
             });
 
+            //////////// RESTORE JOINTS ////////////
+
+            pisosEJuntasPanel.AddItem(new PushButtonData("RestoreJoints", "Restaurar Juntas", executingAssemblyPath, typeof(RestoreJointsEC).FullName)
+            {
+                ToolTip = "Restaura as juntas divididas pelo comando \"Dividir Juntas\" ao seu formato original.",
+                LongDescription = "O comando utilizará o valor prenchido nos parâmetros \"Ambiente\" e \"Comments\" para identificar quais juntas se unirão.",
+                LargeImage = ResourceImage.GetIcon("RestaurarJuntasLPE.png")
+            });
+
             //////////// AMBIENTE MANAGER ////////////
 
-            ambientesPanel.AddItem(new PushButtonData("AmbienteManager", "Gerenciador\nde Ambientes", executingAssemblyPath, typeof(AmbienteManagerEC).FullName)
-            {
-                ToolTip = "O gerenciador de ambientes facilita a gestão dos keyschedules, centralizando as informações.\nEle permite criar, editar, duplicar, importar e deletar ambientes.",
-                LongDescription = "",
-                LargeImage = ResourceImage.GetIcon("AmbienteManagerLPE.png")
-            });
+            //ambientesPanel.AddItem(new PushButtonData("AmbienteManager", "Gerenciador\nde Ambientes", executingAssemblyPath, typeof(AmbienteManagerEC).FullName)
+            //{
+            //    ToolTip = "O gerenciador de ambientes facilita a gestão dos keyschedules, centralizando as informações.\nEle permite criar, editar, duplicar, importar e deletar ambientes.",
+            //    LongDescription = "",
+            //    LargeImage = ResourceImage.GetIcon("AmbienteManagerLPE.png")
+            //});
 
             //////////// ABOUT ////////////
 

@@ -17,6 +17,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)Apps\MeshReinforcement\MeshReinforcementEC.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Apps\MeshReinforcement\MeshReinforcementEEH.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Apps\MeshReinforcement\MeshReinforcement.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Apps\RestoreJoints\RestoreJoints.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Apps\RestoreJoints\RestoreJointsEC.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Apps\RestoreJoints\RestoreJointsEEH.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Apps\RestoreFloors\RestoreFloorsEC.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Apps\RestoreFloors\RestoreFloors.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Apps\RestoreFloors\RestoreFloorsEEH.cs" />
