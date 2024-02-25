@@ -95,6 +95,45 @@ namespace Revit.Common
                         Transaction tx = new Transaction(doc);
                         foreach (var pair in sameSlopeFloors)
                         {
+                            List<Solid> floorSolids = new List<Solid>();
+
+                            List<Floor> floorsJoined = new List<Floor>();
+                            foreach (var floor in pair.Value)
+                            {
+                                foreach (var joinedElementId in JoinGeometryUtils.GetJoinedElements(doc, floor))
+                                {
+                                    Element joinedElement = doc.GetElement(joinedElementId);
+                                    if (joinedElement is Floor)
+                                    {
+                                        floorsJoined.Add(joinedElement as Floor);
+                                    }
+                                }
+                            }
+                            List<Floor> distinctFloorsJoined = floorsJoined.GroupBy(f => f.Id).Select(g => g.First()).ToList();
+
+                            List<Floor> floorsToGetBigSolid = new List<Floor>();
+                            floorsToGetBigSolid.AddRange(distinctFloorsJoined);
+                            floorsToGetBigSolid.AddRange(pair.Value.Cast<Floor>());
+
+                            foreach (var floor in floorsToGetBigSolid)
+                            {
+                                Solid floorSolid = Utils.GetElementSolid(floor);
+                                if (!floorSolids.Any())
+                                {
+                                    floorSolids.Add(floorSolid);
+                                }
+                                else
+                                {
+                                    try
+                                    {
+                                        floorSolids[0] = BooleanOperationsUtils.ExecuteBooleanOperation(floorSolids[0], floorSolid, BooleanOperationsType.Union);
+                                    }
+                                    catch (Exception)
+                                    {
+                                        floorSolids.Add(floorSolid);
+                                    }
+                                }
+                            }
                             List<Curve> curves = new List<Curve>();
                             ElementCategoryFilter linesFilter = new ElementCategoryFilter(BuiltInCategory.OST_SketchLines);
                             foreach (var floor in pair.Value)
@@ -134,45 +173,89 @@ namespace Revit.Common
 
                             SelectAmbienteMVVM.ProgressBarViewModel.ProgressBarValue += 1;
 
-                            List<int> duplicateCurvesIndex = new List<int>();
+                            //List<int> duplicateCurvesIndex = new List<int>();
+                            //for (int i = 0; i < curves.Count; i++)
+                            //{
+                            //    Curve ci = curves[i];
+                            //    XYZ epi0 = ci.GetEndPoint(0);
+                            //    XYZ epi1 = ci.GetEndPoint(1);
+                            //    XYZ mpi = ci.Evaluate(0.5, true);
+
+
+                            //    for (int j = i + 1; j < curves.Count; j++)
+                            //    {
+                            //        if (!duplicateCurvesIndex.Contains(j))
+                            //        {
+                            //            Curve cj = curves[j];
+                            //            XYZ epj0 = cj.GetEndPoint(0);
+                            //            XYZ epj1 = cj.GetEndPoint(1);
+                            //            XYZ mpj = cj.Evaluate(0.5, true);
+
+                            //            if ((mpi.DistanceTo(mpj) < 0.0001) && ((epi0.DistanceTo(epj0) < 0.0001 && epi1.DistanceTo(epj1) < 0.0001) || epi0.DistanceTo(epj1) < 0.0001 && epi1.DistanceTo(epj0) < 0.0001))
+                            //            {
+                            //                duplicateCurvesIndex.Add(i);
+                            //                duplicateCurvesIndex.Add(j);
+                            //            }
+                            //        }
+                            //    }
+                            //}
+                            List<Curve> borderCurves = new List<Curve>();
                             for (int i = 0; i < curves.Count; i++)
                             {
                                 Curve ci = curves[i];
-                                XYZ epi0 = ci.GetEndPoint(0);
-                                XYZ epi1 = ci.GetEndPoint(1);
                                 XYZ mpi = ci.Evaluate(0.5, true);
-
-
-                                for (int j = 0; j < curves.Count; j++)
+                                XYZ mpiOffset1 = mpi + XYZ.BasisZ.CrossProduct(ci.ComputeDerivatives(0.5, true).BasisX) * 0.01;
+                                Curve curveToIntersectSolid = Line.CreateBound(mpiOffset1 - XYZ.BasisZ * 10000, mpiOffset1 + XYZ.BasisZ * 10000);
+                                bool intersect = false;
+                                foreach (var solid in floorSolids)
                                 {
-                                    if (i != j)
+                                    if (solid.IntersectWithCurve(curveToIntersectSolid, new SolidCurveIntersectionOptions()).Any())
                                     {
-                                        Curve cj = curves[j];
-                                        XYZ epj0 = cj.GetEndPoint(0);
-                                        XYZ epj1 = cj.GetEndPoint(1);
-                                        XYZ mpj = cj.Evaluate(0.5, true);
-
-                                        if ((mpi.DistanceTo(mpj) < 0.0001) && ((epi0.DistanceTo(epj0) < 0.0001 && epi1.DistanceTo(epj1) < 0.0001) || epi0.DistanceTo(epj1) < 0.0001 && epi1.DistanceTo(epj0) < 0.0001))
-                                        {
-                                            duplicateCurvesIndex.Add(i);
-                                            duplicateCurvesIndex.Add(j);
-                                        }
+                                        intersect = true;
+                                        break;
                                     }
                                 }
-                            }
-                            SelectAmbienteMVVM.ProgressBarViewModel.ProgressBarValue += 1;
-
-                            List<Curve> curvesWithoutDuplicates = new List<Curve>();
-                            for (int i = 0; i < curves.Count; i++)
-                            {
-                                if (!duplicateCurvesIndex.Contains(i))
+                                if (intersect)
                                 {
-                                    curvesWithoutDuplicates.Add(curves[i]);
+                                    XYZ mpiOffset2 = mpi + -XYZ.BasisZ.CrossProduct(ci.ComputeDerivatives(0.5, true).BasisX) * 0.01;
+                                    Curve curveToIntersectSolid2 = Line.CreateBound(mpiOffset2 - XYZ.BasisZ * 10000, mpiOffset2 + XYZ.BasisZ * 10000);
+                                    bool intersect2 = false;
+                                    foreach (var solid in floorSolids)
+                                    {
+                                        if (solid.IntersectWithCurve(curveToIntersectSolid2, new SolidCurveIntersectionOptions()).Any())
+                                        {
+                                            intersect2 = true;
+                                            break;
+                                        }
+                                    }
+                                    if (intersect2)
+                                    {
+                                        continue;
+                                    }
+                                    else
+                                    {
+                                        borderCurves.Add(ci);
+                                    }
+                                }
+                                else
+                                {
+                                    borderCurves.Add(ci);
                                 }
                             }
 
+                            SelectAmbienteMVVM.ProgressBarViewModel.ProgressBarValue += 1;
 
-                            List<CurveLoop> curveLoops = Utils.OrderCurvesToCurveLoops(curvesWithoutDuplicates);
+                            //List<Curve> curvesWithoutDuplicates = new List<Curve>();
+                            //for (int i = 0; i < curves.Count; i++)
+                            //{
+                            //    if (!duplicateCurvesIndex.Contains(i))
+                            //    {
+                            //        curvesWithoutDuplicates.Add(curves[i]);
+                            //    }
+                            //}
+
+
+                            List<CurveLoop> curveLoops = Utils.OrderCurvesToCurveLoops(borderCurves);
                             curveLoops.Reverse();
                             Dictionary<CurveLoop, Solid> curveLoopSolids = new Dictionary<CurveLoop, Solid>();
                             foreach (var curveLoop in curveLoops)
@@ -245,14 +328,31 @@ namespace Revit.Common
 
                             tx.Start("Recriar Openings");
 
+                            Dictionary<int, List<CurveLoop>> openingCurveLoopsByIndex = new Dictionary<int, List<CurveLoop>>();
                             foreach (var curveLoop in openingCurveLoops)
                             {
-                                CurveArray curveArray = new CurveArray();
-                                foreach (var curve in curveLoop.Key)
+                                if (openingCurveLoopsByIndex.ContainsKey(curveLoop.Value))
                                 {
-                                    curveArray.Append(curve);
+                                    openingCurveLoopsByIndex[curveLoop.Value].Add(curveLoop.Key);
                                 }
-                                doc.Create.NewOpening(newFloors.ElementAt(curveLoop.Value).Value, curveArray, false);
+                                else
+                                {
+                                    openingCurveLoopsByIndex.Add(curveLoop.Value, new List<CurveLoop> { curveLoop.Key });
+
+                                }
+                            }
+
+                            foreach (var openingCLoops in openingCurveLoopsByIndex)
+                            {
+                                CurveArray curveArray = new CurveArray();
+                                foreach (var curveLoop in openingCLoops.Value)
+                                {
+                                    foreach (var curve in curveLoop)
+                                    {
+                                        curveArray.Append(curve);
+                                    }
+                                }
+                                doc.Create.NewOpening(newFloors.ElementAt(openingCLoops.Key).Value, curveArray, false);
                             }
                             tx.Commit();
 
