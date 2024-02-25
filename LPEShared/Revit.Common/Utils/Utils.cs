@@ -1005,7 +1005,11 @@ namespace Revit.Common
                     {
                         for (int i = 0; i < intersectionPoints.Count - 1; i++)
                         {
-                            splitFloorCurves.Add(Arc.Create(curveToSplit.Evaluate(intersectionPoints.ElementAt(i).Key, false), curveToSplit.Evaluate(intersectionPoints.ElementAt(i + 1).Key, false), curveToSplit.Evaluate((intersectionPoints.ElementAt(i + 1).Key + intersectionPoints.ElementAt(i).Key) / 2, false)));
+                            try
+                            {
+                                splitFloorCurves.Add(Arc.Create(curveToSplit.Evaluate(intersectionPoints.ElementAt(i).Key, false), curveToSplit.Evaluate(intersectionPoints.ElementAt(i + 1).Key, false), curveToSplit.Evaluate((intersectionPoints.ElementAt(i + 1).Key + intersectionPoints.ElementAt(i).Key) / 2, false)));
+                            }
+                            catch (Exception) { }
                         }
                     }
                 }
