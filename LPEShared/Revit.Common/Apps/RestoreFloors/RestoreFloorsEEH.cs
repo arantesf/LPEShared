@@ -158,12 +158,19 @@ namespace Revit.Common
                                             curve = (doc.GetElement(item) as ModelArc).GeometryCurve;
 
                                         }
+                                        else if (doc.GetElement(item) is ModelEllipse)
+                                        {
+                                            curve = (doc.GetElement(item) as ModelEllipse).GeometryCurve;
+                                        }
                                         else
                                         {
                                             curve = (doc.GetElement(item) as ModelLine).GeometryCurve;
                                         }
 
-                                        curves.Add(Utils.GetCurveProjection(curve));
+                                        Transform transform = Transform.CreateTranslation(-XYZ.BasisZ * curve.GetEndPoint(0).Z);
+                                        curves.Add(curve.CreateTransformed(transform));
+
+                                        //curves.Add(Utils.GetCurveProjection(curve));
                                     }
                                 }
                             }
