@@ -380,6 +380,10 @@ namespace Revit.Common
                             curveArrayInLevelElevation.Append(Arc.Create(ep050, ep075, ep0));
                         }
                     }
+                    else if (curve is Ellipse)
+                    {
+                        curveArrayInLevelElevation.Append((Ellipse)curve);
+                    }
                     else if (curve is HermiteSpline)
                     {
                         HermiteSpline spline = (HermiteSpline)curve;

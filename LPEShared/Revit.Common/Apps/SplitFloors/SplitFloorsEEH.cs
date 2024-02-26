@@ -69,7 +69,7 @@ namespace Revit.Common
 
                     CurveArray openingsCurveArray = new CurveArray();
                     CurveArray reforcoOpeningsCurveArray = new CurveArray();
-                    Solid openingsSolid = null;
+                    List<Solid> openingsSolids = new List<Solid>();
                     if (openings.Any())
                     {
                         foreach (Opening opening in openings.Cast<Opening>())
@@ -86,7 +86,21 @@ namespace Revit.Common
                             if (loopsByCurveArray.Any())
                             {
                                 Solid openingSolidDown = GeometryCreationUtilities.CreateExtrusionGeometry(loopsByCurveArray, -XYZ.BasisZ, 1000);
-                                openingsSolid = openingsSolid == null ? openingSolidDown : BooleanOperationsUtils.ExecuteBooleanOperation(openingsSolid, openingSolidDown, BooleanOperationsType.Union);
+                                if (!openingsSolids.Any())
+                                {
+                                    openingsSolids.Add(openingSolidDown);
+                                }
+                                else
+                                {
+                                    try
+                                    {
+                                        openingsSolids[0] = BooleanOperationsUtils.ExecuteBooleanOperation(openingsSolids[0], openingSolidDown, BooleanOperationsType.Union);
+                                    }
+                                    catch (Exception)
+                                    {
+                                        openingsSolids.Add(openingSolidDown);
+                                    }
+                                }
                             }
                         }
                     }
@@ -260,6 +274,19 @@ namespace Revit.Common
                                 XYZ roomPoint = (createdRoom.Location as LocationPoint).Point;
                                 XYZ roomPointTrasnformed = transform1.OfPoint(roomPoint);
                                 Curve curveToIntersectSolid = Line.CreateBound(roomPointTrasnformed - XYZ.BasisZ * 10000, roomPointTrasnformed + XYZ.BasisZ * 10000);
+                                bool intersectOpening = false;
+                                foreach (var openingSolid in openingsSolids)
+                                {
+                                    if (openingSolid.IntersectWithCurve(curveToIntersectSolid, solidCurveIntersectionOptions).Any())
+                                    {
+                                        intersectOpening = true;
+                                        break;
+                                    }
+                                }
+                                if (intersectOpening)
+                                {
+                                    continue;
+                                }
                                 bool intersect = false;
                                 foreach (var finalSolid in floorSolids)
                                 {
