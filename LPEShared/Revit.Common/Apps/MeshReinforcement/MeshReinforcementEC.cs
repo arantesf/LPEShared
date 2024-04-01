@@ -31,6 +31,12 @@ namespace Revit.Common
             Application app = uiapp.Application;
             Document doc = uidoc.Document;
 
+            if (uidoc.ActiveView is View3D)
+            {
+                TaskDialog.Show("Atenção!", "Abra uma vista de planta para rodar o plug-in!");
+                return Result.Cancelled;
+            }
+
             List<DimensionType> cotaLPETypeList = new FilteredElementCollector(doc)
                 .OfClass(typeof(DimensionType))
                 .Where(a => a.Name == "Cota_LPE")
