@@ -993,18 +993,15 @@ namespace Revit.Common
                 }
                 else
                 {
-                    double midParameter0 = (curveToSplit.GetEndParameter(0) + intersectionPoints.First().Key) / 2;
-                    double midParameter1 = (curveToSplit.GetEndParameter(1) + intersectionPoints.Last().Key) / 2;
-                    try
+                    if (intersectionPoints.Count() == 1)
                     {
-                        splitFloorCurves.Add(Arc.Create(curveToSplit.GetEndPoint(0), curveToSplit.Evaluate(intersectionPoints.First().Key, false), curveToSplit.Evaluate(midParameter0, false)));
+                        double midParameter0 = (curveToSplit.GetEndParameter(0) + intersectionPoints.First().Key) / 2;
+                        double normalizedMidParameter0 = curveToSplit.ComputeNormalizedParameter(midParameter0);
+                        double midParameter1 = (curveToSplit.GetEndParameter(1) + intersectionPoints.Last().Key) / 2;
+                        double normalizedMidParameter1 = curveToSplit.ComputeNormalizedParameter(midParameter1);
+                        splitFloorCurves.Add(Arc.Create(curveToSplit.GetEndPoint(0), curveToSplit.Evaluate(intersectionPoints.First().Key, false), curveToSplit.Evaluate(normalizedMidParameter0, true)));
+                        splitFloorCurves.Add(Arc.Create(curveToSplit.Evaluate(intersectionPoints.Last().Key, false), curveToSplit.GetEndPoint(1), curveToSplit.Evaluate(normalizedMidParameter1, true)));
                     }
-                    catch (Exception) { }
-                    try
-                    {
-                        splitFloorCurves.Add(Arc.Create(curveToSplit.Evaluate(intersectionPoints.Last().Key, false), curveToSplit.GetEndPoint(1), curveToSplit.Evaluate(midParameter1, false)));
-                    }
-                    catch (Exception) { }
                     if (intersectionPoints.Count() > 1)
                     {
                         for (int i = 0; i < intersectionPoints.Count - 1; i++)

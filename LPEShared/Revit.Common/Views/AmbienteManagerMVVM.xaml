@@ -1,329 +1,499 @@
-﻿<Window x:Class="Revit.Common.AmbienteManagerMVVM"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        Loaded="Window_Loaded" WindowStartupLocation="CenterScreen" MinHeight="500" MinWidth="1000"
-        Width="1000" Height="500" DataContext="{Binding RelativeSource={RelativeSource Self}}">
+﻿<Window
+    x:Class="Revit.Common.AmbienteManagerMVVM"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Title="Gerenciador de ambientes"
+    Width="1000"
+    Height="500"
+    MinWidth="1000"
+    MinHeight="500"
+    DataContext="{Binding RelativeSource={RelativeSource Self}}"
+    Icon="/Revit.Resources;component/Images/icon-lpe-engenharia.png"
+    Loaded="Window_Loaded"
+    WindowStartupLocation="CenterScreen">
     <FrameworkElement.Resources>
         <Style x:Key="Identidade.Background" TargetType="{x:Type DataGridColumnHeader}">
-            <Setter Property="Control.Background" Value="DarkOrange"/>
-            <Setter Property="Control.BorderThickness" Value="0.5"/>
-            <Setter Property="Control.HorizontalContentAlignment" Value="Center"/>
-            <Setter Property="Control.Padding" Value="8"/>
+            <Setter Property="Control.Background" Value="DarkOrange" />
+            <Setter Property="Control.BorderThickness" Value="0.5" />
+            <Setter Property="Control.HorizontalContentAlignment" Value="Center" />
+            <Setter Property="Control.Padding" Value="8" />
         </Style>
         <Style x:Key="HEspacador.Background" TargetType="{x:Type DataGridColumnHeader}">
-            <Setter Property="Control.Background" Value="Lime"/>
-            <Setter Property="Control.BorderThickness" Value="0.5"/>
-            <Setter Property="Control.HorizontalContentAlignment" Value="Center"/>
-            <Setter Property="Control.Padding" Value="8"/>
+            <Setter Property="Control.Background" Value="Lime" />
+            <Setter Property="Control.BorderThickness" Value="0.5" />
+            <Setter Property="Control.HorizontalContentAlignment" Value="Center" />
+            <Setter Property="Control.Padding" Value="8" />
         </Style>
         <Style x:Key="TelaSuperior.Background" TargetType="{x:Type DataGridColumnHeader}">
-            <Setter Property="Control.Background" Value="SteelBlue"/>
-            <Setter Property="Control.BorderThickness" Value="0.5"/>
-            <Setter Property="Control.HorizontalContentAlignment" Value="Center"/>
-            <Setter Property="Control.Padding" Value="8"/>
+            <Setter Property="Control.Background" Value="SteelBlue" />
+            <Setter Property="Control.BorderThickness" Value="0.5" />
+            <Setter Property="Control.HorizontalContentAlignment" Value="Center" />
+            <Setter Property="Control.Padding" Value="8" />
         </Style>
         <Style x:Key="TelaInferior.Background" TargetType="{x:Type DataGridColumnHeader}">
-            <Setter Property="Control.Background" Value="IndianRed"/>
-            <Setter Property="Control.BorderThickness" Value="0.5"/>
-            <Setter Property="Control.HorizontalContentAlignment" Value="Center"/>
-            <Setter Property="Control.Padding" Value="8"/>
+            <Setter Property="Control.Background" Value="IndianRed" />
+            <Setter Property="Control.BorderThickness" Value="0.5" />
+            <Setter Property="Control.HorizontalContentAlignment" Value="Center" />
+            <Setter Property="Control.Padding" Value="8" />
         </Style>
         <Style x:Key="Fibra.Background" TargetType="{x:Type DataGridColumnHeader}">
-            <Setter Property="Control.Background" Value="LightGreen"/>
-            <Setter Property="Control.BorderThickness" Value="0.5"/>
-            <Setter Property="Control.HorizontalContentAlignment" Value="Center"/>
-            <Setter Property="Control.Padding" Value="8"/>
+            <Setter Property="Control.Background" Value="LightGreen" />
+            <Setter Property="Control.BorderThickness" Value="0.5" />
+            <Setter Property="Control.HorizontalContentAlignment" Value="Center" />
+            <Setter Property="Control.Padding" Value="8" />
         </Style>
         <Style x:Key="Tratamento.Background" TargetType="{x:Type DataGridColumnHeader}">
-            <Setter Property="Control.Background" Value="CadetBlue"/>
-            <Setter Property="Control.BorderThickness" Value="0.5"/>
-            <Setter Property="Control.HorizontalContentAlignment" Value="Center"/>
-            <Setter Property="Control.Padding" Value="8"/>
+            <Setter Property="Control.Background" Value="CadetBlue" />
+            <Setter Property="Control.BorderThickness" Value="0.5" />
+            <Setter Property="Control.HorizontalContentAlignment" Value="Center" />
+            <Setter Property="Control.Padding" Value="8" />
         </Style>
         <Style x:Key="Espacadores.Background" TargetType="{x:Type DataGridColumnHeader}">
-            <Setter Property="Control.Background" Value="HotPink"/>
-            <Setter Property="Control.BorderThickness" Value="0.5"/>
-            <Setter Property="Control.HorizontalContentAlignment" Value="Center"/>
-            <Setter Property="Control.Padding" Value="8"/>
+            <Setter Property="Control.Background" Value="HotPink" />
+            <Setter Property="Control.BorderThickness" Value="0.5" />
+            <Setter Property="Control.HorizontalContentAlignment" Value="Center" />
+            <Setter Property="Control.Padding" Value="8" />
         </Style>
         <Style x:Key="Reforco.Background" TargetType="{x:Type DataGridColumnHeader}">
-            <Setter Property="Control.Background" Value="Aqua"/>
-            <Setter Property="Control.BorderThickness" Value="0.5"/>
-            <Setter Property="Control.HorizontalContentAlignment" Value="Center"/>
-            <Setter Property="Control.Padding" Value="8"/>
+            <Setter Property="Control.Background" Value="Aqua" />
+            <Setter Property="Control.BorderThickness" Value="0.5" />
+            <Setter Property="Control.HorizontalContentAlignment" Value="Center" />
+            <Setter Property="Control.Padding" Value="8" />
         </Style>
         <Style x:Key="VeiculosPesados.Background" TargetType="{x:Type DataGridColumnHeader}">
-            <Setter Property="Control.Background" Value="Lime"/>
-            <Setter Property="Control.BorderThickness" Value="0.5"/>
-            <Setter Property="Control.HorizontalContentAlignment" Value="Center"/>
-            <Setter Property="Control.Padding" Value="8"/>
+            <Setter Property="Control.Background" Value="Lime" />
+            <Setter Property="Control.BorderThickness" Value="0.5" />
+            <Setter Property="Control.HorizontalContentAlignment" Value="Center" />
+            <Setter Property="Control.Padding" Value="8" />
         </Style>
         <Style x:Key="Camada1.Background" TargetType="{x:Type DataGridColumnHeader}">
-            <Setter Property="Control.Background" Value="White"/>
-            <Setter Property="Control.BorderThickness" Value="0.5"/>
-            <Setter Property="Control.HorizontalContentAlignment" Value="Center"/>
-            <Setter Property="Control.Padding" Value="8"/>
+            <Setter Property="Control.Background" Value="White" />
+            <Setter Property="Control.BorderThickness" Value="0.5" />
+            <Setter Property="Control.HorizontalContentAlignment" Value="Center" />
+            <Setter Property="Control.Padding" Value="8" />
         </Style>
         <Style x:Key="Camada2.Background" TargetType="{x:Type DataGridColumnHeader}">
-            <Setter Property="Control.Background" Value="Gray"/>
-            <Setter Property="Control.BorderThickness" Value="0.5"/>
-            <Setter Property="Control.HorizontalContentAlignment" Value="Center"/>
-            <Setter Property="Control.Padding" Value="8"/>
+            <Setter Property="Control.Background" Value="Gray" />
+            <Setter Property="Control.BorderThickness" Value="0.5" />
+            <Setter Property="Control.HorizontalContentAlignment" Value="Center" />
+            <Setter Property="Control.Padding" Value="8" />
         </Style>
         <Style x:Key="Camada3.Background" TargetType="{x:Type DataGridColumnHeader}">
-            <Setter Property="Control.Background" Value="White"/>
-            <Setter Property="Control.BorderThickness" Value="0.5"/>
-            <Setter Property="Control.HorizontalContentAlignment" Value="Center"/>
-            <Setter Property="Control.Padding" Value="8"/>
+            <Setter Property="Control.Background" Value="White" />
+            <Setter Property="Control.BorderThickness" Value="0.5" />
+            <Setter Property="Control.HorizontalContentAlignment" Value="Center" />
+            <Setter Property="Control.Padding" Value="8" />
         </Style>
         <Style x:Key="Camada4.Background" TargetType="{x:Type DataGridColumnHeader}">
-            <Setter Property="Control.Background" Value="Gray"/>
-            <Setter Property="Control.BorderThickness" Value="0.5"/>
-            <Setter Property="Control.HorizontalContentAlignment" Value="Center"/>
-            <Setter Property="Control.Padding" Value="8"/>
+            <Setter Property="Control.Background" Value="Gray" />
+            <Setter Property="Control.BorderThickness" Value="0.5" />
+            <Setter Property="Control.HorizontalContentAlignment" Value="Center" />
+            <Setter Property="Control.Padding" Value="8" />
         </Style>
         <Style x:Key="Cargas.Background" TargetType="{x:Type DataGridColumnHeader}">
-            <Setter Property="Control.Background" Value="White"/>
-            <Setter Property="Control.BorderThickness" Value="0.5"/>
-            <Setter Property="Control.HorizontalContentAlignment" Value="Center"/>
-            <Setter Property="Control.Padding" Value="8"/>
+            <Setter Property="Control.Background" Value="White" />
+            <Setter Property="Control.BorderThickness" Value="0.5" />
+            <Setter Property="Control.HorizontalContentAlignment" Value="Center" />
+            <Setter Property="Control.Padding" Value="8" />
         </Style>
         <Style x:Key="TextBlock_DataGrid_Centering" TargetType="{x:Type TextBlock}">
-            <Setter Property="TextBlock.TextAlignment" Value="Center"/>
-            <Setter Property="FrameworkElement.FocusVisualStyle" Value="{x:Null}"/>
-            <Setter Property="FrameworkElement.VerticalAlignment" Value="Center"/>
-            <Setter Property="TextBlock.Padding" Value="5"/>
+            <Setter Property="TextBlock.TextAlignment" Value="Center" />
+            <Setter Property="FrameworkElement.FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="FrameworkElement.VerticalAlignment" Value="Center" />
+            <Setter Property="TextBlock.Padding" Value="5" />
         </Style>
         <Style x:Key="CheckBox_DataGrid_Centering" TargetType="{x:Type CheckBox}">
-            <Setter Property="FrameworkElement.HorizontalAlignment" Value="Center"/>
-            <Setter Property="FrameworkElement.VerticalAlignment" Value="Center"/>
-            <Setter Property="FrameworkElement.FocusVisualStyle" Value="{x:Null}"/>
-            <Setter Property="UIElement.IsHitTestVisible" Value="false"/>
+            <Setter Property="FrameworkElement.HorizontalAlignment" Value="Center" />
+            <Setter Property="FrameworkElement.VerticalAlignment" Value="Center" />
+            <Setter Property="FrameworkElement.FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="UIElement.IsHitTestVisible" Value="false" />
         </Style>
         <Style x:Key="Clear_Focus_DataGridCell" TargetType="{x:Type DataGridCell}">
-            <Setter Property="FrameworkElement.FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="FrameworkElement.FocusVisualStyle" Value="{x:Null}" />
         </Style>
         <Style x:Key="Blue_Button" TargetType="{x:Type Button}">
-            <Setter Property="Control.Background" Value="#FF0e538c"/>
-            <Setter Property="Control.BorderBrush" Value="Black"/>
-            <Setter Property="Control.Foreground" Value="White"/>
-            <Setter Property="Control.FontWeight" Value="Normal"/>
-            <Setter Property="Control.FontSize" Value="13"/>
+            <Setter Property="Control.Background" Value="#FF0e538c" />
+            <Setter Property="Control.BorderBrush" Value="#FF2e73Ac" />
+            <Setter Property="Control.Foreground" Value="White" />
+            <Setter Property="Control.FontWeight" Value="Normal" />
+            <Setter Property="Control.FontSize" Value="13" />
             <Style.Triggers>
                 <Trigger Property="UIElement.IsMouseOver" Value="true">
-                    <Setter Property="Control.Background" Value="#FF000000"/>
-                    <Setter Property="Control.Foreground" Value="#FF0e538c"/>
+                    <Setter Property="Control.Background" Value="#FF000000" />
+                    <Setter Property="Control.Foreground" Value="#FF222222" />
                 </Trigger>
             </Style.Triggers>
         </Style>
         <Style x:Key="Gray_Button" TargetType="{x:Type Button}">
-            <Setter Property="Control.Background" Value="#FFDDDDDD"/>
-            <Setter Property="Control.BorderBrush" Value="Black"/>
-            <Setter Property="Control.Foreground" Value="Black"/>
-            <Setter Property="Control.FontWeight" Value="Normal"/>
-            <Setter Property="Control.FontSize" Value="13"/>
-            <Setter Property="FrameworkElement.Width" Value="250"/>
-            <Setter Property="FrameworkElement.Height" Value="30"/>
+            <Setter Property="Control.Background" Value="#FFDDDDDD" />
+            <Setter Property="Control.BorderBrush" Value="#FF888888" />
+            <Setter Property="Control.Foreground" Value="Black" />
+            <Setter Property="Control.FontWeight" Value="Normal" />
+            <Setter Property="Control.FontSize" Value="13" />
+            <Setter Property="FrameworkElement.Width" Value="250" />
+            <Setter Property="FrameworkElement.Height" Value="30" />
             <Style.Triggers>
                 <Trigger Property="UIElement.IsMouseOver" Value="true">
-                    <Setter Property="Control.Background" Value="#FF000000"/>
-                    <Setter Property="Control.Foreground" Value="#FF0e538c"/>
+                    <Setter Property="Control.Background" Value="#FF888888" />
+                    <Setter Property="Control.Foreground" Value="#FF222222" />
                 </Trigger>
             </Style.Triggers>
         </Style>
     </FrameworkElement.Resources>
-    <Grid Height="Auto" Background="#FFAAAAAA">
+    <Grid Height="Auto" Background="#FFBBBBBB">
         <Grid.RowDefinitions>
-            <RowDefinition Height="125"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="50"/>
+            <RowDefinition Height="125" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="50" />
         </Grid.RowDefinitions>
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="20"/>
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="20" />
+                <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <Image Grid.Row="0" HorizontalAlignment="Left" Margin="20"
-             Source="/Revit.Resources;component/Images/logo-lpe-engenharia-2.png" Width="100"/>
-            <Grid Column="2" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="5,10">
+            <Image
+                Grid.Row="0"
+                Width="100"
+                Margin="20"
+                HorizontalAlignment="Left"
+                Source="/Revit.Resources;component/Images/logo-lpe-engenharia-2.png" />
+            <Grid
+                Margin="5,10"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Center"
+                Column="2">
                 <Grid.RowDefinitions>
-                    <RowDefinition/>
-                    <RowDefinition Height="10"/>
-                    <RowDefinition/>
+                    <RowDefinition />
+                    <RowDefinition Height="10" />
+                    <RowDefinition />
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <Button Click="AddAmbiente_Button_Click" x:Name="AddAmbiente_Button" Content="CRIAR AMBIENTE" Margin="5,0"
-                Style="{StaticResource Gray_Button}"/>
-                <Button Click="DuplicateAmbiente_Button_Click" x:Name="DuplicateAmbiente_Button" Grid.Column="1"
-                Content="DUPLICAR AMBIENTE" Margin="5,0" Style="{StaticResource Gray_Button}"/>
-                <Button Click="DuplicateReforcoAmbiente_Button_Click" x:Name="DuplicateReforcoAmbiente_Button"
-                Grid.Column="2" Content="DUPLICAR AMBIENTE COMO REFORÇO" Margin="5,0"
-                Style="{StaticResource Gray_Button}"/>
-                <Button Click="EditAmbiente_Button_Click" x:Name="EditAmbiente_Button" Grid.Row="2"
-                Content="EDITAR AMBIENTE" Margin="5,0" Style="{StaticResource Gray_Button}"/>
-                <Button Click="ImportAmbiente_Button_Click" x:Name="ImportAmbiente_Button" Grid.Row="2" Grid.Column="1"
-                Content="IMPORTAR AMBIENTES" Margin="5,0" Style="{StaticResource Gray_Button}"/>
-                <Button Click="DeleteAmbiente_Button_Click" x:Name="DeleteAmbiente_Button" Grid.Row="2" Grid.Column="2"
-                Content="EXCLUIR AMBIENTE" Margin="5,0" Style="{StaticResource Gray_Button}"/>
+                <Button
+                    x:Name="AddAmbiente_Button"
+                    Margin="5,0"
+                    Click="AddAmbiente_Button_Click"
+                    Content="CRIAR AMBIENTE"
+                    Style="{StaticResource Gray_Button}" />
+                <Button
+                    x:Name="DuplicateAmbiente_Button"
+                    Grid.Column="1"
+                    Margin="5,0"
+                    Click="DuplicateAmbiente_Button_Click"
+                    Content="DUPLICAR AMBIENTE"
+                    Style="{StaticResource Gray_Button}" />
+                <Button
+                    x:Name="DuplicateReforcoAmbiente_Button"
+                    Grid.Column="2"
+                    Margin="5,0"
+                    Click="DuplicateReforcoAmbiente_Button_Click"
+                    Content="DUPLICAR AMBIENTE COMO REFORÇO"
+                    Style="{StaticResource Gray_Button}" />
+                <Button
+                    x:Name="EditAmbiente_Button"
+                    Grid.Row="2"
+                    Margin="5,0"
+                    Click="EditAmbiente_Button_Click"
+                    Content="EDITAR AMBIENTE"
+                    Style="{StaticResource Gray_Button}" />
+                <Button
+                    x:Name="ImportAmbiente_Button"
+                    Grid.Row="2"
+                    Grid.Column="1"
+                    Margin="5,0"
+                    Click="ImportAmbiente_Button_Click"
+                    Content="IMPORTAR AMBIENTES"
+                    Style="{StaticResource Gray_Button}" />
+                <Button
+                    x:Name="DeleteAmbiente_Button"
+                    Grid.Row="2"
+                    Grid.Column="2"
+                    Margin="5,0"
+                    Click="DeleteAmbiente_Button_Click"
+                    Content="EXCLUIR AMBIENTE"
+                    Style="{StaticResource Gray_Button}" />
             </Grid>
         </Grid>
-        <DataGrid x:Name="Ambiente_DataGrid" SelectionUnit="FullRow" SelectionMode="Single"
-              VerticalGridLinesBrush="#11000000" HorizontalGridLinesBrush="#11000000"
-              AlternatingRowBackground="#dddddd" CellStyle="{StaticResource Clear_Focus_DataGridCell}"
-              FontSize="13" Grid.Row="1" Margin="10,0" HeadersVisibility="Column" FrozenColumnCount="2"
-              AutoGenerateColumns="false" IsReadOnly="true"
-              SelectedItem="{Binding SelectedFullAmbienteViewModel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+        <DataGrid
+            x:Name="Ambiente_DataGrid"
+            Grid.Row="1"
+            Margin="10,0"
+            AlternatingRowBackground="#dddddd"
+            AutoGenerateColumns="false"
+            CellStyle="{StaticResource Clear_Focus_DataGridCell}"
+            FontSize="13"
+            FrozenColumnCount="2"
+            HeadersVisibility="Column"
+            HorizontalGridLinesBrush="#11000000"
+            IsReadOnly="true"
+            SelectedItem="{Binding SelectedFullAmbienteViewModel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+            SelectionMode="Single"
+            SelectionUnit="FullRow"
+            VerticalGridLinesBrush="#11000000">
             <DataGrid.Columns>
-                <DataGridTextColumn ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
-                            HeaderStyle="{StaticResource Identidade.Background}" Header="Tipo de Piso"
-                            Binding="{Binding TipoDePiso, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                <DataGridTextColumn ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
-                            HeaderStyle="{StaticResource Identidade.Background}" Header="Ambiente"
-                            Binding="{Binding Ambiente, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                <DataGridTextColumn ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
-                            HeaderStyle="{StaticResource Identidade.Background}" Header="H Concreto"
-                            Binding="{Binding HConcreto, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                <DataGridTextColumn ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
-                            HeaderStyle="{StaticResource Identidade.Background}" Header="Comprimento Placa"
-                            Binding="{Binding ComprimentoDaPlaca, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                <DataGridTextColumn ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
-                            HeaderStyle="{StaticResource Identidade.Background}" Header="Largura Da Placa"
-                            Binding="{Binding LarguraDaPlaca, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                <DataGridTextColumn ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
-                            HeaderStyle="{StaticResource HEspacador.Background}" Header="H-Espaçador Soldado (cm)"
-                            Binding="{Binding HEspacadorSoldado, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                <DataGridCheckBoxColumn IsReadOnly="true" ElementStyle="{StaticResource CheckBox_DataGrid_Centering}"
-                                HeaderStyle="{StaticResource TelaSuperior.Background}" Header="(s/n) Tela Superior"
-                                Binding="{Binding BoolTelaSuperior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                <DataGridTextColumn ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
-                            HeaderStyle="{StaticResource TelaSuperior.Background}" Header="Tela Superior"
-                            Binding="{Binding TelaSuperior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                <DataGridTextColumn ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
-                            HeaderStyle="{StaticResource TelaSuperior.Background}" Header="Finalidade - Tela Superior"
-                            Binding="{Binding FinalidadeTelaSuperior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                <DataGridTextColumn ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
-                            HeaderStyle="{StaticResource TelaSuperior.Background}" Header="Emenda - Tela Superior"
-                            Binding="{Binding EmendaTelaSuperior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                <DataGridCheckBoxColumn IsReadOnly="true" ElementStyle="{StaticResource CheckBox_DataGrid_Centering}"
-                                HeaderStyle="{StaticResource TelaInferior.Background}" Header="(s/n) Tela Inferior"
-                                Binding="{Binding BoolTelaInferior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                <DataGridTextColumn ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
-                            HeaderStyle="{StaticResource TelaInferior.Background}" Header="Tela Inferior"
-                            Binding="{Binding TelaInferior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                <DataGridTextColumn ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
-                            HeaderStyle="{StaticResource TelaInferior.Background}" Header="Emenda - Tela Inferior"
-                            Binding="{Binding EmendaTelaInferior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                <DataGridCheckBoxColumn IsReadOnly="true" ElementStyle="{StaticResource CheckBox_DataGrid_Centering}"
-                                HeaderStyle="{StaticResource Fibra.Background}" Header="(s/n) Fibra"
-                                Binding="{Binding BoolFibra, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                <DataGridTextColumn ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
-                            HeaderStyle="{StaticResource Fibra.Background}" Header="Fibra"
-                            Binding="{Binding Fibra, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                <DataGridTextColumn ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
-                            HeaderStyle="{StaticResource Fibra.Background}" Header="Dosagem Fibra"
-                            Binding="{Binding DosagemFibra, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                <DataGridTextColumn ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
-                            HeaderStyle="{StaticResource Fibra.Background}" Header="FR1"
-                            Binding="{Binding FR1, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                <DataGridTextColumn ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
-                            HeaderStyle="{StaticResource Fibra.Background}" Header="FR4"
-                            Binding="{Binding FR4, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                <DataGridCheckBoxColumn IsReadOnly="true" ElementStyle="{StaticResource CheckBox_DataGrid_Centering}"
-                                HeaderStyle="{StaticResource Tratamento.Background}" Header="(s/n) Tratamento Superficial"
-                                Binding="{Binding BoolTratamentoSuperficial, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                <DataGridTextColumn ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
-                            HeaderStyle="{StaticResource Tratamento.Background}" Header="Tratamento Superficial"
-                            Binding="{Binding TratamentoSuperficial, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                <DataGridCheckBoxColumn IsReadOnly="true" ElementStyle="{StaticResource CheckBox_DataGrid_Centering}"
-                                HeaderStyle="{StaticResource Espacadores.Background}" Header="(s/n) Espaçador Sup."
-                                Binding="{Binding BoolEspacadorSuperior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                <DataGridTextColumn ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
-                            HeaderStyle="{StaticResource Espacadores.Background}" Header="H-Espaçador Superior &quot;W&quot;"
-                            Binding="{Binding HEspacadorSuperior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                <DataGridCheckBoxColumn IsReadOnly="true" ElementStyle="{StaticResource CheckBox_DataGrid_Centering}"
-                                HeaderStyle="{StaticResource Espacadores.Background}" Header="(s/n) Espaçador Inf."
-                                Binding="{Binding BoolEspacadorInferior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                <DataGridTextColumn ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
-                            HeaderStyle="{StaticResource Espacadores.Background}" Header="H-Espaçador Inferior (cm)"
-                            Binding="{Binding HEspacadorInferior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                <DataGridCheckBoxColumn IsReadOnly="true" ElementStyle="{StaticResource CheckBox_DataGrid_Centering}"
-                                HeaderStyle="{StaticResource Reforco.Background}" Header="Reforço de Tela"
-                                Binding="{Binding BoolReforcoDeTela, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                <DataGridCheckBoxColumn IsReadOnly="true" ElementStyle="{StaticResource CheckBox_DataGrid_Centering}"
-                                HeaderStyle="{StaticResource Reforco.Background}" Header="(s/n) Ref. Tela Superior"
-                                Binding="{Binding BoolReforcoTelaSuperior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                <DataGridTextColumn ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
-                            HeaderStyle="{StaticResource Reforco.Background}" Header="Ref. Tela Superior"
-                            Binding="{Binding ReforcoTelaSuperior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                <DataGridTextColumn ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
-                            HeaderStyle="{StaticResource Reforco.Background}" Header="Emenda - Ref. Tela Sup"
-                            Binding="{Binding EmendaReforcoTelaSuperior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                <DataGridTextColumn ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
-                            HeaderStyle="{StaticResource Reforco.Background}" Header="Finalidade Ref. Tela Sup"
-                            Binding="{Binding FinalidadeReforcoTelaSuperior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                <DataGridCheckBoxColumn IsReadOnly="true" ElementStyle="{StaticResource CheckBox_DataGrid_Centering}"
-                                HeaderStyle="{StaticResource Reforco.Background}" Header="(s/n) Ref. Tela Inferior"
-                                Binding="{Binding BoolReforcoTelaInferior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                <DataGridTextColumn ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
-                            HeaderStyle="{StaticResource Reforco.Background}" Header="Ref. Tela Inferior"
-                            Binding="{Binding ReforcoTelaInferior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                <DataGridTextColumn ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
-                            HeaderStyle="{StaticResource Reforco.Background}" Header="Emenda - Ref. Tela Inf"
-                            Binding="{Binding EmendaReforcoTelaInferior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                <DataGridTextColumn ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
-                            HeaderStyle="{StaticResource Reforco.Background}" Header="Finalidade Ref. Tela Inf"
-                            Binding="{Binding FinalidadeReforcoTelaInferior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                <DataGridCheckBoxColumn IsReadOnly="true" ElementStyle="{StaticResource CheckBox_DataGrid_Centering}"
-                                HeaderStyle="{StaticResource VeiculosPesados.Background}" Header="LPE__VEÍCULOS PESADOS"
-                                Binding="{Binding BoolLPEVeiculosPesados, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                <DataGridTextColumn ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
-                            HeaderStyle="{StaticResource Camada1.Background}" Header="TAG__CONCRETO"
-                            Binding="{Binding TagConcreto, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                <DataGridCheckBoxColumn IsReadOnly="true" ElementStyle="{StaticResource CheckBox_DataGrid_Centering}"
-                                HeaderStyle="{StaticResource Camada2.Background}" Header="CB__SUB__BASE"
-                                Binding="{Binding CBSubBase, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                <DataGridTextColumn ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
-                            HeaderStyle="{StaticResource Camada2.Background}" Header="H SUB__BASE"
-                            Binding="{Binding HSubBase, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                <DataGridTextColumn ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
-                            HeaderStyle="{StaticResource Camada2.Background}" Header="TAG__SUB-BASE"
-                            Binding="{Binding TagSubBase, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                <DataGridCheckBoxColumn IsReadOnly="true" ElementStyle="{StaticResource CheckBox_DataGrid_Centering}"
-                                HeaderStyle="{StaticResource Camada2.Background}" Header="CB__BASE GENÉRICA"
-                                Binding="{Binding CBBaseGenerica, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                <DataGridTextColumn ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
-                            HeaderStyle="{StaticResource Camada2.Background}" Header="TAG__BASE GENÉRICA"
-                            Binding="{Binding TagBaseGenerica, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                <DataGridCheckBoxColumn IsReadOnly="true" ElementStyle="{StaticResource CheckBox_DataGrid_Centering}"
-                                HeaderStyle="{StaticResource Camada3.Background}" Header="CB__REF. SUBLEITO"
-                                Binding="{Binding CBRefSubleito, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                <DataGridTextColumn ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
-                            HeaderStyle="{StaticResource Camada3.Background}" Header="H Ref. Subleito"
-                            Binding="{Binding HRefSubleito, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                <DataGridTextColumn ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
-                            HeaderStyle="{StaticResource Camada3.Background}" Header="TAG__REF. SUBLEITO"
-                            Binding="{Binding TagRefSubleito, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                <DataGridCheckBoxColumn IsReadOnly="true" ElementStyle="{StaticResource CheckBox_DataGrid_Centering}"
-                                HeaderStyle="{StaticResource Camada4.Background}" Header="CB__SUBLEITO"
-                                Binding="{Binding CBSubleito, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                <DataGridTextColumn ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
-                            HeaderStyle="{StaticResource Camada4.Background}" Header="TAG__SUBLEITO"
-                            Binding="{Binding TagSubleito, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                <DataGridTextColumn ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
-                            HeaderStyle="{StaticResource Cargas.Background}" Header="LPE__CARGA"
-                            Binding="{Binding LPECarga, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                <DataGridTextColumn
+                    Binding="{Binding TipoDePiso, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
+                    Header="Tipo de Piso"
+                    HeaderStyle="{StaticResource Identidade.Background}" />
+                <DataGridTextColumn
+                    Binding="{Binding Ambiente, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
+                    Header="Ambiente"
+                    HeaderStyle="{StaticResource Identidade.Background}" />
+                <DataGridCheckBoxColumn
+                    Binding="{Binding BoolReforcoDeTela, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    ElementStyle="{StaticResource CheckBox_DataGrid_Centering}"
+                    Header="PISO DE REFORÇO"
+                    HeaderStyle="{StaticResource Identidade.Background}"
+                    IsReadOnly="true" />
+                <DataGridTextColumn
+                    Binding="{Binding HConcreto, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
+                    Header="H Concreto"
+                    HeaderStyle="{StaticResource Identidade.Background}" />
+                <DataGridTextColumn
+                    Binding="{Binding ComprimentoDaPlaca, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
+                    Header="Comprimento Placa"
+                    HeaderStyle="{StaticResource Identidade.Background}" />
+                <DataGridTextColumn
+                    Binding="{Binding LarguraDaPlaca, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
+                    Header="Largura Da Placa"
+                    HeaderStyle="{StaticResource Identidade.Background}" />
+                <DataGridTextColumn
+                    Binding="{Binding HEspacadorSoldado, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
+                    Header="H-Espaçador Soldado (cm)"
+                    HeaderStyle="{StaticResource HEspacador.Background}" />
+                <DataGridCheckBoxColumn
+                    Binding="{Binding BoolTelaSuperior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    ElementStyle="{StaticResource CheckBox_DataGrid_Centering}"
+                    Header="(s/n) Tela Superior"
+                    HeaderStyle="{StaticResource TelaSuperior.Background}"
+                    IsReadOnly="true" />
+                <DataGridTextColumn
+                    Binding="{Binding TelaSuperior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
+                    Header="Tela Superior"
+                    HeaderStyle="{StaticResource TelaSuperior.Background}" />
+                <DataGridTextColumn
+                    Binding="{Binding FinalidadeTelaSuperior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
+                    Header="Finalidade - Tela Superior"
+                    HeaderStyle="{StaticResource TelaSuperior.Background}" />
+                <DataGridTextColumn
+                    Binding="{Binding EmendaTelaSuperior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
+                    Header="Emenda - Tela Superior"
+                    HeaderStyle="{StaticResource TelaSuperior.Background}" />
+                <DataGridCheckBoxColumn
+                    Binding="{Binding BoolTelaInferior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    ElementStyle="{StaticResource CheckBox_DataGrid_Centering}"
+                    Header="(s/n) Tela Inferior"
+                    HeaderStyle="{StaticResource TelaInferior.Background}"
+                    IsReadOnly="true" />
+                <DataGridTextColumn
+                    Binding="{Binding TelaInferior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
+                    Header="Tela Inferior"
+                    HeaderStyle="{StaticResource TelaInferior.Background}" />
+                <DataGridTextColumn
+                    Binding="{Binding EmendaTelaInferior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
+                    Header="Emenda - Tela Inferior"
+                    HeaderStyle="{StaticResource TelaInferior.Background}" />
+                <DataGridCheckBoxColumn
+                    Binding="{Binding BoolFibra, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    ElementStyle="{StaticResource CheckBox_DataGrid_Centering}"
+                    Header="(s/n) Fibra"
+                    HeaderStyle="{StaticResource Fibra.Background}"
+                    IsReadOnly="true" />
+                <DataGridTextColumn
+                    Binding="{Binding Fibra, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
+                    Header="Fibra"
+                    HeaderStyle="{StaticResource Fibra.Background}" />
+                <DataGridTextColumn
+                    Binding="{Binding DosagemFibra, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
+                    Header="Dosagem Fibra"
+                    HeaderStyle="{StaticResource Fibra.Background}" />
+                <DataGridTextColumn
+                    Binding="{Binding FR1, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
+                    Header="FR1"
+                    HeaderStyle="{StaticResource Fibra.Background}" />
+                <DataGridTextColumn
+                    Binding="{Binding FR4, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
+                    Header="FR4"
+                    HeaderStyle="{StaticResource Fibra.Background}" />
+                <DataGridCheckBoxColumn
+                    Binding="{Binding BoolTratamentoSuperficial, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    ElementStyle="{StaticResource CheckBox_DataGrid_Centering}"
+                    Header="(s/n) Tratamento Superficial"
+                    HeaderStyle="{StaticResource Tratamento.Background}"
+                    IsReadOnly="true" />
+                <DataGridTextColumn
+                    Binding="{Binding TratamentoSuperficial, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
+                    Header="Tratamento Superficial"
+                    HeaderStyle="{StaticResource Tratamento.Background}" />
+                <DataGridCheckBoxColumn
+                    Binding="{Binding BoolEspacadorSuperior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    ElementStyle="{StaticResource CheckBox_DataGrid_Centering}"
+                    Header="(s/n) Espaçador Sup."
+                    HeaderStyle="{StaticResource Espacadores.Background}"
+                    IsReadOnly="true" />
+                <DataGridTextColumn
+                    Binding="{Binding HEspacadorSuperior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
+                    Header="H-Espaçador Superior &quot;W&quot;"
+                    HeaderStyle="{StaticResource Espacadores.Background}" />
+                <DataGridCheckBoxColumn
+                    Binding="{Binding BoolEspacadorInferior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    ElementStyle="{StaticResource CheckBox_DataGrid_Centering}"
+                    Header="(s/n) Espaçador Inf."
+                    HeaderStyle="{StaticResource Espacadores.Background}"
+                    IsReadOnly="true" />
+                <DataGridTextColumn
+                    Binding="{Binding HEspacadorInferior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
+                    Header="H-Espaçador Inferior (cm)"
+                    HeaderStyle="{StaticResource Espacadores.Background}" />
+
+                <DataGridCheckBoxColumn
+                    Binding="{Binding BoolReforcoTelaSuperior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    ElementStyle="{StaticResource CheckBox_DataGrid_Centering}"
+                    Header="(s/n) Ref. Tela Superior"
+                    HeaderStyle="{StaticResource Reforco.Background}"
+                    IsReadOnly="true" />
+                <DataGridTextColumn
+                    Binding="{Binding ReforcoTelaSuperior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
+                    Header="Ref. Tela Superior"
+                    HeaderStyle="{StaticResource Reforco.Background}" />
+                <DataGridTextColumn
+                    Binding="{Binding EmendaReforcoTelaSuperior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
+                    Header="Emenda - Ref. Tela Sup"
+                    HeaderStyle="{StaticResource Reforco.Background}" />
+                <DataGridTextColumn
+                    Binding="{Binding FinalidadeReforcoTelaSuperior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
+                    Header="Finalidade Ref. Tela Sup"
+                    HeaderStyle="{StaticResource Reforco.Background}" />
+                <DataGridCheckBoxColumn
+                    Binding="{Binding BoolReforcoTelaInferior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    ElementStyle="{StaticResource CheckBox_DataGrid_Centering}"
+                    Header="(s/n) Ref. Tela Inferior"
+                    HeaderStyle="{StaticResource Reforco.Background}"
+                    IsReadOnly="true" />
+                <DataGridTextColumn
+                    Binding="{Binding ReforcoTelaInferior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
+                    Header="Ref. Tela Inferior"
+                    HeaderStyle="{StaticResource Reforco.Background}" />
+                <DataGridTextColumn
+                    Binding="{Binding EmendaReforcoTelaInferior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
+                    Header="Emenda - Ref. Tela Inf"
+                    HeaderStyle="{StaticResource Reforco.Background}" />
+                <DataGridTextColumn
+                    Binding="{Binding FinalidadeReforcoTelaInferior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
+                    Header="Finalidade Ref. Tela Inf"
+                    HeaderStyle="{StaticResource Reforco.Background}" />
+                <DataGridCheckBoxColumn
+                    Binding="{Binding BoolLPEVeiculosPesados, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    ElementStyle="{StaticResource CheckBox_DataGrid_Centering}"
+                    Header="LPE__VEÍCULOS PESADOS"
+                    HeaderStyle="{StaticResource VeiculosPesados.Background}"
+                    IsReadOnly="true" />
+                <DataGridTextColumn
+                    Binding="{Binding TagConcreto, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
+                    Header="TAG__CONCRETO"
+                    HeaderStyle="{StaticResource Camada1.Background}" />
+                <DataGridCheckBoxColumn
+                    Binding="{Binding CBSubBase, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    ElementStyle="{StaticResource CheckBox_DataGrid_Centering}"
+                    Header="CB__SUB__BASE"
+                    HeaderStyle="{StaticResource Camada2.Background}"
+                    IsReadOnly="true" />
+                <DataGridTextColumn
+                    Binding="{Binding HSubBase, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
+                    Header="H SUB__BASE"
+                    HeaderStyle="{StaticResource Camada2.Background}" />
+                <DataGridTextColumn
+                    Binding="{Binding TagSubBase, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
+                    Header="TAG__SUB-BASE"
+                    HeaderStyle="{StaticResource Camada2.Background}" />
+                <DataGridCheckBoxColumn
+                    Binding="{Binding CBBaseGenerica, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    ElementStyle="{StaticResource CheckBox_DataGrid_Centering}"
+                    Header="CB__BASE GENÉRICA"
+                    HeaderStyle="{StaticResource Camada2.Background}"
+                    IsReadOnly="true" />
+                <DataGridTextColumn
+                    Binding="{Binding TagBaseGenerica, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
+                    Header="TAG__BASE GENÉRICA"
+                    HeaderStyle="{StaticResource Camada2.Background}" />
+                <DataGridCheckBoxColumn
+                    Binding="{Binding CBRefSubleito, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    ElementStyle="{StaticResource CheckBox_DataGrid_Centering}"
+                    Header="CB__REF. SUBLEITO"
+                    HeaderStyle="{StaticResource Camada3.Background}"
+                    IsReadOnly="true" />
+                <DataGridTextColumn
+                    Binding="{Binding HRefSubleito, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
+                    Header="H Ref. Subleito"
+                    HeaderStyle="{StaticResource Camada3.Background}" />
+                <DataGridTextColumn
+                    Binding="{Binding TagRefSubleito, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
+                    Header="TAG__REF. SUBLEITO"
+                    HeaderStyle="{StaticResource Camada3.Background}" />
+                <DataGridCheckBoxColumn
+                    Binding="{Binding CBSubleito, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    ElementStyle="{StaticResource CheckBox_DataGrid_Centering}"
+                    Header="CB__SUBLEITO"
+                    HeaderStyle="{StaticResource Camada4.Background}"
+                    IsReadOnly="true" />
+                <DataGridTextColumn
+                    Binding="{Binding TagSubleito, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
+                    Header="TAG__SUBLEITO"
+                    HeaderStyle="{StaticResource Camada4.Background}" />
+                <DataGridTextColumn
+                    Binding="{Binding LPECarga, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
+                    Header="LPE__CARGA"
+                    HeaderStyle="{StaticResource Cargas.Background}" />
             </DataGrid.Columns>
         </DataGrid>
-        <Button Click="Apply_Button_Click" x:Name="Execute_Button" Content="APLICAR ALTERAÇÕES" Grid.Row="3"
-            HorizontalAlignment="Right" Width="230" Height="30" Margin="10"
-            Style="{StaticResource Blue_Button}"/>
+        <Button
+            x:Name="Execute_Button"
+            Grid.Row="3"
+            Width="230"
+            Height="30"
+            Margin="10"
+            HorizontalAlignment="Right"
+            Click="Apply_Button_Click"
+            Content="APLICAR ALTERAÇÕES"
+            Style="{StaticResource Blue_Button}" />
     </Grid>
 </Window>

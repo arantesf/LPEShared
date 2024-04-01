@@ -121,5 +121,8 @@
   <ItemGroup>
     <EmbeddedResource Include="Images\RestaurarJuntasLPE.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\icon-lpe-engenharia.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

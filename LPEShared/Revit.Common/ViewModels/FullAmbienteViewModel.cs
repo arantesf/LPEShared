@@ -5,10 +5,13 @@
 // Assembly location: C:\ProgramData\Autodesk\Revit\Addins\2024\LPE\LPE.dll
 
 using Autodesk.Revit.DB;
+using Revit.Common.Classes;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace Revit.Common
 {
@@ -157,6 +160,7 @@ namespace Revit.Common
             string str3 = "";
             string str4 = "";
             string str5 = "";
+            string str6 = "";
             if (this.boolFibra)
                 str1 += string.Format("FIBRA {0}", (object)this.dosagemFibra);
             else if (this.boolTelaSuperior)
@@ -167,22 +171,27 @@ namespace Revit.Common
             }
             else if (this.boolTelaInferior)
                 str1 += this.telaInferior;
-            if (this.boolReforcoTelaSuperior)
+
+            //if (this.boolReforcoTelaSuperior)
+            //{
+            //    str2 = " - REF_" + this.finalidadeReforcoTelaSuperior;
+            //    str3 = " (" + this.reforcoTelaSuperior + ")";
+            //    if (this.boolReforcoTelaInferior)
+            //    {
+            //        str4 = " + REF_" + this.finalidadeReforcoTelaInferior;
+            //        str5 = " (" + this.reforcoTelaInferior + ")";
+            //    }
+            //}
+            //else if (this.boolReforcoTelaInferior)
+            //{
+            //    str4 = " - REF_" + this.finalidadeReforcoTelaInferior;
+            //    str5 = " (" + this.reforcoTelaInferior + ")";
+            //}
+            if (this.BoolReforcoDeTela)
             {
-                str2 = " - REF_" + this.finalidadeReforcoTelaSuperior;
-                str3 = " (" + this.reforcoTelaSuperior + ")";
-                if (this.boolReforcoTelaInferior)
-                {
-                    str4 = " + REF_" + this.finalidadeReforcoTelaInferior;
-                    str5 = " (" + this.reforcoTelaInferior + ")";
-                }
+                str6 += " - REFORÇO";
             }
-            else if (this.boolReforcoTelaInferior)
-            {
-                str4 = " - REF_" + this.finalidadeReforcoTelaInferior;
-                str5 = " (" + this.reforcoTelaInferior + ")";
-            }
-            this.TipoDePiso = string.Format("{0} - H={1}cm ({2}){3}{4}{5}{6}", (object)this.ambiente, (object)this.HConcreto, (object)str1, (object)str2, (object)str3, (object)str4, (object)str5);
+            this.TipoDePiso = string.Format("{0} - H={1}cm ({2}){3}{4}{5}{6}{7}", (object)this.ambiente, (object)this.HConcreto, (object)str1, (object)str2, (object)str3, (object)str4, (object)str5, (object)str6);
         }
 
         public bool ParametersScrollVisible
@@ -963,8 +972,11 @@ namespace Revit.Common
                 this.SetTipoDePiso();
             }
         }
+        public FullAmbienteViewModel()
+        {
 
-        public FullAmbienteViewModel(Element tipoDePisoElement, Element itensDeDetalheElement)
+        }
+        public FullAmbienteViewModel(Element tipoDePisoElement, Element itensDeDetalheElement, Document doc)
         {
             if (tipoDePisoElement.LookupParameter("(s/n) Fibra").AsInteger() == 1)
                 this.TipoDeSolucao = "FIBRA";
@@ -1036,6 +1048,23 @@ namespace Revit.Common
             this.TagRefSubleito = itensDeDetalheElement.LookupParameter("TAG_REF. SUBLEITO").AsString();
             this.TagSubBase = itensDeDetalheElement.LookupParameter("TAG_SUB-BASE").AsString();
             this.TagSubleito = itensDeDetalheElement.LookupParameter("TAG_SUBLEITO").AsString();
+            try
+            {
+                FloorType floorType = new FilteredElementCollector(doc)
+                    .OfClass(typeof(FloorType))
+                    .Cast<FloorType>()
+                    .FirstOrDefault(x => this.TipoDePiso == x.Name);
+
+                if (floorType != null)
+                {
+                    FloorMatriz floorMatriz = new FloorMatriz();
+                    floorMatriz.GetFloorTypeData(floorType, GlobalVariables.materialsByClass);
+                    FloorMatriz = floorMatriz;
+                }
+            }
+            catch (Exception)
+            {
+            }
         }
 
         public object Clone() => (object)(FullAmbienteViewModel)this.MemberwiseClone();

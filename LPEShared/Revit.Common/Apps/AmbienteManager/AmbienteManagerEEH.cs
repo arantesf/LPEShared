@@ -83,18 +83,22 @@ namespace Revit.Common
         {
             try
             {
-
-
                 UIDocument uidoc = uiapp.ActiveUIDocument;
                 Document doc = uidoc.Document;
-
-
                 TransactionGroup tg = new TransactionGroup(doc, "Gerenciador de Ambientes");
                 Transaction tx = new Transaction(doc, "tx");
                 tg.Start();
                 foreach (var ambienteViewModel in AmbienteManagerMVVM.MainView.AmbienteViewModelsToDelete)
                 {
                     tx.Start();
+                    var floorType = new FilteredElementCollector(doc)
+                        .OfClass(typeof(FloorType))
+                        .Cast<FloorType>()
+                        .FirstOrDefault(a => a.Name == ambienteViewModel.FloorMatriz?.FloorName);
+                    if (floorType != null)
+                    {
+                        doc.Delete(floorType.Id);
+                    }
                     doc.Delete(ambienteViewModel.Id);
                     tx.Commit();
                 }
@@ -158,6 +162,10 @@ namespace Revit.Common
                             AmbienteManagerUtils.SetAmbienteLPETipoDePiso(tipoDePisoComMesmoId, ambienteViewModel);
                             AmbienteManagerUtils.SetAmbienteLPEItensDeDetalhe(itemDeDetalheComMesmoAmbiente, ambienteViewModel);
                             AmbienteManagerUtils.SetAmbienteLPETipoDeJunta(tipoDeJuntaComMesmoAmbiente, ambienteViewModel);
+                            if (ambienteViewModel.SelectedfloorMatriz?.FloorName != null || ambienteViewModel.FloorMatriz?.FloorName != null)
+                            {
+                                AmbienteManagerUtils.SetFloorType(doc, ambienteViewModel, false);
+                            }
                             tx.Commit();
                             break;
                         case Action.Delete:
@@ -193,6 +201,10 @@ namespace Revit.Common
                             AmbienteManagerUtils.SetAmbienteLPETipoDePiso(tipoDePisoComMesmoId, ambienteViewModel);
                             AmbienteManagerUtils.SetAmbienteLPEItensDeDetalhe(itemDeDetalheComMesmoAmbiente, ambienteViewModel);
                             AmbienteManagerUtils.SetAmbienteLPETipoDeJunta(tipoDeJuntaComMesmoAmbiente, ambienteViewModel);
+                            if (ambienteViewModel.SelectedfloorMatriz?.FloorName != null || ambienteViewModel.FloorMatriz?.FloorName != null)
+                            {
+                                AmbienteManagerUtils.SetFloorType(doc, ambienteViewModel, false);
+                            }
                             tx.Commit();
                             break;
                         case Action.Create:
@@ -235,6 +247,10 @@ namespace Revit.Common
                             AmbienteManagerUtils.SetAmbienteLPETipoDePiso(novoTipoDePiso, ambienteViewModel);
                             AmbienteManagerUtils.SetAmbienteLPEItensDeDetalhe(itemDeDetalheComMesmoAmbiente, ambienteViewModel);
                             AmbienteManagerUtils.SetAmbienteLPETipoDeJunta(tipoDeJuntaComMesmoAmbiente, ambienteViewModel);
+                            if (ambienteViewModel.SelectedfloorMatriz?.FloorName != null || ambienteViewModel.FloorMatriz?.FloorName != null)
+                            {
+                                AmbienteManagerUtils.SetFloorType(doc, ambienteViewModel, true);
+                            }
                             tx.Commit();
                             break;
                         default:

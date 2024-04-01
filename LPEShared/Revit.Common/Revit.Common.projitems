@@ -36,6 +36,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Apps\TagJoints\TagJointsEC.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Apps\TagJoints\TagJointsEEH.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Apps\TagJoints\TagJoints.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Classes\GlobalVariables.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Classes\GroupOfJoints.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ExternalApplication\ExternalApplication.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ValidationRules\StringValidationRule.cs" />

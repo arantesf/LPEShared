@@ -83,7 +83,7 @@ namespace Revit.Common
 
         private void AddAmbiente_Button_Click(object sender, RoutedEventArgs e)
         {
-            AmbienteEditMVVM ambienteEditMvvm = new AmbienteEditMVVM(new FullAmbienteViewModel((Element)null, (Element)null), true);
+            AmbienteEditMVVM ambienteEditMvvm = new AmbienteEditMVVM(new FullAmbienteViewModel(), true);
             ambienteEditMvvm.Topmost = true;
             ambienteEditMvvm.ShowDialog();
         }
@@ -174,6 +174,7 @@ namespace Revit.Common
             if (this.Ambiente_DataGrid.SelectedIndex <= -1)
                 return;
             FullAmbienteViewModel fullAmbienteViewModels = (FullAmbienteViewModel)this.SelectedFullAmbienteViewModel.Clone();
+            fullAmbienteViewModels.BoolReforcoDeTela = true;
             fullAmbienteViewModels.TipoDePiso += " - REFORÇO";
             AmbienteEditMVVM ambienteEditMvvm = new AmbienteEditMVVM(fullAmbienteViewModels, true);
             ambienteEditMvvm.Topmost = true;

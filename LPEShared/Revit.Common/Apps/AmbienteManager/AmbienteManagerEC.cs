@@ -15,6 +15,7 @@ using Autodesk.Revit.DB.Architecture;
 using Microsoft.SqlServer.Server;
 using System.Xml.Linq;
 using System.Diagnostics.Eventing.Reader;
+using Revit.Common.Classes;
 
 namespace Revit.Common
 {
@@ -31,9 +32,9 @@ namespace Revit.Common
             Application app = uiapp.Application;
             Document doc = uidoc.Document;
 
+            GlobalVariables.materialsByClass = AmbienteManagerUtils.GetMaterialsByClass(doc);
             List<FullAmbienteViewModel> fullAmbienteViewModels = AmbienteManagerUtils.GetAmbientes(doc);
-            Dictionary<MaterialClass, List<string>> materialsByClass = AmbienteManagerUtils.GetMaterialsByClass(doc);
-            Dictionary<FloorMatrizClass, List<FloorMatriz>> floorMatrizes = AmbienteManagerUtils.GetFloorMatrizes(doc, materialsByClass);
+            Dictionary<FloorMatrizClass, List<FloorMatriz>> floorMatrizes = AmbienteManagerUtils.GetFloorMatrizes(doc, GlobalVariables.materialsByClass);
             List<string> allMaterialNames = new FilteredElementCollector(doc)
                 .WhereElementIsNotElementType()
                 .OfCategory(BuiltInCategory.OST_Materials)
@@ -41,7 +42,7 @@ namespace Revit.Common
                 .OrderBy(x => x)
                 .ToList();
             ExternalApplication.LPEApp.uiApp = uiapp;
-            ExternalApplication.LPEApp.ShowAmbienteManagerUI(floorMatrizes, fullAmbienteViewModels, allMaterialNames, materialsByClass);
+            ExternalApplication.LPEApp.ShowAmbienteManagerUI(floorMatrizes, fullAmbienteViewModels, allMaterialNames, GlobalVariables.materialsByClass);
 
             return Result.Succeeded;
         }

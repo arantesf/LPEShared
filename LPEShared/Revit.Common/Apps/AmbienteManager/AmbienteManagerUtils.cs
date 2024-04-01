@@ -14,6 +14,100 @@ namespace Revit.Common
 {
     public static class AmbienteManagerUtils
     {
+        public static IList<CompoundStructureLayer> GetCompoundStructureLayer(Document doc, FullAmbienteViewModel ambienteViewModel, FloorType floorType)
+        {
+            IList<CompoundStructureLayer> orderedExistingLayers = floorType
+                .GetCompoundStructure()
+                .GetLayers()
+                .OrderBy(x => x.LayerId)
+                .ToList();
+
+            IList<CompoundStructureLayer> layers = new List<CompoundStructureLayer>();
+            for (int i = 0; i < ambienteViewModel.FloorMatriz.Layers.Count; i++)
+            {
+                var tableLayer = ambienteViewModel.FloorMatriz.Layers.ElementAt(i);
+                if (!tableLayer.IsEnabled) continue;
+                bool isMatch = false;
+                foreach (CompoundStructureLayer existingLayer in orderedExistingLayers)
+                {
+                    double existingWidthInCm = Math.Round(UnitUtils.ConvertFromInternalUnits(existingLayer.Width, UnitTypeId.Centimeters), 1);
+                    if (existingWidthInCm == tableLayer.Width && doc.GetElement(existingLayer.MaterialId).Name == tableLayer.SelectedMaterial)
+                    {
+                        isMatch = true;
+                        layers.Add(existingLayer);
+                        break;
+                    }
+                }
+                if (!isMatch)
+                {
+                    CompoundStructureLayer newLayer = new CompoundStructureLayer();
+                    newLayer.MaterialId = new FilteredElementCollector(doc)
+                        .OfClass(typeof(Material))
+                        .First(m => m.Name == tableLayer.SelectedMaterial)
+                        .Id;
+                    newLayer.Width = UnitUtils.ConvertToInternalUnits(tableLayer.Width, UnitTypeId.Centimeters);
+                    switch (tableLayer.SelectedCamadaTipo)
+                    {
+                        case "Bloco Intertravado":
+                            newLayer.Function = MaterialFunctionAssignment.Structure;
+                            break;
+                        case "Concreto":
+                            newLayer.Function = MaterialFunctionAssignment.Structure;
+                            break;
+                        case "Concreto Asfáltico":
+                            newLayer.Function = MaterialFunctionAssignment.Structure;
+                            break;
+                        case "Filme Plástico":
+                            newLayer.Function = MaterialFunctionAssignment.Membrane;
+                            break;
+                        case "Imprimação Asfáltica":
+                            newLayer.Function = MaterialFunctionAssignment.Membrane;
+                            break;
+                        case "Pintura de ligação":
+                            newLayer.Function = MaterialFunctionAssignment.Membrane;
+                            break;
+                        default:
+                            newLayer.Function = MaterialFunctionAssignment.Substrate;
+                            break;
+                    }
+                    layers.Add(newLayer);
+                }
+
+            }
+            return layers;
+        }
+        public static void SetFloorType(Document doc, FullAmbienteViewModel ambienteViewModel, bool duplicate)
+        {
+            FloorType floorType = null;
+            if (ambienteViewModel.FloorMatriz.FloorName == null)
+            {
+                floorType = new FilteredElementCollector(doc)
+                .OfClass(typeof(FloorType))
+                .Cast<FloorType>()
+                .First(a => a.Name == ambienteViewModel.SelectedfloorMatriz.FloorName);
+                floorType = floorType.Duplicate(ambienteViewModel.TipoDePiso) as FloorType;
+            }
+            else
+            {
+                floorType = new FilteredElementCollector(doc)
+                .OfClass(typeof(FloorType))
+                .Cast<FloorType>()
+                .First(a => a.Name == ambienteViewModel.FloorMatriz.FloorName);
+            }
+            if (floorType.Name != ambienteViewModel.TipoDePiso)
+            {
+                floorType.Name = ambienteViewModel.TipoDePiso;
+            }
+            IList<CompoundStructureLayer> layers = GetCompoundStructureLayer(doc, ambienteViewModel, floorType);
+            CompoundStructure compoundStructure1 = CompoundStructure.CreateSimpleCompoundStructure(layers);
+            compoundStructure1.StructuralMaterialIndex = layers.ToList().FindIndex(x => x.Function == MaterialFunctionAssignment.Structure);
+            int coreLayerIndex = ambienteViewModel.FloorMatriz.Layers.ToList().FindIndex(x => !x.IsEnabled);
+            int numberOfInteriorLayers = ambienteViewModel.FloorMatriz.Layers.ToList().Skip(coreLayerIndex).Count(x => x.IsEnabled);
+            compoundStructure1.SetNumberOfShellLayers(ShellLayerType.Interior, numberOfInteriorLayers);
+            compoundStructure1.EndCap = EndCapCondition.NoEndCap;
+            floorType.SetCompoundStructure(compoundStructure1);
+        }
+
         public static Dictionary<string, List<Element>> GetPisoTypes(Document doc)
         {
             List<Element> list = new FilteredElementCollector(doc)
@@ -288,7 +382,7 @@ namespace Revit.Common
                 Element itensDeDetalheElement = (Element)null;
                 if (dictionary2.ContainsKey(tipoDePisoElement.Name))
                     itensDeDetalheElement = dictionary2.First(a => a.Key == tipoDePisoElement.LookupParameter("Key Name")?.AsString()).Value;
-                FullAmbienteViewModel ambienteViewModel = new FullAmbienteViewModel(tipoDePisoElement, itensDeDetalheElement);
+                FullAmbienteViewModel ambienteViewModel = new FullAmbienteViewModel(tipoDePisoElement, itensDeDetalheElement, doc);
                 ambientes.Add(ambienteViewModel);
             }
             return ambientes;

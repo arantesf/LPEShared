@@ -179,7 +179,7 @@ namespace Revit.Common
                 // tab already exists
             }
             RibbonPanel pisosEJuntasPanel = application.CreateRibbonPanel(tabName, "Pisos e Juntas");
-            //RibbonPanel ambientesPanel = application.CreateRibbonPanel(tabName, "Ambientes");
+            RibbonPanel ambientesPanel = application.CreateRibbonPanel(tabName, "Ambientes");
             RibbonPanel sobrePanel = application.CreateRibbonPanel(tabName, "Sobre");
 
             //////////// SPLIT FLOORS ////////////
@@ -247,12 +247,12 @@ namespace Revit.Common
 
             //////////// AMBIENTE MANAGER ////////////
 
-            //ambientesPanel.AddItem(new PushButtonData("AmbienteManager", "Gerenciador\nde Ambientes", executingAssemblyPath, typeof(AmbienteManagerEC).FullName)
-            //{
-            //    ToolTip = "O gerenciador de ambientes facilita a gestão dos keyschedules, centralizando as informações.\nEle permite criar, editar, duplicar, importar e deletar ambientes.",
-            //    LongDescription = "",
-            //    LargeImage = ResourceImage.GetIcon("AmbienteManagerLPE.png")
-            //});
+            ambientesPanel.AddItem(new PushButtonData("AmbienteManager", "Gerenciador\nde Ambientes", executingAssemblyPath, typeof(AmbienteManagerEC).FullName)
+            {
+                ToolTip = "O gerenciador de ambientes facilita a gestão dos keyschedules, centralizando as informações.\nEle permite criar, editar, duplicar, importar e deletar ambientes.",
+                LongDescription = "",
+                LargeImage = ResourceImage.GetIcon("AmbienteManagerLPE.png")
+            });
 
             //////////// ABOUT ////////////
 

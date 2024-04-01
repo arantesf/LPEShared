@@ -98,6 +98,36 @@ namespace Revit.Common
                         SelectAmbienteMVVM.MainView.ProgressBar.Maximum = joints.Count;
                         int count = 0;
 
+                        List<Element> ambienteFloors = new FilteredElementCollector(doc)
+                            .WhereElementIsNotElementType()
+                            .OfCategory(BuiltInCategory.OST_Floors)
+                            .Where(f => f.LookupParameter("Ambiente").AsString() == ambienteJoints.Key)
+                            .ToList();
+                        List<Solid> floorSolids = new List<Solid>();
+                        foreach (var floor in ambienteFloors)
+                        {
+                            Solid floorSolid = Utils.GetElementSolid(floor);
+                            if (!floorSolids.Any())
+                                floorSolids.Add(floorSolid);
+                            else
+                            {
+                                try
+                                {
+                                    floorSolids[0] = BooleanOperationsUtils.ExecuteBooleanOperation(floorSolids[0], floorSolid, BooleanOperationsType.Union);
+                                }
+                                catch (Exception)
+                                {
+                                    floorSolids.Add(floorSolid);
+                                }
+                            }
+                        }
+
+                        List<Face> floorSolidsTopFaces = new List<Face>();
+                        foreach (var solid in floorSolids)
+                        {
+                            floorSolidsTopFaces.AddRange(solid.Faces.Cast<Face>().Where(f => f.ComputeNormal(new UV(0, 0)).Z > 0.5));
+                        }
+
                         for (int i = 0; i < joints.Count; i++)
                         {
                             try
@@ -119,6 +149,42 @@ namespace Revit.Common
 #endif
                                 dividedJointsAndOriginal.Add(jointId, new List<Element>());
 
+
+
+
+
+                                //XYZ transformDirection = XYZ.BasisZ.CrossProduct(initialCurve.ComputeDerivatives(0.5, true).BasisX).Normalize();
+                                //Transform transform = Transform.CreateTranslation(transformDirection * 1);
+                                //Transform transform1000 = Transform.CreateTranslation(-XYZ.BasisZ * 1000);
+                                //Curve transformedCurve = initialCurve.CreateTransformed(transform).CreateReversed();
+                                //CurveLoop curveLoop = new CurveLoop();
+                                //curveLoop.Append(initialCurve.CreateTransformed(transform1000));
+                                //curveLoop.Append(Line.CreateBound(initialCurve.GetEndPoint(1), transformedCurve.GetEndPoint(0)).CreateTransformed(transform1000));
+                                //curveLoop.Append(transformedCurve.CreateTransformed(transform1000));
+                                //curveLoop.Append(Line.CreateBound(transformedCurve.GetEndPoint(1), initialCurve.GetEndPoint(0)).CreateTransformed(transform1000));
+
+                                //Solid solid = GeometryCreationUtilities.CreateExtrusionGeometry(new List<CurveLoop> { curveLoop }, XYZ.BasisZ, 2000);
+                                //Face faceToIntersect = solid.Faces
+                                //    .Cast<Face>()
+                                //    .FirstOrDefault(f => f.ComputeNormal(f.Project(initialCurve.Evaluate(0.5, true)).UVPoint).IsAlmostEqualTo(-transformDirection));
+
+                                //List<Curve> splitJointCurves = new List<Curve>();
+                                //foreach (var floorSolidTopFace in floorSolidsTopFaces)
+                                //{
+                                //    if (floorSolidTopFace.Intersect(faceToIntersect, out Curve intersectCurve) == FaceIntersectionFaceResult.Intersecting)
+                                //    {
+                                //        splitJointCurves.Add(intersectCurve);
+                                //        doc.Create.NewModelCurve(intersectCurve, SketchPlane.Create(doc, Plane.CreateByNormalAndOrigin(transformDirection, initialCurve.Evaluate(0.5, true))));
+                                //    }
+                                //}
+
+                                //DirectShape directShape = DirectShape.CreateElement(doc, Category.GetCategory(doc, BuiltInCategory.OST_Walls).Id);
+                                //directShape.AppendShape(new List<GeometryObject> { solid });
+
+
+
+
+
                                 if (splitCurves.Count > 1)
                                 {
                                     //tx.Start();
@@ -128,6 +194,36 @@ namespace Revit.Common
                                     foreach (var splitCurve in splitCurves)
                                     {
                                         Level level = doc.GetElement((joint as FamilyInstance).get_Parameter(BuiltInParameter.INSTANCE_REFERENCE_LEVEL_PARAM).AsElementId()) as Level;
+
+                                        //XYZ transformDirection = XYZ.BasisZ.CrossProduct(splitCurve.ComputeDerivatives(0.5, true).BasisX).Normalize();
+                                        //Transform transform = Transform.CreateTranslation(transformDirection * 1);
+                                        //Transform transform1000 = Transform.CreateTranslation(-XYZ.BasisZ * 1000);
+                                        //Curve transformedCurve = splitCurve.CreateTransformed(transform).CreateReversed();
+                                        //CurveLoop curveLoop = new CurveLoop();
+                                        //curveLoop.Append(splitCurve.CreateTransformed(transform1000));
+                                        //curveLoop.Append(Line.CreateBound(splitCurve.GetEndPoint(1), transformedCurve.GetEndPoint(0)).CreateTransformed(transform1000));
+                                        //curveLoop.Append(transformedCurve.CreateTransformed(transform1000));
+                                        //curveLoop.Append(Line.CreateBound(transformedCurve.GetEndPoint(1), splitCurve.GetEndPoint(0)).CreateTransformed(transform1000));
+
+                                        //Solid solid = GeometryCreationUtilities.CreateExtrusionGeometry(new List<CurveLoop> { curveLoop }, XYZ.BasisZ, 2000);
+                                        //Face faceToIntersect = solid.Faces
+                                        //    .Cast<Face>()
+                                        //    .FirstOrDefault(f => f.ComputeNormal(f.Project(splitCurve.Evaluate(0.5, true)).UVPoint).IsAlmostEqualTo(-transformDirection));
+
+                                        //List<Curve> splitJointCurves = new List<Curve>();
+                                        //foreach (var floorSolidTopFace in floorSolidsTopFaces)
+                                        //{
+                                        //    if (floorSolidTopFace.Intersect(faceToIntersect, out Curve intersectCurve) == FaceIntersectionFaceResult.Intersecting)
+                                        //    {
+                                        //        splitJointCurves.Add(intersectCurve);
+                                        //        //doc.Create.NewModelCurve(intersectCurve, SketchPlane.Create(doc, Plane.CreateByNormalAndOrigin(transformDirection, initialCurve.Evaluate(0.5, true))));
+                                        //    }
+                                        //}
+
+                                        ////doc.Create.NewModelCurve(splitJointCurve, SketchPlane.Create(doc, Plane.CreateByNormalAndOrigin(transformDirection, splitCurve.Evaluate(0.5, true))));
+                                        //DirectShape directShape = DirectShape.CreateElement(doc, Category.GetCategory(doc, BuiltInCategory.OST_Walls).Id);
+                                        //directShape.AppendShape(new List<GeometryObject> { solid });
+
                                         FamilyInstance newJoint = doc.Create.NewFamilyInstance(splitCurve, (joint as FamilyInstance).Symbol, level, Autodesk.Revit.DB.Structure.StructuralType.Beam);
                                         if (!newJoint.get_Parameter(BuiltInParameter.INSTANCE_REFERENCE_LEVEL_PARAM).IsReadOnly)
                                         {
@@ -138,17 +234,37 @@ namespace Revit.Common
                                         //tx.Commit();
 
                                         dividedJointsAndOriginal[jointId].Add(newJoint);
-                                        if (Math.Abs((initialCurve.GetEndPoint(1) - initialCurve.GetEndPoint(0)).AngleTo(XYZ.BasisZ) - (Math.PI / 2)) > 0.01)
+
+                                        Curve curveEp0 = Line.CreateBound(splitCurve.GetEndPoint(0) - XYZ.BasisZ * 5000, splitCurve.GetEndPoint(0) + XYZ.BasisZ * 10000);
+                                        Curve curveEp1 = Line.CreateBound(splitCurve.GetEndPoint(1) - XYZ.BasisZ * 5000, splitCurve.GetEndPoint(1) + XYZ.BasisZ * 10000);
+                                        SolidCurveIntersectionOptions opt = new SolidCurveIntersectionOptions();
+                                        foreach (var floorSolid in floorSolids)
                                         {
-                                            Curve curveEp0 = Line.CreateBound(splitCurve.GetEndPoint(0) - XYZ.BasisZ * 5000, splitCurve.GetEndPoint(0) + XYZ.BasisZ * 10000);
-                                            Curve curveEp1 = Line.CreateBound(splitCurve.GetEndPoint(1) - XYZ.BasisZ * 5000, splitCurve.GetEndPoint(1) + XYZ.BasisZ * 10000);
-                                            curveEp0.Intersect(initialCurve, out IntersectionResultArray resultArray0);
-                                            curveEp1.Intersect(initialCurve, out IntersectionResultArray resultArray1);
-                                            double ep0Offset = resultArray0.get_Item(0).XYZPoint.Z - splitCurve.GetEndPoint(0).Z;
-                                            double ep1Offset = resultArray1.get_Item(0).XYZPoint.Z - splitCurve.GetEndPoint(1).Z;
-                                            newJoint.get_Parameter(BuiltInParameter.STRUCTURAL_BEAM_END0_ELEVATION).Set(ep0Offset);
-                                            newJoint.get_Parameter(BuiltInParameter.STRUCTURAL_BEAM_END1_ELEVATION).Set(ep1Offset);
+                                            SolidCurveIntersection intersection0 = floorSolid.IntersectWithCurve(curveEp0, new SolidCurveIntersectionOptions());
+                                            if (intersection0.Any())
+                                            {
+                                                double ep0Offset = intersection0.First().GetEndPoint(1).Z - splitCurve.GetEndPoint(0).Z;
+                                                newJoint.get_Parameter(BuiltInParameter.STRUCTURAL_BEAM_END0_ELEVATION).Set(ep0Offset);
+                                            }
+                                            SolidCurveIntersection intersection1 = floorSolid.IntersectWithCurve(curveEp1, new SolidCurveIntersectionOptions());
+                                            if (intersection1.Any())
+                                            {
+                                                double ep1Offset = intersection1.First().GetEndPoint(1).Z - splitCurve.GetEndPoint(1).Z;
+                                                newJoint.get_Parameter(BuiltInParameter.STRUCTURAL_BEAM_END1_ELEVATION).Set(ep1Offset);
+                                            }
                                         }
+
+                                        //if (Math.Abs((initialCurve.GetEndPoint(1) - initialCurve.GetEndPoint(0)).AngleTo(XYZ.BasisZ) - (Math.PI / 2)) > 0.01)
+                                        //{
+                                        //    Curve curveEp0 = Line.CreateBound(splitCurve.GetEndPoint(0) - XYZ.BasisZ * 5000, splitCurve.GetEndPoint(0) + XYZ.BasisZ * 10000);
+                                        //    Curve curveEp1 = Line.CreateBound(splitCurve.GetEndPoint(1) - XYZ.BasisZ * 5000, splitCurve.GetEndPoint(1) + XYZ.BasisZ * 10000);
+                                        //    curveEp0.Intersect(initialCurve, out IntersectionResultArray resultArray0);
+                                        //    curveEp1.Intersect(initialCurve, out IntersectionResultArray resultArray1);
+                                        //    double ep0Offset = resultArray0.get_Item(0).XYZPoint.Z - splitCurve.GetEndPoint(0).Z;
+                                        //    double ep1Offset = resultArray1.get_Item(0).XYZPoint.Z - splitCurve.GetEndPoint(1).Z;
+                                        //    newJoint.get_Parameter(BuiltInParameter.STRUCTURAL_BEAM_END0_ELEVATION).Set(ep0Offset);
+                                        //    newJoint.get_Parameter(BuiltInParameter.STRUCTURAL_BEAM_END1_ELEVATION).Set(ep1Offset);
+                                        //}
                                     }
                                     doc.Delete(joint.Id);
                                 }
