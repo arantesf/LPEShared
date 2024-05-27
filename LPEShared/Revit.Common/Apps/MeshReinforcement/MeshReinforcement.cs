@@ -16,6 +16,7 @@ using Microsoft.SqlServer.Server;
 using System.Xml.Linq;
 using System.Diagnostics.Eventing.Reader;
 using System.Threading.Tasks;
+using Application = Autodesk.Revit.ApplicationServices.Application;
 
 namespace Revit.Common
 {
@@ -98,7 +99,7 @@ namespace Revit.Common
             }
             if (!OK || !OKfamily)
             {
-                TaskDialog.Show("ATENÇÃO!", errorFinal);
+                Autodesk.Revit.UI.TaskDialog.Show("ATENÇÃO!", errorFinal);
                 return Result.Cancelled;
             }
             DimensionType cotaLPEType = cotaLPETypeList.First();
@@ -164,7 +165,7 @@ namespace Revit.Common
 
             TransactionGroup tg = new TransactionGroup(doc, "Reforçar com Tela");
             tg.Start();
-            View initialView = uidoc.ActiveView;
+            Autodesk.Revit.DB.View initialView = uidoc.ActiveView;
             Options options = new Options
             {
                 View = initialView,
@@ -195,7 +196,7 @@ namespace Revit.Common
 
                     List<Element> existingView = new FilteredElementCollector(doc)
                         .WhereElementIsNotElementType()
-                        .OfClass(typeof(View))
+                        .OfClass(typeof(Autodesk.Revit.DB.View))
                         .Where(a => a.Name == ambiente + " - FATOR DE FORMA")
                         .ToList();
 
@@ -207,7 +208,7 @@ namespace Revit.Common
                     }
 
                     tx.Start();
-                    View view = doc.GetElement(initialView.Duplicate(ViewDuplicateOption.Duplicate)) as View;
+                    Autodesk.Revit.DB.View view = doc.GetElement(initialView.Duplicate(ViewDuplicateOption.Duplicate)) as Autodesk.Revit.DB.View;
                     view.Name = ambiente + " - FATOR DE FORMA";
                     tx.Commit();
                     uidoc.ActiveView = view;

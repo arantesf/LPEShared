@@ -5,6 +5,7 @@
 // Assembly location: C:\ProgramData\Autodesk\Revit\Addins\2024\LPE\LPE.dll
 
 using Autodesk.Revit.DB;
+using Revit.Common.Classes;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -14,6 +15,123 @@ namespace Revit.Common
 {
     public static class AmbienteManagerUtils
     {
+        public static List<TagViewModel> GetTags(Document doc)
+        {
+            List<TagViewModel> tagViewModels = new List<TagViewModel>();
+            List<ViewSchedule> schedules = new FilteredElementCollector(doc)
+                .WhereElementIsNotElementType()
+                .OfCategory(BuiltInCategory.OST_Schedules).Cast<ViewSchedule>()
+                .Where(view => view.LookupParameter("LPE_AMBIENTE").AsString() == "TAG TEXTOS")
+                .ToList();
+            foreach (var schedule in schedules)
+            {
+                ScheduleDefinition scheduleDefinition = schedule.Definition;
+                var keyName = schedule.KeyScheduleParameterName;
+                var tagName = scheduleDefinition.GetField(scheduleDefinition.GetFieldId(1)).GetName();
+                List<Element> linhas = new FilteredElementCollector(doc, schedule.Id)
+                    .ToList();
+                foreach (var linha in linhas)
+                {
+                    Parameter parameter = linha.LookupParameter(tagName);
+                    if (parameter.HasValue)
+                    {
+                        tagViewModels.Add(new TagViewModel(linha.Name, parameter.AsString()));
+                    }
+                }
+
+            }
+            return tagViewModels;
+        }
+
+        public static List<FibraViewModel> GetFibras(Document doc)
+        {
+            List<FibraViewModel> fibraViewModels = new List<FibraViewModel>();
+            ViewSchedule schedule = new FilteredElementCollector(doc)
+                .WhereElementIsNotElementType()
+                .OfCategory(BuiltInCategory.OST_Schedules).Cast<ViewSchedule>()
+                .Where(view => view.Name == "TIPO DE FIBRA")
+                .FirstOrDefault();
+            List<Element> linhas = new FilteredElementCollector(doc, schedule.Id)
+                .ToList();
+            foreach (var linha in linhas)
+            {
+                Parameter parameter = linha.LookupParameter("TIPO DE FIBRA");
+                if (parameter.HasValue)
+                {
+                    fibraViewModels.Add(
+                        new FibraViewModel(linha.LookupParameter("TIPO DE FIBRA").AsString(),
+                                           linha.LookupParameter("Dosagem").AsDouble(),
+                                           linha.LookupParameter("Fr1").AsDouble().ToString(),
+                                           linha.LookupParameter("Fr4").AsDouble().ToString())
+                        );
+                }
+            }
+            return fibraViewModels;
+        }
+
+        public static List<int> GetTelas(Document doc)
+        {
+            List<int> telas = new List<int>();
+            ViewSchedule schedule = new FilteredElementCollector(doc)
+                .WhereElementIsNotElementType()
+                .OfCategory(BuiltInCategory.OST_Schedules).Cast<ViewSchedule>()
+                .Where(view => view.Name == "TABELA DE TELAS")
+                .FirstOrDefault();
+            List<Element> linhas = new FilteredElementCollector(doc, schedule.Id)
+                .ToList();
+            foreach (var linha in linhas)
+            {
+                Parameter parameter = linha.LookupParameter("TIPO DE TELA (QXXX)");
+                if (parameter.HasValue)
+                {
+                    telas.Add(parameter.AsInteger());
+                }
+            }
+            return telas;
+        }
+
+        public static List<double> GetEmendas(Document doc)
+        {
+            List<double> emendas = new List<double>();
+            ViewSchedule schedule = new FilteredElementCollector(doc)
+                .WhereElementIsNotElementType()
+                .OfCategory(BuiltInCategory.OST_Schedules).Cast<ViewSchedule>()
+                .Where(view => view.Name == "EMENDA DE TELA")
+                .FirstOrDefault();
+            List<Element> linhas = new FilteredElementCollector(doc, schedule.Id)
+                .ToList();
+            foreach (var linha in linhas)
+            {
+                Parameter parameter = linha.LookupParameter("Emenda");
+                if (parameter.HasValue)
+                {
+                    emendas.Add(parameter.AsDouble());
+                }
+            }
+            return emendas;
+        }
+
+        public static List<string> GetTratamentoSuperficial(Document doc)
+        {
+            List<string> tratamentos = new List<string>();
+            ViewSchedule schedule = new FilteredElementCollector(doc)
+                .WhereElementIsNotElementType()
+                .OfCategory(BuiltInCategory.OST_Schedules).Cast<ViewSchedule>()
+                .Where(view => view.Name == "TRATAMENTO SUPERFICIAL")
+                .FirstOrDefault();
+            List<Element> linhas = new FilteredElementCollector(doc, schedule.Id)
+                .ToList();
+            foreach (var linha in linhas)
+            {
+                Parameter parameter = linha.LookupParameter("TIPO DE TRATAMENTO SUPERFICIAL");
+                if (parameter.HasValue)
+                {
+                    tratamentos.Add(parameter.AsString());
+                }
+            }
+            return tratamentos;
+        }
+
         public static IList<CompoundStructureLayer> GetCompoundStructureLayer(Document doc, FullAmbienteViewModel ambienteViewModel, FloorType floorType)
         {
             IList<CompoundStructureLayer> orderedExistingLayers = floorType
@@ -78,26 +196,57 @@ namespace Revit.Common
         }
         public static void SetFloorType(Document doc, FullAmbienteViewModel ambienteViewModel, bool duplicate)
         {
+            if (ambienteViewModel.BoolReforcoDeTela)
+            {
+                return;
+            }
             FloorType floorType = null;
-            if (ambienteViewModel.FloorMatriz.FloorName == null)
+            if (ambienteViewModel.PisoId.IntegerValue != -1)
             {
                 floorType = new FilteredElementCollector(doc)
-                .OfClass(typeof(FloorType))
-                .Cast<FloorType>()
-                .First(a => a.Name == ambienteViewModel.SelectedfloorMatriz.FloorName);
-                floorType = floorType.Duplicate(ambienteViewModel.TipoDePiso) as FloorType;
+                    .OfClass(typeof(FloorType))
+                    .Cast<FloorType>()
+                    .FirstOrDefault(a => a.Id == ambienteViewModel.PisoId);
             }
             else
             {
-                floorType = new FilteredElementCollector(doc)
-                .OfClass(typeof(FloorType))
-                .Cast<FloorType>()
-                .First(a => a.Name == ambienteViewModel.FloorMatriz.FloorName);
+                var existingFloorType = new FilteredElementCollector(doc)
+                    .OfClass(typeof(FloorType))
+                    .Cast<FloorType>()
+                    .FirstOrDefault(a => a.Name == ambienteViewModel.TipoDePiso);
+                if (existingFloorType != null)
+                {
+                    floorType = existingFloorType;
+                }
+                else
+                {
+                    if (ambienteViewModel.StoredFloorMatriz?.FloorName != null)
+                    {
+                        floorType = new FilteredElementCollector(doc)
+                            .OfClass(typeof(FloorType))
+                            .Cast<FloorType>()
+                            .First(a => a.Name == ambienteViewModel.StoredFloorMatriz.FloorName);
+                        floorType = floorType.Duplicate(ambienteViewModel.TipoDePiso) as FloorType;
+                    }
+                    else
+                    {
+                        floorType = new FilteredElementCollector(doc)
+                            .OfClass(typeof(FloorType))
+                            .Cast<FloorType>()
+                            .First(a => a.Name == ambienteViewModel.FloorMatriz.FloorName);
+                        if (!ambienteViewModel.BoolReforcoDeTela)
+                        {
+                            floorType = floorType.Duplicate(ambienteViewModel.TipoDePiso) as FloorType;
+                        }
+                    }
+                }
             }
-            if (floorType.Name != ambienteViewModel.TipoDePiso)
+            if (floorType.Name != ambienteViewModel.TipoDePiso && !ambienteViewModel.TipoDePiso.Contains("REF"))
             {
                 floorType.Name = ambienteViewModel.TipoDePiso;
             }
+            ambienteViewModel.FloorMatriz.FloorName = floorType.Name;
+
             IList<CompoundStructureLayer> layers = GetCompoundStructureLayer(doc, ambienteViewModel, floorType);
             CompoundStructure compoundStructure1 = CompoundStructure.CreateSimpleCompoundStructure(layers);
             compoundStructure1.StructuralMaterialIndex = layers.ToList().FindIndex(x => x.Function == MaterialFunctionAssignment.Structure);
@@ -327,32 +476,32 @@ namespace Revit.Common
 
         public static void DuplicateViewSchedules(Document doc, string newAmbienteName)
         {
-            ElementId elementId = new ElementId(505819);
-            List<ViewSchedule> list = new FilteredElementCollector(doc).WhereElementIsNotElementType().OfCategory(BuiltInCategory.OST_Schedules).Cast<ViewSchedule>().Where(view => view.LookupParameter("LPE_AMBIENTE").AsString() == "AMBIENTE XX").ToList();
-            Transaction transaction = new Transaction(doc, "Duplicar tabelas");
-            transaction.Start();
-            foreach (ViewSchedule viewSchedule1 in list)
-            {
-                ViewSchedule viewSchedule = viewSchedule1;
-                if (!new FilteredElementCollector(doc).WhereElementIsNotElementType().OfCategory(BuiltInCategory.OST_Schedules).Cast<ViewSchedule>().Where(view => view.Name == viewSchedule.Name + " - " + newAmbienteName).ToList().Any())
-                {
-                    ViewSchedule element = doc.GetElement(((View)viewSchedule).Duplicate((ViewDuplicateOption)0)) as ViewSchedule;
-                    element.Name = viewSchedule.Name + " - " + newAmbienteName;
-                    element.LookupParameter("LPE_AMBIENTE").Set(newAmbienteName);
-                    ScheduleFieldId scheduleFieldId = null;
-                    for (int index = 0; index < viewSchedule.Definition.GetFieldCount(); ++index)
-                    {
-                        if (viewSchedule.Definition.GetField(index).GetName() == "Ambiente")
-                        {
-                            scheduleFieldId = viewSchedule.Definition.GetFieldId(index);
-                            break;
-                        }
-                    }
-                    ScheduleFilter scheduleFilter = new ScheduleFilter(scheduleFieldId, (ScheduleFilterType)2, newAmbienteName);
-                    element.Definition.AddFilter(scheduleFilter);
-                }
-            }
-            transaction.Commit();
+            //ElementId elementId = new ElementId(505819);
+            //List<ViewSchedule> list = new FilteredElementCollector(doc).WhereElementIsNotElementType().OfCategory(BuiltInCategory.OST_Schedules).Cast<ViewSchedule>().Where(view => view.LookupParameter("LPE_AMBIENTE").AsString() == "AMBIENTE XX").ToList();
+            //Transaction transaction = new Transaction(doc, "Duplicar tabelas");
+            //transaction.Start();
+            //foreach (ViewSchedule viewSchedule1 in list)
+            //{
+            //    ViewSchedule viewSchedule = viewSchedule1;
+            //    if (!new FilteredElementCollector(doc).WhereElementIsNotElementType().OfCategory(BuiltInCategory.OST_Schedules).Cast<ViewSchedule>().Where(view => view.Name == viewSchedule.Name + " - " + newAmbienteName).ToList().Any())
+            //    {
+            //        ViewSchedule element = doc.GetElement(((Autodesk.Revit.DB.View)viewSchedule).Duplicate((ViewDuplicateOption.))) as ViewSchedule;
+            //        element.Name = viewSchedule.Name + " - " + newAmbienteName;
+            //        element.LookupParameter("LPE_AMBIENTE").Set(newAmbienteName);
+            //        ScheduleFieldId scheduleFieldId = null;
+            //        for (int index = 0; index < viewSchedule.Definition.GetFieldCount(); ++index)
+            //        {
+            //            if (viewSchedule.Definition.GetField(index).GetName() == "Ambiente")
+            //            {
+            //                scheduleFieldId = viewSchedule.Definition.GetFieldId(index);
+            //                break;
+            //            }
+            //        }
+            //        ScheduleFilter scheduleFilter = new ScheduleFilter(scheduleFieldId, (ScheduleFilterType)2, newAmbienteName);
+            //        element.Definition.AddFilter(scheduleFilter);
+            //    }
+            //}
+            //transaction.Commit();
         }
 
         public static void DeleteViewSchedules(Document doc, string ambienteName)
@@ -367,25 +516,70 @@ namespace Revit.Common
             transaction.Commit();
         }
 
-        public static List<FullAmbienteViewModel> GetAmbientes(Document doc)
+        public static bool GetAmbientes(Document doc, out List<FullAmbienteViewModel> fullAmbienteViewModels)
         {
-            ViewSchedule viewSchedule1 = new FilteredElementCollector(doc).WhereElementIsNotElementType().OfCategory(BuiltInCategory.OST_Schedules).Cast<ViewSchedule>().Where(view => view.Name == "LPE_TIPO DE PISO").FirstOrDefault();
-            Dictionary<string, Element> dictionary1 = new FilteredElementCollector(doc, viewSchedule1.Id).ToDictionary(e => e.Name);
-            ViewSchedule viewSchedule2 = new FilteredElementCollector(doc).WhereElementIsNotElementType().OfCategory(BuiltInCategory.OST_Schedules).Cast<ViewSchedule>().Where(view => view.Name == "LPE_TIPO DE JUNTA").FirstOrDefault();
-            new FilteredElementCollector(doc, viewSchedule2.Id).ToDictionary(e => e.Name);
-            ViewSchedule viewSchedule3 = new FilteredElementCollector(doc).WhereElementIsNotElementType().OfCategory(BuiltInCategory.OST_Schedules).Cast<ViewSchedule>().Where(view => view.Name == "LPE_ITENS DE DETALHE SEÇÕES").FirstOrDefault();
-            Dictionary<string, Element> dictionary2 = new FilteredElementCollector(doc, viewSchedule3.Id).ToDictionary(e => e.Name);
-            List<FullAmbienteViewModel> ambientes = new List<FullAmbienteViewModel>();
-            foreach (KeyValuePair<string, Element> keyValuePair in dictionary1)
+            ViewSchedule viewSchedule1 = null;
+            List<Element> tipoDePisoRows = null;
+            ViewSchedule viewSchedule2 = null;
+            Dictionary<string, Element> itemDeDetalheDict = null;
+            ViewSchedule viewSchedule3 = null;
+            Dictionary<string, Element> tipoDeJuntaDict = null;
+            Dictionary<string, Element> dictionary4 = null;
+            fullAmbienteViewModels = new List<FullAmbienteViewModel>();
+            try
             {
-                Element tipoDePisoElement = keyValuePair.Value;
-                Element itensDeDetalheElement = (Element)null;
-                if (dictionary2.ContainsKey(tipoDePisoElement.Name))
-                    itensDeDetalheElement = dictionary2.First(a => a.Key == tipoDePisoElement.LookupParameter("Key Name")?.AsString()).Value;
-                FullAmbienteViewModel ambienteViewModel = new FullAmbienteViewModel(tipoDePisoElement, itensDeDetalheElement, doc);
-                ambientes.Add(ambienteViewModel);
+                viewSchedule1 = new FilteredElementCollector(doc).WhereElementIsNotElementType().OfCategory(BuiltInCategory.OST_Schedules).Cast<ViewSchedule>().Where(view => view.Name == "LPE_TIPO DE PISO").FirstOrDefault();
+                tipoDePisoRows = new FilteredElementCollector(doc, viewSchedule1.Id).ToList();
+                viewSchedule2 = new FilteredElementCollector(doc).WhereElementIsNotElementType().OfCategory(BuiltInCategory.OST_Schedules).Cast<ViewSchedule>().Where(view => view.Name == "LPE_ITENS DE DETALHE SEÇÕES").FirstOrDefault();
+                itemDeDetalheDict = new FilteredElementCollector(doc, viewSchedule2.Id).ToDictionary(e => e.Name);
+                viewSchedule3 = new FilteredElementCollector(doc).WhereElementIsNotElementType().OfCategory(BuiltInCategory.OST_Schedules).Cast<ViewSchedule>().Where(view => view.Name == "LPE_TIPO DE JUNTA").FirstOrDefault();
+                tipoDeJuntaDict = new FilteredElementCollector(doc, viewSchedule3.Id).ToDictionary(e => e.Name);
+                dictionary4 = new FilteredElementCollector(doc).WhereElementIsElementType().OfCategory(BuiltInCategory.OST_Floors).ToDictionary(e => e.Name);
             }
-            return ambientes;
+            catch (Exception)
+            {
+                return false;
+            }
+
+            tipoDePisoRows.OrderBy(x => x.LookupParameter("Reforço de Tela").AsInteger()).ToList();
+            foreach (Element tipoDePiso in tipoDePisoRows)
+            {
+                string name = tipoDePiso.Name;
+                Element itensDeDetalheElement = null;
+                Element juntaElement = null;
+                Element pisoElementType = null;
+                if (itemDeDetalheDict.ContainsKey(name))
+                    itensDeDetalheElement = itemDeDetalheDict[name];
+                if (tipoDeJuntaDict.ContainsKey(name))
+                    juntaElement = tipoDeJuntaDict[name];
+                if (dictionary4.ContainsKey(name))
+                    pisoElementType = dictionary4[name];
+                FullAmbienteViewModel ambienteViewModel = new FullAmbienteViewModel(tipoDePiso, itensDeDetalheElement, juntaElement, pisoElementType, doc);
+                if (tipoDePiso.LookupParameter("Reforço de Tela").AsInteger() == 1)
+                {
+                    FullAmbienteViewModel parent = fullAmbienteViewModels.First(x => tipoDePiso.Name.Contains(x.TipoDePiso));
+                    ambienteViewModel.ParentAmbienteViewModelGUID = parent.GUID;
+                    try
+                    {
+                        FloorType floorType = new FilteredElementCollector(doc)
+                            .OfClass(typeof(FloorType))
+                            .Cast<FloorType>()
+                            .FirstOrDefault(x => parent.TipoDePiso == x.Name);
+
+                        if (floorType != null)
+                        {
+                            FloorMatriz floorMatriz = new FloorMatriz();
+                            floorMatriz.GetFloorTypeData(floorType, GlobalVariables.MaterialsByClass, ambienteViewModel);
+                            ambienteViewModel.FloorMatriz = floorMatriz;
+                        }
+                    }
+                    catch (Exception)
+                    {
+                    }
+                }
+                fullAmbienteViewModels.Add(ambienteViewModel);
+            }
+            return true;
         }
 
         public static Element SetAmbienteLPETipoDePiso(
@@ -399,6 +593,7 @@ namespace Revit.Common
             element.LookupParameter("LPE_VEÍCULOS PESADOS")?.Set(fullAmbienteViewModel.BoolLPEVeiculosPesados ? 1 : 0);
             element.LookupParameter("LPE_Carga")?.Set(fullAmbienteViewModel.LPECarga);
             element.LookupParameter("(s/n) Ref. Tela Inferior")?.Set(fullAmbienteViewModel.BoolReforcoTelaInferior ? 1 : 0);
+            element.LookupParameter("TAG_TIPO REF. TELA INFERIOR")?.Set(fullAmbienteViewModel.BoolReforcoTelaInferior ? 1 : 0);
             element.LookupParameter("(s/n) Ref. Tela Superior")?.Set(fullAmbienteViewModel.BoolReforcoTelaSuperior ? 1 : 0);
             element.LookupParameter("(s/n) Tela Inferior")?.Set(fullAmbienteViewModel.BoolTelaInferior ? 1 : 0);
             element.LookupParameter("(s/n) Tela Superior")?.Set(fullAmbienteViewModel.BoolTelaSuperior ? 1 : 0);
@@ -409,6 +604,8 @@ namespace Revit.Common
             element.LookupParameter("Emenda - Ref. Tela Sup")?.Set(fullAmbienteViewModel.EmendaReforcoTelaSuperior);
             element.LookupParameter("Emenda - Tela Inferior (\"0,xx\")")?.Set(fullAmbienteViewModel.EmendaTelaInferior);
             element.LookupParameter("Emenda - Tela Superior (\"0,xx\")")?.Set(fullAmbienteViewModel.EmendaTelaSuperior);
+            element.LookupParameter("LPE_COBRIMENTO SUPERIOR")?.Set(UnitUtils.ConvertToInternalUnits(fullAmbienteViewModel.CobrimentoTelaSuperior, UnitTypeId.Centimeters));
+            element.LookupParameter("LPE_COBRIMENTO INFERIOR")?.Set(UnitUtils.ConvertToInternalUnits(fullAmbienteViewModel.CobrimentoTelaInferior, UnitTypeId.Centimeters));
             element.LookupParameter("Fibra")?.Set(fullAmbienteViewModel.Fibra);
             element.LookupParameter("Reforço de Tela")?.Set(fullAmbienteViewModel.BoolReforcoDeTela ? 1 : 0);
             element.LookupParameter("Finalidade Ref. Tela Inf")?.Set(fullAmbienteViewModel.FinalidadeReforcoTelaInferior);
@@ -421,12 +618,16 @@ namespace Revit.Common
             element.LookupParameter("H-Espaçador Soldado (cm)")?.Set(fullAmbienteViewModel.HEspacadorSoldado);
             element.LookupParameter("H-Espaçador Superior (cm)")?.Set(fullAmbienteViewModel.HEspacadorSuperior);
             element.LookupParameter("Largura da Placa")?.Set(UnitUtils.ConvertToInternalUnits(fullAmbienteViewModel.LarguraDaPlaca, UnitTypeId.Meters));
-            element.LookupParameter("Ref. Tela Inferior")?.Set(fullAmbienteViewModel.ReforcoTelaInferior);
-            element.LookupParameter("Ref. Tela Superior")?.Set(fullAmbienteViewModel.ReforcoTelaSuperior);
-            element.LookupParameter("Tela Inferior")?.Set(fullAmbienteViewModel.TelaInferior);
-            element.LookupParameter("Tela Superior")?.Set(fullAmbienteViewModel.TelaSuperior);
+            element.LookupParameter("Ref. Tela Inferior")?.Set(fullAmbienteViewModel.ReforcoTelaInferior.ToString());
+            element.LookupParameter("Ref. Tela Superior")?.Set(fullAmbienteViewModel.ReforcoTelaSuperior.ToString());
+            element.LookupParameter("Tela Inferior")?.Set(fullAmbienteViewModel.TelaInferior.ToString());
+            element.LookupParameter("TIPO TELA INFERIOR")?.Set(fullAmbienteViewModel.TelaInferior);
+            element.LookupParameter("Tela Superior")?.Set(fullAmbienteViewModel.TelaSuperior.ToString());
+            element.LookupParameter("TIPO TELA SUPERIOR")?.Set(fullAmbienteViewModel.TelaSuperior);
             element.LookupParameter("Tratamento Superficial")?.Set(fullAmbienteViewModel.TratamentoSuperficial);
-            element.LookupParameter("Key Name")?.Set(fullAmbienteViewModel.TipoDePiso);
+            element.LookupParameter("CB_BARRA DE TRANSFERÊNCIA AMARRADA POR CIMA")?.Set(fullAmbienteViewModel.BoolBarraPorCima ? 1 : 0);
+            element.get_Parameter(BuiltInParameter.REF_TABLE_ELEM_NAME)?.Set(fullAmbienteViewModel.TipoDePiso);
+
             return element;
         }
 
@@ -434,86 +635,36 @@ namespace Revit.Common
           Element itensDeDetalheElement,
           FullAmbienteViewModel fullAmbienteViewModel)
         {
-            itensDeDetalheElement.LookupParameter("Key Name")?.Set(fullAmbienteViewModel.TipoDePiso);
+            itensDeDetalheElement.get_Parameter(BuiltInParameter.REF_TABLE_ELEM_NAME)?.Set(fullAmbienteViewModel.TipoDePiso);
             itensDeDetalheElement.LookupParameter("Ambiente")?.Set(fullAmbienteViewModel.Ambiente);
-            itensDeDetalheElement.LookupParameter("CB_CONCRETO").Set((fullAmbienteViewModel != null ? (fullAmbienteViewModel.HConcreto != 0.0 ? 1 : 0) : 1) != 0 ? 1 : 0);
-            itensDeDetalheElement.LookupParameter("CB_FIBRA").Set(fullAmbienteViewModel.BoolFibra ? 1 : 0);
+            itensDeDetalheElement.LookupParameter("CB_CONCRETO")?.Set((fullAmbienteViewModel != null ? (fullAmbienteViewModel.HConcreto != 0.0 ? 1 : 0) : 1) != 0 ? 1 : 0);
+            itensDeDetalheElement.LookupParameter("CB_FIBRA")?.Set(fullAmbienteViewModel.BoolFibra ? 1 : 0);
             itensDeDetalheElement.LookupParameter("H Concreto")?.Set(UnitUtils.ConvertToInternalUnits(fullAmbienteViewModel.HConcreto, UnitTypeId.Centimeters));
-            itensDeDetalheElement.LookupParameter("TAG_CONCRETO").Set(fullAmbienteViewModel.TagConcreto);
-            itensDeDetalheElement.LookupParameter("CB_SUB_BASE").Set(fullAmbienteViewModel.CBSubBase ? 1 : 0);
-            itensDeDetalheElement.LookupParameter("H SUB_BASE").Set(UnitUtils.ConvertToInternalUnits(fullAmbienteViewModel.HSubBase, UnitTypeId.Centimeters));
-            itensDeDetalheElement.LookupParameter("TAG_SUB-BASE").Set(fullAmbienteViewModel.TagSubBase);
-            itensDeDetalheElement.LookupParameter("CB_BASE GENÉRICA").Set(fullAmbienteViewModel.CBBaseGenerica ? 1 : 0);
-            itensDeDetalheElement.LookupParameter("TAG_BASE GENÉRICA").Set(fullAmbienteViewModel.TagBaseGenerica);
-            itensDeDetalheElement.LookupParameter("CB_REF. SUBLEITO").Set(fullAmbienteViewModel.CBRefSubleito ? 1 : 0);
-            try
-            {
-                itensDeDetalheElement.LookupParameter("H Ref. Subleito").Set(UnitUtils.ConvertToInternalUnits(fullAmbienteViewModel.HRefSubleito, UnitTypeId.Centimeters));
-            }
-            catch (Exception ex)
-            {
-            }
-            itensDeDetalheElement.LookupParameter("TAG_REF. SUBLEITO").Set(fullAmbienteViewModel.TagRefSubleito);
-            itensDeDetalheElement.LookupParameter("CB_SUBLEITO").Set(fullAmbienteViewModel.CBSubleito ? 1 : 0);
-            itensDeDetalheElement.LookupParameter("TAG_SUBLEITO").Set(fullAmbienteViewModel.TagSubleito);
-            try
-            {
-                itensDeDetalheElement.LookupParameter("CB_TELA SUPERIOR").Set(fullAmbienteViewModel.BoolTelaSuperior ? 1 : 0);
-            }
-            catch (Exception ex)
-            {
-            }
-            try
-            {
-                itensDeDetalheElement.LookupParameter("TAG_TIPO TELA SUPERIOR").Set(int.Parse(fullAmbienteViewModel.TelaSuperior.Replace("Q", "")));
-            }
-            catch (Exception ex)
-            {
-            }
-            try
-            {
-                itensDeDetalheElement.LookupParameter("CB_TELA INFERIOR").Set(fullAmbienteViewModel.BoolTelaInferior ? 1 : 0);
-            }
-            catch (Exception ex)
-            {
-            }
-            try
-            {
-                itensDeDetalheElement.LookupParameter("TAG_TIPO TELA INFERIOR").Set(int.Parse(fullAmbienteViewModel.TelaInferior.Replace("Q", "")));
-            }
-            catch (Exception ex)
-            {
-            }
-            try
-            {
-                itensDeDetalheElement.LookupParameter("CB_REF. TELA SUPERIOR").Set(fullAmbienteViewModel.BoolReforcoTelaSuperior ? 1 : 0);
-            }
-            catch (Exception ex)
-            {
-            }
-            try
-            {
-                itensDeDetalheElement.LookupParameter("TAG_TIPO REF. TELA SUPERIOR").Set("REF. TELA SUPERIOR (" + fullAmbienteViewModel.ReforcoTelaSuperior + ")");
-            }
-            catch (Exception ex)
-            {
-            }
-            try
-            {
-                itensDeDetalheElement.LookupParameter("CB_REF. TELA INFERIOR").Set(fullAmbienteViewModel.BoolReforcoTelaInferior ? 1 : 0);
-            }
-            catch (Exception ex)
-            {
-            }
-            try
-            {
-                itensDeDetalheElement.LookupParameter("TAG_TIPO REF. TELA INFERIOR").Set("REF. TELA INFERIOR (" + fullAmbienteViewModel.ReforcoTelaInferior + ")");
-            }
-            catch (Exception ex)
-            {
-            }
+            itensDeDetalheElement.LookupParameter("TAG_CONCRETO")?.Set(fullAmbienteViewModel.TagConcreto);
+            itensDeDetalheElement.LookupParameter("CB_SUB_BASE")?.Set(fullAmbienteViewModel.CBSubBase ? 1 : 0);
+            itensDeDetalheElement.LookupParameter("H SUB_BASE")?.Set(UnitUtils.ConvertToInternalUnits(fullAmbienteViewModel.HSubBase, UnitTypeId.Centimeters));
+            itensDeDetalheElement.LookupParameter("TAG_SUB-BASE")?.Set(fullAmbienteViewModel.TagSubBase);
+            itensDeDetalheElement.LookupParameter("CB_BASE GENÉRICA")?.Set(fullAmbienteViewModel.CBBaseGenerica ? 1 : 0);
+            itensDeDetalheElement.LookupParameter("TAG_BASE GENÉRICA")?.Set(fullAmbienteViewModel.TagBaseGenerica);
+            itensDeDetalheElement.LookupParameter("CB_REF. SUBLEITO")?.Set(fullAmbienteViewModel.CBRefSubleito ? 1 : 0);
+            itensDeDetalheElement.LookupParameter("LPE_COBRIMENTO SUPERIOR")?.Set(UnitUtils.ConvertToInternalUnits(fullAmbienteViewModel.CobrimentoTelaSuperior, UnitTypeId.Centimeters));
+            itensDeDetalheElement.LookupParameter("LPE_COBRIMENTO INFERIOR")?.Set(UnitUtils.ConvertToInternalUnits(fullAmbienteViewModel.CobrimentoTelaInferior, UnitTypeId.Centimeters));
+            itensDeDetalheElement.LookupParameter("H Ref. Subleito")?.Set(UnitUtils.ConvertToInternalUnits(fullAmbienteViewModel.HRefSubleito, UnitTypeId.Centimeters));
+            itensDeDetalheElement.LookupParameter("TAG_REF. SUBLEITO")?.Set(fullAmbienteViewModel.TagRefSubleito);
+            itensDeDetalheElement.LookupParameter("CB_SUBLEITO")?.Set(fullAmbienteViewModel.CBSubleito ? 1 : 0);
+            itensDeDetalheElement.LookupParameter("TAG_SUBLEITO")?.Set(fullAmbienteViewModel.TagSubleito);
+            itensDeDetalheElement.LookupParameter("CB_TELA SUPERIOR")?.Set(fullAmbienteViewModel.BoolTelaSuperior ? 1 : 0);
+            itensDeDetalheElement.LookupParameter("TAG_TIPO TELA SUPERIOR")?.Set(fullAmbienteViewModel.TelaSuperior);
+            itensDeDetalheElement.LookupParameter("CB_TELA INFERIOR")?.Set(fullAmbienteViewModel.BoolTelaInferior ? 1 : 0);
+            itensDeDetalheElement.LookupParameter("TAG_TIPO TELA INFERIOR")?.Set(fullAmbienteViewModel.TelaInferior);
+            itensDeDetalheElement.LookupParameter("CB_REF. TELA SUPERIOR")?.Set(fullAmbienteViewModel.BoolReforcoTelaSuperior ? 1 : 0);
+            itensDeDetalheElement.LookupParameter("TAG_TIPO REF. TELA SUPERIOR")?.Set("REF. TELA SUPERIOR (" + fullAmbienteViewModel.ReforcoTelaSuperior + ")");
+            itensDeDetalheElement.LookupParameter("CB_REF. TELA INFERIOR")?.Set(fullAmbienteViewModel.BoolReforcoTelaInferior ? 1 : 0);
+            itensDeDetalheElement.LookupParameter("TAG_TIPO REF. TELA INFERIOR")?.Set("REF. TELA INFERIOR (" + fullAmbienteViewModel.ReforcoTelaInferior + ")");
             itensDeDetalheElement.LookupParameter("CB_VEÍCULOS PESADOS")?.Set(fullAmbienteViewModel.BoolLPEVeiculosPesados ? 1 : 0);
-            itensDeDetalheElement.LookupParameter("LPE_CARGA").Set(fullAmbienteViewModel.LPECarga);
+            itensDeDetalheElement.LookupParameter("LPE_CARGA")?.Set(fullAmbienteViewModel.LPECarga);
+            itensDeDetalheElement.LookupParameter("Espaçamento (BT)")?.Set(UnitUtils.ConvertToInternalUnits(fullAmbienteViewModel.EspacamentoBarra, UnitTypeId.Centimeters));
+            itensDeDetalheElement.LookupParameter("CB_BARRA DE TRANSFERÊNCIA AMARRADA POR CIMA")?.Set(fullAmbienteViewModel.BoolBarraPorCima ? 1 : 0);
             return itensDeDetalheElement;
         }
 
@@ -527,35 +678,13 @@ namespace Revit.Common
             tipoDeJuntaElement.LookupParameter("(s/n) Tela Inferior")?.Set(fullAmbienteViewModel.BoolTelaInferior ? 1 : 0);
             tipoDeJuntaElement.LookupParameter("LPE_VEÍCULOS PESADOS")?.Set(fullAmbienteViewModel.BoolLPEVeiculosPesados ? 1 : 0);
             tipoDeJuntaElement.LookupParameter("H-Espaçador Soldado (cm)")?.Set(fullAmbienteViewModel.HEspacadorSoldado);
-            tipoDeJuntaElement.LookupParameter("Key Name")?.Set(fullAmbienteViewModel.TipoDePiso);
+            tipoDeJuntaElement.LookupParameter("LPE_COBRIMENTO SUPERIOR")?.Set(UnitUtils.ConvertToInternalUnits(fullAmbienteViewModel.CobrimentoTelaSuperior, UnitTypeId.Centimeters));
+            tipoDeJuntaElement.LookupParameter("LPE_COBRIMENTO INFERIOR")?.Set(UnitUtils.ConvertToInternalUnits(fullAmbienteViewModel.CobrimentoTelaInferior, UnitTypeId.Centimeters));
+            tipoDeJuntaElement.LookupParameter("CB_BARRA DE TRANSFERÊNCIA AMARRADA POR CIMA")?.Set(fullAmbienteViewModel.BoolBarraPorCima ? 1 : 0);
+            tipoDeJuntaElement.get_Parameter(BuiltInParameter.REF_TABLE_ELEM_NAME)?.Set(fullAmbienteViewModel.TipoDePiso);
+            tipoDeJuntaElement.LookupParameter("TIPO TELA INFERIOR")?.Set(fullAmbienteViewModel.TelaInferior);
+            tipoDeJuntaElement.LookupParameter("TIPO TELA SUPERIOR")?.Set(fullAmbienteViewModel.TelaSuperior);
             return tipoDeJuntaElement;
-        }
-
-        public static Element SetFloorType(Document doc, FullAmbienteViewModel fullAmbienteViewModel)
-        {
-            FloorType floorType = (FloorType)null;
-            try
-            {
-                ElementId elementId = new ElementId(-1);
-                string tipoDeSolucao = fullAmbienteViewModel.TipoDeSolucao;
-                if (!(tipoDeSolucao == "TELA SIMPLES"))
-                {
-                    if (!(tipoDeSolucao == "TELA DUPLA"))
-                    {
-                        if (!(tipoDeSolucao == "FIBRA"))
-                        {
-                            if (!(tipoDeSolucao == "PAV. INTERTRAVADO"))
-                            {
-                                int num = tipoDeSolucao == "PAV. ASFÁLTICO" ? 1 : 0;
-                            }
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-            }
-            return floorType;
         }
     }
 }

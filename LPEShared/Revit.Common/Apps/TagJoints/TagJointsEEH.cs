@@ -33,7 +33,7 @@ namespace Revit.Common
 
                 UIDocument uidoc = uiapp.ActiveUIDocument;
                 Document doc = uidoc.Document;
-                View initialView = uidoc.ActiveView;
+                Autodesk.Revit.DB.View initialView = uidoc.ActiveView;
 
                 Element e100 = new FilteredElementCollector(doc)
                     .WhereElementIsElementType()
@@ -239,7 +239,7 @@ namespace Revit.Common
             catch (Exception ex)
             {
                 SelectAmbienteMVVM.MainView.Dispose(); 
-                TaskDialog.Show("ATENÇÃO!", "Erro não mapeado, contate os desenvolvedores.\n\n" + ex.StackTrace);
+                Autodesk.Revit.UI.TaskDialog.Show("ATENÇÃO!", "Erro não mapeado, contate os desenvolvedores.\n\n" + ex.StackTrace);
                 throw;
             }
 

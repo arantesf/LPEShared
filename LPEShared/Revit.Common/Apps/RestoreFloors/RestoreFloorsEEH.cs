@@ -16,7 +16,6 @@ using Microsoft.SqlServer.Server;
 using System.Xml.Linq;
 using System.Diagnostics.Eventing.Reader;
 using System.Windows;
-using System.Windows.Controls;
 
 namespace Revit.Common
 {
@@ -416,7 +415,7 @@ namespace Revit.Common
             catch (Exception ex)
             {
                 SelectAmbienteMVVM.MainView.Dispose();
-                TaskDialog.Show("ATENÇÃO!", "Erro não mapeado, contate os desenvolvedores.\n\n" + ex.StackTrace);
+                Autodesk.Revit.UI.TaskDialog.Show("ATENÇÃO!", "Erro não mapeado, contate os desenvolvedores.\n\n" + ex.StackTrace);
                 throw;
             }
         }

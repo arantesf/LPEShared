@@ -39,13 +39,13 @@ namespace Revit.Common
             }
             if (!OK)
             {
-                TaskDialog.Show("ATENÇÃO!", $"Não foi possível executar o comando por não existir no modelo os seguintes parâmetros:\n {error}");
+                Autodesk.Revit.UI.TaskDialog.Show("ATENÇÃO!", $"Não foi possível executar o comando por não existir no modelo os seguintes parâmetros:\n {error}");
                 return Result.Cancelled;
             }
 
             if (uidoc.ActiveView is View3D)
             {
-                TaskDialog.Show("Atenção!", "Abra uma vista de planta para rodar o plug-in!");
+                Autodesk.Revit.UI.TaskDialog.Show("Atenção!", "Abra uma vista de planta para rodar o plug-in!");
                 return Result.Cancelled;
             }
 

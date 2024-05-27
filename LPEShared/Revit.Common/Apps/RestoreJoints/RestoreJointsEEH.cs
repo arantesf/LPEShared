@@ -16,7 +16,6 @@ using Microsoft.SqlServer.Server;
 using System.Xml.Linq;
 using System.Diagnostics.Eventing.Reader;
 using System.Windows;
-using System.Windows.Controls;
 
 namespace Revit.Common
 {
@@ -90,6 +89,7 @@ namespace Revit.Common
                             try
                             {
                                 FamilyInstance newJoint = doc.Create.NewFamilyInstance(curve, (GUIDGroupedJoints[guid][0] as FamilyInstance).Symbol, doc.GetElement((GUIDGroupedJoints[guid][0] as FamilyInstance).LevelId) as Level, Autodesk.Revit.DB.Structure.StructuralType.Beam);
+                                Utils.CopyAllParametersWithoutTransaction(GUIDGroupedJoints[guid].First(), newJoint, new List<BuiltInParameter>() { BuiltInParameter.ALL_MODEL_MARK, BuiltInParameter.FLOOR_HEIGHTABOVELEVEL_PARAM });
                             }
                             catch (Exception)
                             {
@@ -110,7 +110,7 @@ namespace Revit.Common
             catch (Exception ex)
             {
                 SelectAmbienteMVVM.MainView.Dispose();
-                TaskDialog.Show("ATENÇÃO!", "Erro não mapeado, contate os desenvolvedores.\n\n" + ex.StackTrace);
+                Autodesk.Revit.UI.TaskDialog.Show("ATENÇÃO!", "Erro não mapeado, contate os desenvolvedores.\n\n" + ex.StackTrace);
                 throw;
             }
         }

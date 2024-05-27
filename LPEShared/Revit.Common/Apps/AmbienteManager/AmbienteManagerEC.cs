@@ -16,6 +16,7 @@ using Microsoft.SqlServer.Server;
 using System.Xml.Linq;
 using System.Diagnostics.Eventing.Reader;
 using Revit.Common.Classes;
+using Application = Autodesk.Revit.ApplicationServices.Application;
 
 namespace Revit.Common
 {
@@ -32,9 +33,20 @@ namespace Revit.Common
             Application app = uiapp.Application;
             Document doc = uidoc.Document;
 
-            GlobalVariables.materialsByClass = AmbienteManagerUtils.GetMaterialsByClass(doc);
-            List<FullAmbienteViewModel> fullAmbienteViewModels = AmbienteManagerUtils.GetAmbientes(doc);
-            Dictionary<FloorMatrizClass, List<FloorMatriz>> floorMatrizes = AmbienteManagerUtils.GetFloorMatrizes(doc, GlobalVariables.materialsByClass);
+            GlobalVariables.MaterialsByClass = AmbienteManagerUtils.GetMaterialsByClass(doc);
+            Dictionary<FloorMatrizClass, List<FloorMatriz>> floorMatrizes = AmbienteManagerUtils.GetFloorMatrizes(doc, GlobalVariables.MaterialsByClass);
+            List<FibraViewModel> fibras = AmbienteManagerUtils.GetFibras(doc);
+            List<TagViewModel> tags = AmbienteManagerUtils.GetTags(doc);
+            List<double> emendas = AmbienteManagerUtils.GetEmendas(doc);
+            List<int> telas = AmbienteManagerUtils.GetTelas(doc);
+            List<string> tratamentos = AmbienteManagerUtils.GetTratamentoSuperficial(doc);
+            GlobalVariables.StaticScheduleData = new StaticScheduleData(fibras, emendas, telas, tratamentos, tags);
+            List<FullAmbienteViewModel> fullAmbienteViewModels = new List<FullAmbienteViewModel>();
+            if (!AmbienteManagerUtils.GetAmbientes(doc, out fullAmbienteViewModels))
+            {
+                Autodesk.Revit.UI.TaskDialog.Show("ATENÇÃO!", "Verificar duplicidade de chaves nos Key Schedules");
+                return Result.Failed;
+            }
             List<string> allMaterialNames = new FilteredElementCollector(doc)
                 .WhereElementIsNotElementType()
                 .OfCategory(BuiltInCategory.OST_Materials)
@@ -42,7 +54,7 @@ namespace Revit.Common
                 .OrderBy(x => x)
                 .ToList();
             ExternalApplication.LPEApp.uiApp = uiapp;
-            ExternalApplication.LPEApp.ShowAmbienteManagerUI(floorMatrizes, fullAmbienteViewModels, allMaterialNames, GlobalVariables.materialsByClass);
+            ExternalApplication.LPEApp.ShowAmbienteManagerUI(floorMatrizes, fullAmbienteViewModels, allMaterialNames, GlobalVariables.MaterialsByClass);
 
             return Result.Succeeded;
         }

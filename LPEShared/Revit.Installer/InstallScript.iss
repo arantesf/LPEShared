@@ -3,12 +3,13 @@
 
 #define MyAppName "Plug-in Revit LPE"
 #define FolderName "LPE"
-#define MyAppVersion "2.0.0"
+#define MyAppVersion "2.0.8"
 #define MyAppPublisher "FCA"
 #define Revit2021 "\Autodesk\Revit\Addins\2021\"
 #define Revit2022 "\Autodesk\Revit\Addins\2022\"
 #define Revit2023 "\Autodesk\Revit\Addins\2023\"
 #define Revit2024 "\Autodesk\Revit\Addins\2024\"
+#define Revit2025 "\Autodesk\Revit\Addins\2025\"
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
@@ -46,6 +47,8 @@ Source: "..\Revit.2023\bin\x64\Release\*.dll"; DestDir: "{userappdata}\{#Revit20
 Source: "..\Revit.Common\LPE-PisosEJuntas.addin"; DestDir: "{userappdata}\{#Revit2023}\"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "..\Revit.2024\bin\x64\Release\*.dll"; DestDir: "{userappdata}\{#Revit2024}\{#FolderName}"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "..\Revit.Common\LPE-PisosEJuntas.addin"; DestDir: "{userappdata}\{#Revit2024}\"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "..\Revit.2025\bin\Release\net8.0-windows\*.dll"; DestDir: "{userappdata}\{#Revit2025}\{#FolderName}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "..\Revit.Common\LPE-PisosEJuntas.addin"; DestDir: "{userappdata}\{#Revit2025}\"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 ; Source: "..\Revit.Common\PackageContents.xml"; DestDir: "{userappdata}\Autodesk\ApplicationPlugins\Revit.bundle\"; Flags: ignoreversion
 

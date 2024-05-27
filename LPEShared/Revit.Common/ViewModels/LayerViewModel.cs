@@ -34,7 +34,7 @@ namespace Revit.Common
     {
       "",
       "Base",
-      "Base Genérica",
+      //"Base Genérica",
       "Bloco Intertravado",
       "Camada de Assentamento",
       "Camada de Isolamento",
@@ -83,6 +83,23 @@ namespace Revit.Common
             this.SelectedMaterial = materialName;
             this.Width = width;
             this.IsEnabled = isEnabled;
+        }
+
+        public LayerViewModel(
+          string tipo,
+          string materialName,
+          double width,
+          List<string> possibleMaterials,
+          bool isEnabled,
+          string tag)
+        {
+            if (this.CamadaTipos.Contains(tipo))
+                this.SelectedCamadaTipo = tipo;
+            this.PossibleMaterials = possibleMaterials;
+            this.SelectedMaterial = materialName;
+            this.Width = width;
+            this.IsEnabled = isEnabled;
+            this.Tag = tag;
         }
 
         public object Clone() => (object)(this.MemberwiseClone() as LayerViewModel);

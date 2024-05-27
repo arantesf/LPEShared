@@ -35,7 +35,7 @@ namespace Revit.Common
                 SelectAmbienteMVVM.MainView.SelectPisos_Button.IsEnabled = false;
                 SelectAmbienteMVVM.MainView.Execute_Button.IsEnabled = false;
 
-                View initialView = uidoc.ActiveView;
+                Autodesk.Revit.DB.View initialView = uidoc.ActiveView;
                 List<ElementId> selectedFloorIds = SelectAmbienteMVVM.MainView.SelectedFloorsIds;
 
                 List<string> selectedAmbientes = SelectAmbienteMVVM.MainView.AmbienteViewModels.Where(x => x.IsChecked).Select(x => x.Name).ToList();
@@ -309,7 +309,7 @@ namespace Revit.Common
             catch (Exception ex)
             {
                 SelectAmbienteMVVM.MainView.Dispose();
-                TaskDialog.Show("ATENÇÃO!", "Erro não mapeado, contate os desenvolvedores.\n\n" + ex.StackTrace);
+                Autodesk.Revit.UI.TaskDialog.Show("ATENÇÃO!", "Erro não mapeado, contate os desenvolvedores.\n\n" + ex.StackTrace);
                 tg.Assimilate();
             }
         }

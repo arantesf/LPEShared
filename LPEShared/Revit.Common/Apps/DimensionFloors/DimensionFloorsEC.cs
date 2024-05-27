@@ -15,6 +15,7 @@ using Autodesk.Revit.DB.Architecture;
 using Microsoft.SqlServer.Server;
 using System.Xml.Linq;
 using System.Diagnostics.Eventing.Reader;
+using Application = Autodesk.Revit.ApplicationServices.Application;
 
 namespace Revit.Common
 {
@@ -30,7 +31,7 @@ namespace Revit.Common
             UIDocument uidoc = uiapp.ActiveUIDocument;
             Application app = uiapp.Application;
             Document doc = uidoc.Document;
-            View initialView = uidoc.ActiveView;
+            Autodesk.Revit.DB.View initialView = uidoc.ActiveView;
 
             bool OK = true;
             string errors = "";
@@ -46,13 +47,13 @@ namespace Revit.Common
             }
             if (!OK)
             {
-                TaskDialog.Show("ATENÇÃO!", $"Não foi possível executar o comando por não existir no modelo os seguintes parâmetros:\n {errors}");
+                Autodesk.Revit.UI.TaskDialog.Show("ATENÇÃO!", $"Não foi possível executar o comando por não existir no modelo os seguintes parâmetros:\n {errors}");
                 return Result.Cancelled;
             }
 
             if (uidoc.ActiveView is View3D)
             {
-                TaskDialog.Show("Atenção!", "Abra uma vista de planta para rodar o plug-in!");
+                Autodesk.Revit.UI.TaskDialog.Show("Atenção!", "Abra uma vista de planta para rodar o plug-in!");
                 return Result.Cancelled;
             }
 
@@ -64,7 +65,7 @@ namespace Revit.Common
 
             if (cotaLPEType == null)
             {
-                TaskDialog.Show("ATENÇÃO!", $"Não foi possível executar o comando por não existir as seguintes famílias no modelo:\n Cota_LPE");
+                Autodesk.Revit.UI.TaskDialog.Show("ATENÇÃO!", $"Não foi possível executar o comando por não existir as seguintes famílias no modelo:\n Cota_LPE");
                 return Result.Cancelled;
             }
 

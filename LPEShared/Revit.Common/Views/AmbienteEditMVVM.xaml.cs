@@ -4,6 +4,8 @@
 // MVID: 6E06EE1B-06C5-4A71-9629-ACF2EB60ECA2
 // Assembly location: C:\ProgramData\Autodesk\Revit\Addins\2024\LPE\LPE.dll
 
+using Autodesk.Internal.InfoCenter;
+using Autodesk.Revit.UI;
 using System;
 using System.CodeDom.Compiler;
 using System.Collections;
@@ -11,6 +13,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -29,9 +32,8 @@ namespace Revit.Common
 
     public partial class AmbienteEditMVVM : Window, IDisposable
     {
-        public bool Create { get; set; }
-
         public int MyProperty { get; set; }
+        public bool Create { get; set; }
 
         public FullAmbienteViewModel SelectedFullAmbienteViewModel { get; set; }
 
@@ -39,7 +41,7 @@ namespace Revit.Common
         {
             this.SelectedFullAmbienteViewModel = fullAmbienteViewModels;
             this.InitializeComponent();
-            this.Create = create;
+            Create = create;
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -47,10 +49,81 @@ namespace Revit.Common
             this.Layers_DataGrid.ItemsSource = (IEnumerable)this.SelectedFullAmbienteViewModel.FloorMatriz.Layers;
         }
 
+        private void SetPropertiesBasedOnLayers()
+        {
+            foreach (var layer in SelectedFullAmbienteViewModel.FloorMatriz.Layers)
+            {
+                switch (layer.SelectedCamadaTipo)
+                {
+                    case "Base": break;
+                    //case "Base Genérica": 
+                    //    SelectedFullAmbienteViewModel.CBBaseGenerica = true;
+                    //    SelectedFullAmbienteViewModel.TagBaseGenerica = layer.Tag;
+                    //    break;
+                    case "Bloco Intertravado": 
+                        SelectedFullAmbienteViewModel.TagConcreto = layer.Tag;
+                        break;
+                    case "Camada de Assentamento": break;
+                    case "Camada de Isolamento": break;
+                    case "Camada de Ventilação": break;
+                    case "Concreto":
+                        SelectedFullAmbienteViewModel.TagConcreto = layer.Tag;
+                        break;
+                    case "Concreto Asfáltico": 
+                        SelectedFullAmbienteViewModel.TagConcreto = layer.Tag;
+                        break;
+                    case "Filme Plastico": break;
+                    case "Imprimacao Asfáltica": break;
+                    case "Pintura de Ligação": break;
+                    case "Reforço de Subleito":
+                        SelectedFullAmbienteViewModel.CBRefSubleito = true;
+                        SelectedFullAmbienteViewModel.TagRefSubleito = layer.Tag;
+                        SelectedFullAmbienteViewModel.HRefSubleito = layer.Width;
+                        break;
+                    case "Sub-Base":
+                        SelectedFullAmbienteViewModel.CBSubBase = true;
+                        SelectedFullAmbienteViewModel.TagSubBase = layer.Tag;
+                        SelectedFullAmbienteViewModel.HSubBase = layer.Width;
+                        break;
+                    default:
+                        break;
+                }
+            }
+            if (SelectedFullAmbienteViewModel.UltimaCamada == "Nenhum")
+            {
+                SelectedFullAmbienteViewModel.TagUltimaCamada = "";
+            }
+            SelectedFullAmbienteViewModel.CBSubleito = SelectedFullAmbienteViewModel.UltimaCamada == "Subleito";
+            SelectedFullAmbienteViewModel.TagSubleito = SelectedFullAmbienteViewModel.UltimaCamada == "Subleito" ? SelectedFullAmbienteViewModel.TagUltimaCamada : "";
+            SelectedFullAmbienteViewModel.CBBaseGenerica = SelectedFullAmbienteViewModel.UltimaCamada == "Base genérica";
+            SelectedFullAmbienteViewModel.TagBaseGenerica = SelectedFullAmbienteViewModel.UltimaCamada == "Base genérica" ? SelectedFullAmbienteViewModel.TagUltimaCamada : "";
+            if (!SelectedFullAmbienteViewModel.TipoDePiso.Contains("REF"))
+            {
+                SelectedFullAmbienteViewModel.FloorMatriz.FloorName = SelectedFullAmbienteViewModel.TipoDePiso;
+            }
+        }
+
         private void ApplyNewAmbiente_Button_Click(object sender, RoutedEventArgs e)
         {
-            this.DialogResult = new bool?(true);
-            if (this.Create)
+            int existingViewModelsWithSameNameCount = AmbienteManagerMVVM.MainView.AmbienteViewModels
+                .Where(x => x.GUID != SelectedFullAmbienteViewModel.GUID)
+                .Where(x => x.TipoDePiso == SelectedFullAmbienteViewModel.TipoDePiso)
+                .Count();
+            SelectedFullAmbienteViewModel.StoredFloorMatriz = SelectedFullAmbienteViewModel.SelectedfloorMatriz;   
+            SelectedFullAmbienteViewModel.SelectedfloorMatriz = null;
+            if (existingViewModelsWithSameNameCount > 0)
+            {
+                SelectedFullAmbienteViewModel.Errors = "Já existe um tipo de piso com esse nome.";
+                return;
+            }
+            else
+            {
+                SelectedFullAmbienteViewModel.Errors = "";
+            }
+            CleanNonUsedParameters();
+            SetPropertiesBasedOnLayers();
+
+            if (Create)
             {
                 this.SelectedFullAmbienteViewModel.Action = Action.Create;
                 AmbienteManagerMVVM.MainView.ApplyAddAmbiente(this.SelectedFullAmbienteViewModel);
@@ -60,7 +133,48 @@ namespace Revit.Common
                 this.SelectedFullAmbienteViewModel.Action = Action.Modify;
                 AmbienteManagerMVVM.MainView.ApplyEditAmbiente(this.SelectedFullAmbienteViewModel);
             }
+            AmbienteManagerMVVM.MainView.ApplyParentChangesToChildren(this.SelectedFullAmbienteViewModel);
+
+            
+            this.DialogResult = new bool?(true);
             this.Dispose();
+        }
+
+        private void CleanNonUsedParameters()
+        {
+            if (!SelectedFullAmbienteViewModel.BoolTelaInferior)
+            {
+                SelectedFullAmbienteViewModel.TelaInferior = 0;
+                SelectedFullAmbienteViewModel.EmendaTelaInferior = 0;
+                SelectedFullAmbienteViewModel.CobrimentoTelaInferior = 0;
+            }
+            if (!SelectedFullAmbienteViewModel.BoolTelaSuperior)
+            {
+                SelectedFullAmbienteViewModel.TelaSuperior = 0;
+                SelectedFullAmbienteViewModel.FinalidadeTelaSuperior = "";
+                SelectedFullAmbienteViewModel.EmendaTelaSuperior = 0;
+                SelectedFullAmbienteViewModel.CobrimentoTelaSuperior = 0;
+            }
+            if (!SelectedFullAmbienteViewModel.BoolFibra)
+            {
+                SelectedFullAmbienteViewModel.SelectedFibra = null;
+                SelectedFullAmbienteViewModel.Fibra = "";
+                SelectedFullAmbienteViewModel.DosagemFibra = 0;
+                SelectedFullAmbienteViewModel.FR1 = "";
+                SelectedFullAmbienteViewModel.FR4 = "";
+            }
+            if (!SelectedFullAmbienteViewModel.BoolReforcoTelaSuperior)
+            {
+                SelectedFullAmbienteViewModel.ReforcoTelaSuperior = 0;
+                SelectedFullAmbienteViewModel.FinalidadeReforcoTelaSuperior = "";
+                SelectedFullAmbienteViewModel.EmendaReforcoTelaSuperior = 0;
+            }
+            if (!SelectedFullAmbienteViewModel.BoolReforcoTelaInferior)
+            {
+                SelectedFullAmbienteViewModel.ReforcoTelaInferior = 0;
+                SelectedFullAmbienteViewModel.FinalidadeReforcoTelaInferior = "";
+                SelectedFullAmbienteViewModel.EmendaReforcoTelaInferior = 0;
+            }
         }
 
         private void ProjBasico_Checkbox_Click(object sender, RoutedEventArgs e)
@@ -261,13 +375,24 @@ namespace Revit.Common
 
         private void FloorMatriz_SelectionChanged(object sender, RoutedEventArgs e)
         {
-            this.SelectedFullAmbienteViewModel.FloorMatriz.Layers.Clear();
             if (this.SelectedFullAmbienteViewModel.SelectedfloorMatriz != null)
             {
+                this.SelectedFullAmbienteViewModel.FloorMatriz.Layers.Clear();
                 foreach (LayerViewModel layer in (Collection<LayerViewModel>)this.SelectedFullAmbienteViewModel.SelectedfloorMatriz.Layers)
                     this.SelectedFullAmbienteViewModel.FloorMatriz.Layers.Add(layer.Clone() as LayerViewModel);
             }
             this.CalculateAndSetH();
+        }
+
+        private void Fibra_SelectionChanged(object sender, RoutedEventArgs e)
+        {
+            if (this.SelectedFullAmbienteViewModel.SelectedFibra != null)
+            {
+                 SelectedFullAmbienteViewModel.Fibra = SelectedFullAmbienteViewModel.SelectedFibra.Fibra;
+                 SelectedFullAmbienteViewModel.DosagemFibra = SelectedFullAmbienteViewModel.SelectedFibra.Dosagem;
+                 SelectedFullAmbienteViewModel.FR1 = SelectedFullAmbienteViewModel.SelectedFibra.FR1;
+                 SelectedFullAmbienteViewModel.FR4 = SelectedFullAmbienteViewModel.SelectedFibra.FR4;
+            }
         }
 
         private void Layers_DataGrid_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
@@ -279,6 +404,14 @@ namespace Revit.Common
         {
             this.SelectedFullAmbienteViewModel.ParametersScrollVisible = true;
             this.SelectedFullAmbienteViewModel.StructuralSolutionBorderThickness = new Thickness(0.0);
+            if (this.SelectedFullAmbienteViewModel.BoolReforcoDeTela)
+            {
+                this.SelectedFullAmbienteViewModel.IsColumn2Visible = true;
+            }
+            else
+            {
+                this.SelectedFullAmbienteViewModel.IsColumn2Visible = false;
+            }
             switch (this.SelectedFullAmbienteViewModel.TipoDeSolucao)
             {
                 case "TELA SIMPLES":
@@ -298,7 +431,6 @@ namespace Revit.Common
                     this.SelectedFullAmbienteViewModel.BoolFibra = false;
                     this.SelectedFullAmbienteViewModel.IsColumn0Visible = true;
                     this.SelectedFullAmbienteViewModel.IsColumn1Visible = true;
-                    this.SelectedFullAmbienteViewModel.IsColumn2Visible = false;
                     this.SelectedFullAmbienteViewModel.IsRigid = true;
                     this.SelectedFullAmbienteViewModel.DimensoesIsVisible = true;
                     this.SelectedFullAmbienteViewModel.EspacadorSoldadoIsVisible = true;
@@ -326,7 +458,6 @@ namespace Revit.Common
                     this.SelectedFullAmbienteViewModel.BoolFibra = false;
                     this.SelectedFullAmbienteViewModel.IsColumn0Visible = true;
                     this.SelectedFullAmbienteViewModel.IsColumn1Visible = true;
-                    this.SelectedFullAmbienteViewModel.IsColumn2Visible = false;
                     this.SelectedFullAmbienteViewModel.IsRigid = true;
                     this.SelectedFullAmbienteViewModel.DimensoesIsVisible = true;
                     this.SelectedFullAmbienteViewModel.EspacadorSoldadoIsVisible = true;
@@ -347,14 +478,12 @@ namespace Revit.Common
                     this.SelectedFullAmbienteViewModel.CamadaConcretoVisible = true;
                     this.SelectedFullAmbienteViewModel.EspacadorInferiorVisible = false;
                     this.SelectedFullAmbienteViewModel.TelaSuperiorIsEnable = true;
-                    this.SelectedFullAmbienteViewModel.BoolTelaSuperior = false;
                     this.SelectedFullAmbienteViewModel.BoolEspacadorSuperior = false;
                     this.SelectedFullAmbienteViewModel.BoolTelaInferior = false;
                     this.SelectedFullAmbienteViewModel.BoolEspacadorInferior = false;
                     this.SelectedFullAmbienteViewModel.BoolFibra = true;
                     this.SelectedFullAmbienteViewModel.IsColumn0Visible = true;
                     this.SelectedFullAmbienteViewModel.IsColumn1Visible = true;
-                    this.SelectedFullAmbienteViewModel.IsColumn2Visible = false;
                     this.SelectedFullAmbienteViewModel.IsRigid = true;
                     this.SelectedFullAmbienteViewModel.DimensoesIsVisible = true;
                     this.SelectedFullAmbienteViewModel.EspacadorSoldadoIsVisible = true;
@@ -377,7 +506,6 @@ namespace Revit.Common
                     this.SelectedFullAmbienteViewModel.BoolFibra = false;
                     this.SelectedFullAmbienteViewModel.IsColumn0Visible = true;
                     this.SelectedFullAmbienteViewModel.IsColumn1Visible = false;
-                    this.SelectedFullAmbienteViewModel.IsColumn2Visible = false;
                     this.SelectedFullAmbienteViewModel.IsRigid = false;
                     this.SelectedFullAmbienteViewModel.DimensoesIsVisible = false;
                     this.SelectedFullAmbienteViewModel.EspacadorSoldadoIsVisible = false;
@@ -400,7 +528,6 @@ namespace Revit.Common
                     this.SelectedFullAmbienteViewModel.BoolFibra = false;
                     this.SelectedFullAmbienteViewModel.IsColumn0Visible = true;
                     this.SelectedFullAmbienteViewModel.IsColumn1Visible = false;
-                    this.SelectedFullAmbienteViewModel.IsColumn2Visible = false;
                     this.SelectedFullAmbienteViewModel.IsRigid = false;
                     this.SelectedFullAmbienteViewModel.DimensoesIsVisible = false;
                     this.SelectedFullAmbienteViewModel.EspacadorSoldadoIsVisible = false;
@@ -414,6 +541,6 @@ namespace Revit.Common
             }
         }
 
-        
+
     }
 }

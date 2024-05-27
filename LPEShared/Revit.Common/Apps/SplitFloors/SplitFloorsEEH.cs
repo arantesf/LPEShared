@@ -240,11 +240,11 @@ namespace Revit.Common
                             Utils.AddJointCurvesToCurveArray(doc, curveArrayToCreateRoomBoundaries, joints);
 
                             Level level = Utils.CreateLevel(doc, 10000);
-                            View deletarView = new FilteredElementCollector(doc)
+                            Autodesk.Revit.DB.View deletarView = new FilteredElementCollector(doc)
                                 .WhereElementIsNotElementType()
                                 .OfClass(typeof(ViewPlan))
                                 .Where(view => view.Name == "Deletar")
-                                .Cast<View>()
+                                .Cast<Autodesk.Revit.DB.View>()
                                 .FirstOrDefault();
                             Utils.DeleteElements(doc, new List<Element>() { deletarView });
 
@@ -479,7 +479,7 @@ namespace Revit.Common
             catch (Exception ex)
             {
                 SelectAmbienteMVVM.MainView.Dispose();
-                TaskDialog.Show("ATENÇÃO!", "Erro não mapeado, contate os desenvolvedores.\n\n" + ex.StackTrace);
+                Autodesk.Revit.UI.TaskDialog.Show("ATENÇÃO!", "Erro não mapeado, contate os desenvolvedores.\n\n" + ex.StackTrace);
                 throw;
             }
         }

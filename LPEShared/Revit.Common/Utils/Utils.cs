@@ -12,7 +12,6 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Media;
@@ -351,7 +350,7 @@ namespace Revit.Common
             }
         }
 
-        public static ModelCurveArray CreateRoomBoundaryLines(Document doc, ElementId levelId, CurveArray curveArray, View view)
+        public static ModelCurveArray CreateRoomBoundaryLines(Document doc, ElementId levelId, CurveArray curveArray, Autodesk.Revit.DB.View view)
         {
             using (var trans = new Transaction(doc))
             {
@@ -418,7 +417,7 @@ namespace Revit.Common
             }
         }
 
-        public static View CreateTemporaryViewInLevel(Document doc, Level level)
+        public static Autodesk.Revit.DB.View CreateTemporaryViewInLevel(Document doc, Level level)
         {
             using (var trans = new Transaction(doc))
             {
@@ -431,7 +430,7 @@ namespace Revit.Common
                     .Where(vft => (vft as ViewFamilyType).ViewFamily == ViewFamily.FloorPlan)
                     .Select(vft => vft.Id)
                     .FirstOrDefault();
-                View initialView = ViewPlan.Create(doc, firstViewPlanType, level.Id);
+                Autodesk.Revit.DB.View initialView = ViewPlan.Create(doc, firstViewPlanType, level.Id);
                 initialView.Name = "Deletar";
 
                 trans.Commit();
@@ -2716,7 +2715,7 @@ namespace Revit.Common
                     nuuumber++;
                     if (nuuumber > 1000)
                     {
-                        TaskDialog.Show("ERRO", "Muitas tentativas de criar um Loop Com as curvas fornecidas");
+                        Autodesk.Revit.UI.TaskDialog.Show("ERRO", "Muitas tentativas de criar um Loop Com as curvas fornecidas");
                         return null;
                     }
                 }
@@ -2763,7 +2762,7 @@ namespace Revit.Common
                     nuuumber++;
                     if (nuuumber > 1000)
                     {
-                        TaskDialog.Show("ERRO", "Muitas tentativas de criar um Loop Com as curvas fornecidas");
+                        Autodesk.Revit.UI.TaskDialog.Show("ERRO", "Muitas tentativas de criar um Loop Com as curvas fornecidas");
                         return null;
                     }
                 }
@@ -3483,7 +3482,7 @@ namespace Revit.Common
                         number++;
                         if (number > 1000)
                         {
-                            TaskDialog.Show("erro", "erro");
+                            Autodesk.Revit.UI.TaskDialog.Show("erro", "erro");
                             goto finish;
                         }
                     }
@@ -3659,7 +3658,7 @@ namespace Revit.Common
                         number++;
                         if (number > 1000)
                         {
-                            TaskDialog.Show("erro", "erro");
+                            Autodesk.Revit.UI.TaskDialog.Show("erro", "erro");
                             goto finish;
                         }
                     }

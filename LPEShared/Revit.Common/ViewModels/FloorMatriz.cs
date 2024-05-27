@@ -5,6 +5,7 @@
 // Assembly location: C:\ProgramData\Autodesk\Revit\Addins\2024\LPE\LPE.dll
 
 using Autodesk.Revit.DB;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -28,7 +29,7 @@ namespace Revit.Common
         ImprimacaoAsflatica,
     }
 
-    public class FloorMatriz : ViewModelBase
+    public class FloorMatriz : ViewModelBase, ICloneable
     {
         private ObservableCollection<LayerViewModel> layers = new ObservableCollection<LayerViewModel>();
 
@@ -46,9 +47,21 @@ namespace Revit.Common
             }
         }
 
+        public object Clone()
+        {
+            FloorMatriz cloneFloorMatriz = (object)(FloorMatriz)this.MemberwiseClone() as FloorMatriz;
+            cloneFloorMatriz.Layers = new ObservableCollection<LayerViewModel>();
+            foreach (LayerViewModel layerViewModel in this.Layers)
+            {
+                cloneFloorMatriz.Layers.Add(new LayerViewModel(layerViewModel.SelectedCamadaTipo, layerViewModel.SelectedMaterial, layerViewModel.Width, layerViewModel.PossibleMaterials, layerViewModel.IsEnabled, layerViewModel.Tag));
+            }
+            return cloneFloorMatriz;
+        } 
+
+
         public void GetFloorTypeData(
           FloorType floorType,
-          Dictionary<MaterialClass, List<string>> materialsDict)
+          Dictionary<MaterialClass, List<string>> materialsDict, FullAmbienteViewModel fullAmbienteViewModel = null)
         {
             this.FloorName = ((Element)floorType).Name;
             this.IsModelo = this.FloorName.Contains("0.MODELO");
@@ -58,6 +71,7 @@ namespace Revit.Common
                 Element element = ((Element)floorType).Document.GetElement(layer1.MaterialId);
                 List<string> source = new List<string>();
                 string tipo;
+                string tag = "";
                 if (element.LookupParameter("LPE_MAT_BASE").AsInteger() == 1)
                 {
                     bool flag = false;
@@ -78,17 +92,20 @@ namespace Revit.Common
                     {
                         source.AddRange((IEnumerable<string>)materialsDict[MaterialClass.SubBase]);
                         tipo = "Sub-Base";
+                        tag = fullAmbienteViewModel?.TagSubBase;
                     }
                 }
                 else if (element.LookupParameter("LPE_MAT_SUB-BASE").AsInteger() == 1)
                 {
                     source.AddRange((IEnumerable<string>)materialsDict[MaterialClass.SubBase]);
                     tipo = "Sub-Base";
+                    tag = fullAmbienteViewModel?.TagSubBase;
                 }
                 else if (element.LookupParameter("LPE_MAT_CONCRETO").AsInteger() == 1)
                 {
                     source.AddRange((IEnumerable<string>)materialsDict[MaterialClass.Concreto]);
                     tipo = "Concreto";
+                    tag = fullAmbienteViewModel?.TagConcreto;
                 }
                 else if (element.LookupParameter("LPE_MAT_FILME PLÁSTICO").AsInteger() == 1)
                 {
@@ -99,6 +116,7 @@ namespace Revit.Common
                 {
                     source.AddRange((IEnumerable<string>)materialsDict[MaterialClass.ReforcoSubleito]);
                     tipo = "Reforço de Subleito";
+                    tag = fullAmbienteViewModel?.TagRefSubleito;
                 }
                 else if (element.LookupParameter("LPE_MAT_CAMADA DE ISOLAMENTO").AsInteger() == 1)
                 {
@@ -124,6 +142,7 @@ namespace Revit.Common
                 {
                     source.AddRange((IEnumerable<string>)materialsDict[MaterialClass.ConcretoAsfaltico]);
                     tipo = "Concreto Asfáltico";
+                    tag = fullAmbienteViewModel?.TagConcreto;
                 }
                 else if (element.LookupParameter("LPE_MAT_PINTURA DE LIGAÇÃO").AsInteger() == 1)
                 {
@@ -142,14 +161,14 @@ namespace Revit.Common
                 }
                 List<string> list = source.Distinct<string>().ToList<string>();
                 list.Sort();
-                this.Layers.Add(new LayerViewModel(tipo, element.Name, UnitUtils.ConvertFromInternalUnits(layer1.Width, UnitTypeId.Centimeters), list, true));
+                this.Layers.Add(new LayerViewModel(tipo, element.Name, UnitUtils.ConvertFromInternalUnits(layer1.Width, UnitTypeId.Centimeters), list, true, tag));
                 if (((HostObjAttributes)floorType).GetCompoundStructure().GetLastCoreLayerIndex() == index1)
                     this.Layers.Add(new LayerViewModel("", "", 0.0, new List<string>(), false)
                     {
                         CamadaTipos = new List<string>()
-            {
-              "Core Boundary"
-            },
+                        {
+                          "Core Boundary"
+                        },
                         SelectedCamadaTipo = "Core Boundary"
                     });
             }

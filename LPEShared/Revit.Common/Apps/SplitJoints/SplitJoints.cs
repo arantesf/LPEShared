@@ -11,6 +11,7 @@ using System.Diagnostics;
 using Autodesk.Revit.DB.Events;
 using System.IO;
 using System.Reflection;
+using Application = Autodesk.Revit.ApplicationServices.Application;
 
 #endregion
 
@@ -28,7 +29,7 @@ namespace Revit.Common
             UIDocument uidoc = uiapp.ActiveUIDocument;
             Application app = uiapp.Application;
             Document doc = uidoc.Document;
-            View initialView = uidoc.ActiveView;
+            Autodesk.Revit.DB.View initialView = uidoc.ActiveView;
 
             //try
             //{
@@ -42,7 +43,7 @@ namespace Revit.Common
 
             if (!OK)
             {
-                TaskDialog.Show("ATENÇÃO!", $"Não foi possível executar o comando por não existir no modelo os seguintes parâmetros:\n {errors}");
+                Autodesk.Revit.UI.TaskDialog.Show("ATENÇÃO!", $"Não foi possível executar o comando por não existir no modelo os seguintes parâmetros:\n {errors}");
                 return Result.Cancelled;
             }
 

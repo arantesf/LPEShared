@@ -4,7 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    Title="Gerenciador de ambientes"
+    Title="Gerenciador de ambientes v2.0.8"
     Width="1000"
     Height="500"
     MinWidth="1000"
@@ -229,7 +229,7 @@
             AutoGenerateColumns="false"
             CellStyle="{StaticResource Clear_Focus_DataGridCell}"
             FontSize="13"
-            FrozenColumnCount="2"
+            FrozenColumnCount="3"
             HeadersVisibility="Column"
             HorizontalGridLinesBrush="#11000000"
             IsReadOnly="true"
@@ -295,6 +295,11 @@
                     ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
                     Header="Emenda - Tela Superior"
                     HeaderStyle="{StaticResource TelaSuperior.Background}" />
+                <DataGridTextColumn
+                    Binding="{Binding CobrimentoTelaSuperior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
+                    Header="Cobrimento Superior"
+                    HeaderStyle="{StaticResource TelaSuperior.Background}" />
                 <DataGridCheckBoxColumn
                     Binding="{Binding BoolTelaInferior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     ElementStyle="{StaticResource CheckBox_DataGrid_Centering}"
@@ -310,6 +315,11 @@
                     Binding="{Binding EmendaTelaInferior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
                     Header="Emenda - Tela Inferior"
+                    HeaderStyle="{StaticResource TelaInferior.Background}" />
+                <DataGridTextColumn
+                    Binding="{Binding CobrimentoTelaInferior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
+                    Header="Cobrimento Inferior"
                     HeaderStyle="{StaticResource TelaInferior.Background}" />
                 <DataGridCheckBoxColumn
                     Binding="{Binding BoolFibra, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
@@ -348,7 +358,7 @@
                     ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
                     Header="Tratamento Superficial"
                     HeaderStyle="{StaticResource Tratamento.Background}" />
-                <DataGridCheckBoxColumn
+                <!--<DataGridCheckBoxColumn
                     Binding="{Binding BoolEspacadorSuperior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     ElementStyle="{StaticResource CheckBox_DataGrid_Centering}"
                     Header="(s/n) Espaçador Sup."
@@ -369,8 +379,7 @@
                     Binding="{Binding HEspacadorInferior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
                     Header="H-Espaçador Inferior (cm)"
-                    HeaderStyle="{StaticResource Espacadores.Background}" />
-
+                    HeaderStyle="{StaticResource Espacadores.Background}" />-->
                 <DataGridCheckBoxColumn
                     Binding="{Binding BoolReforcoTelaSuperior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     ElementStyle="{StaticResource CheckBox_DataGrid_Centering}"
@@ -419,6 +428,16 @@
                     Header="LPE__VEÍCULOS PESADOS"
                     HeaderStyle="{StaticResource VeiculosPesados.Background}"
                     IsReadOnly="true" />
+                <DataGridTextColumn
+                    Binding="{Binding EspacamentoBarra, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
+                    Header="Espaçamento Barra"
+                    HeaderStyle="{StaticResource Camada1.Background}" />
+                <DataGridCheckBoxColumn
+                    Binding="{Binding BoolBarraPorCima, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    ElementStyle="{StaticResource CheckBox_DataGrid_Centering}"
+                    Header="Barra por cima"
+                    HeaderStyle="{StaticResource Camada1.Background}" />
                 <DataGridTextColumn
                     Binding="{Binding TagConcreto, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"

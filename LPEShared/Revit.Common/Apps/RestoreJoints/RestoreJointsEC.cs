@@ -15,6 +15,7 @@ using Autodesk.Revit.DB.Architecture;
 using Microsoft.SqlServer.Server;
 using System.Xml.Linq;
 using System.Diagnostics.Eventing.Reader;
+using Application = Autodesk.Revit.ApplicationServices.Application;
 
 namespace Revit.Common
 {
@@ -47,7 +48,7 @@ namespace Revit.Common
 
             if (!OK)
             {
-                TaskDialog.Show("ATENÇÃO!", $"Não foi possível executar o comando por não existir no modelo os seguintes parâmetros:\n {error}");
+                Autodesk.Revit.UI.TaskDialog.Show("ATENÇÃO!", $"Não foi possível executar o comando por não existir no modelo os seguintes parâmetros:\n {error}");
                 return Result.Cancelled;
             }
 

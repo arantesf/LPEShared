@@ -91,15 +91,20 @@ namespace Revit.Common
                 foreach (var ambienteViewModel in AmbienteManagerMVVM.MainView.AmbienteViewModelsToDelete)
                 {
                     tx.Start();
+                    if (ambienteViewModel.PisoId.IntegerValue != -1)
+                        doc.Delete(ambienteViewModel.PisoId);
                     var floorType = new FilteredElementCollector(doc)
                         .OfClass(typeof(FloorType))
                         .Cast<FloorType>()
                         .FirstOrDefault(a => a.Name == ambienteViewModel.FloorMatriz?.FloorName);
                     if (floorType != null)
-                    {
                         doc.Delete(floorType.Id);
-                    }
-                    doc.Delete(ambienteViewModel.Id);
+                    if (ambienteViewModel.KSPisoId.IntegerValue != -1)
+                        doc.Delete(ambienteViewModel.KSPisoId);
+                    if (ambienteViewModel.KSDetalheId.IntegerValue != -1)
+                        doc.Delete(ambienteViewModel.KSDetalheId);
+                    if (ambienteViewModel.KSJuntaId.IntegerValue != -1)
+                        doc.Delete(ambienteViewModel.KSJuntaId);
                     tx.Commit();
                 }
                 foreach (var ambienteViewModel in AmbienteManagerMVVM.MainView.AmbienteViewModels)
@@ -124,147 +129,58 @@ namespace Revit.Common
                         .Cast<ViewSchedule>()
                         .Where(view => view.Name == "LPE_ITENS DE DETALHE SEÇÕES")
                         .FirstOrDefault();
-                    
-                    Element tipoDePisoComMesmoId = new FilteredElementCollector(doc, keyScheduleTipoDePiso.Id).Where(a => a.Id == ambienteViewModel.Id).FirstOrDefault();
-                    Element itemDeDetalheComMesmoAmbiente = new FilteredElementCollector(doc, keyScheduleItensDeDetalhe.Id).Where(a => a.get_Parameter(BuiltInParameter.REF_TABLE_ELEM_NAME).AsString() == ambienteViewModel.TipoDePiso).FirstOrDefault();
-                    Element tipoDeJuntaComMesmoAmbiente = new FilteredElementCollector(doc, keyScheduleTipoDeJunta.Id).Where(a => a.get_Parameter(BuiltInParameter.REF_TABLE_ELEM_NAME).AsString() == ambienteViewModel.TipoDePiso).FirstOrDefault();
-                    switch (ambienteViewModel.Action)
+
+                    Element tipoDePisoComMesmoId = new FilteredElementCollector(doc, keyScheduleTipoDePiso.Id).Where(a => a.Id == ambienteViewModel.KSPisoId).FirstOrDefault();
+                    Element itemDeDetalheComMesmoId = new FilteredElementCollector(doc, keyScheduleItensDeDetalhe.Id).Where(a => a.Id == ambienteViewModel.KSDetalheId).FirstOrDefault();
+                    Element tipoDeJuntaComMesmoId = new FilteredElementCollector(doc, keyScheduleTipoDeJunta.Id).Where(a => a.Id == ambienteViewModel.KSJuntaId).FirstOrDefault();
+                    List<Element> tipoDeJuntaComMesmoId2 = new FilteredElementCollector(doc, keyScheduleTipoDeJunta.Id).ToList();
+                    TableData tableDataPiso = keyScheduleTipoDePiso.GetTableData();
+                    TableData tableDataDetalhe = keyScheduleItensDeDetalhe.GetTableData();
+                    TableData tableDataJunta = keyScheduleTipoDeJunta.GetTableData();
+                    TableSectionData tsd1 = tableDataPiso.GetSectionData(SectionType.Body);
+                    TableSectionData tsd2 = tableDataDetalhe.GetSectionData(SectionType.Body);
+                    TableSectionData tsd3 = tableDataJunta.GetSectionData(SectionType.Body);
+
+                    if (tipoDePisoComMesmoId == null)
                     {
-                        case Action.Continue:
-                            if (itemDeDetalheComMesmoAmbiente == null)
-                            {
-                                if (ambienteViewModel.Ambiente != null || ambienteViewModel.Ambiente != "")
-                                {
-                                    List<ElementId> itensDeDetalheExistentes = new FilteredElementCollector(doc, keyScheduleItensDeDetalhe.Id).ToElementIds().ToList();
-                                    tx.Start();
-                                    TableData tableDataItensDeDetalhe = keyScheduleItensDeDetalhe.GetTableData();
-                                    TableSectionData tsdItensDeDetalhe = tableDataItensDeDetalhe.GetSectionData(SectionType.Body);
-                                    tsdItensDeDetalhe.InsertRow(1);
-                                    tx.Commit();
-                                    itemDeDetalheComMesmoAmbiente = new FilteredElementCollector(doc, keyScheduleItensDeDetalhe.Id).Where(a => !itensDeDetalheExistentes.Contains(a.Id)).FirstOrDefault();
-                                }
-                            }
-                            if (tipoDeJuntaComMesmoAmbiente == null)
-                            {
-                                if (ambienteViewModel.Ambiente != null || ambienteViewModel.Ambiente != "")
-                                {
-                                    List<ElementId> tipoDeJuntaExistentes = new FilteredElementCollector(doc, keyScheduleTipoDeJunta.Id).ToElementIds().ToList();
-                                    tx.Start();
-                                    TableData tableDataTipoDeJunta = keyScheduleTipoDeJunta.GetTableData();
-                                    TableSectionData tsdTipoDeJunta = tableDataTipoDeJunta.GetSectionData(SectionType.Body);
-                                    tsdTipoDeJunta.InsertRow(1);
-                                    tx.Commit();
-                                    tipoDeJuntaComMesmoAmbiente = new FilteredElementCollector(doc, keyScheduleTipoDeJunta.Id).Where(a => !tipoDeJuntaExistentes.Contains(a.Id)).FirstOrDefault();
-                                }
-                            }
-
-                            tx.Start();
-                            AmbienteManagerUtils.SetAmbienteLPETipoDePiso(tipoDePisoComMesmoId, ambienteViewModel);
-                            AmbienteManagerUtils.SetAmbienteLPEItensDeDetalhe(itemDeDetalheComMesmoAmbiente, ambienteViewModel);
-                            AmbienteManagerUtils.SetAmbienteLPETipoDeJunta(tipoDeJuntaComMesmoAmbiente, ambienteViewModel);
-                            if (ambienteViewModel.SelectedfloorMatriz?.FloorName != null || ambienteViewModel.FloorMatriz?.FloorName != null)
-                            {
-                                AmbienteManagerUtils.SetFloorType(doc, ambienteViewModel, false);
-                            }
-                            tx.Commit();
-                            break;
-                        case Action.Delete:
-                            break;
-                        case Action.Modify:
-                            if (itemDeDetalheComMesmoAmbiente == null)
-                            {
-                                if (ambienteViewModel.Ambiente != null || ambienteViewModel.Ambiente != "")
-                                {
-                                    List<ElementId> itensDeDetalheExistentes = new FilteredElementCollector(doc, keyScheduleItensDeDetalhe.Id).ToElementIds().ToList();
-                                    tx.Start();
-                                    TableData tableDataItensDeDetalhe = keyScheduleItensDeDetalhe.GetTableData();
-                                    TableSectionData tsdItensDeDetalhe = tableDataItensDeDetalhe.GetSectionData(SectionType.Body);
-                                    tsdItensDeDetalhe.InsertRow(1);
-                                    tx.Commit();
-                                    itemDeDetalheComMesmoAmbiente = new FilteredElementCollector(doc, keyScheduleItensDeDetalhe.Id).Where(a => !itensDeDetalheExistentes.Contains(a.Id)).FirstOrDefault();
-                                }
-                            }
-                            if (tipoDeJuntaComMesmoAmbiente == null)
-                            {
-                                if (ambienteViewModel.Ambiente != null || ambienteViewModel.Ambiente != "")
-                                {
-                                    List<ElementId> tipoDeJuntaExistentes = new FilteredElementCollector(doc, keyScheduleTipoDeJunta.Id).ToElementIds().ToList();
-                                    tx.Start();
-                                    TableData tableDataTipoDeJunta = keyScheduleTipoDeJunta.GetTableData();
-                                    TableSectionData tsdTipoDeJunta = tableDataTipoDeJunta.GetSectionData(SectionType.Body);
-                                    tsdTipoDeJunta.InsertRow(1);
-                                    tx.Commit();
-                                    tipoDeJuntaComMesmoAmbiente = new FilteredElementCollector(doc, keyScheduleTipoDeJunta.Id).Where(a => !tipoDeJuntaExistentes.Contains(a.Id)).FirstOrDefault();
-                                }
-                            }
-                            tx.Start();
-                            AmbienteManagerUtils.SetAmbienteLPETipoDePiso(tipoDePisoComMesmoId, ambienteViewModel);
-                            AmbienteManagerUtils.SetAmbienteLPEItensDeDetalhe(itemDeDetalheComMesmoAmbiente, ambienteViewModel);
-                            AmbienteManagerUtils.SetAmbienteLPETipoDeJunta(tipoDeJuntaComMesmoAmbiente, ambienteViewModel);
-                            if (ambienteViewModel.SelectedfloorMatriz?.FloorName != null || ambienteViewModel.FloorMatriz?.FloorName != null)
-                            {
-                                AmbienteManagerUtils.SetFloorType(doc, ambienteViewModel, false);
-                            }
-                            tx.Commit();
-                            break;
-                        case Action.Create:
-                            tx.Start();
-                            TableData tableData = keyScheduleTipoDePiso.GetTableData();
-                            TableSectionData tsd = tableData.GetSectionData(SectionType.Body);
-                            tsd.InsertRow(1);
-                            tx.Commit();
-
-                            
-                            Element novoTipoDePiso = new FilteredElementCollector(doc, keyScheduleTipoDePiso.Id).Where(a => !a.LookupParameter("Ambiente").HasValue).FirstOrDefault();
-
-                            if (itemDeDetalheComMesmoAmbiente == null)
-                            {
-                                if (ambienteViewModel.Ambiente != null || ambienteViewModel.Ambiente != "")
-                                {
-                                    List<ElementId> itensDeDetalheExistentes = new FilteredElementCollector(doc, keyScheduleItensDeDetalhe.Id).ToElementIds().ToList();
-                                    tx.Start();
-                                    TableData tableDataItensDeDetalhe = keyScheduleItensDeDetalhe.GetTableData();
-                                    TableSectionData tsdItensDeDetalhe = tableDataItensDeDetalhe.GetSectionData(SectionType.Body);
-                                    tsdItensDeDetalhe.InsertRow(1);
-                                    tx.Commit();
-                                    itemDeDetalheComMesmoAmbiente = new FilteredElementCollector(doc, keyScheduleItensDeDetalhe.Id).Where(a => !itensDeDetalheExistentes.Contains(a.Id)).FirstOrDefault();
-                                }
-                            }
-                            if (tipoDeJuntaComMesmoAmbiente == null)
-                            {
-                                if (ambienteViewModel.Ambiente != null || ambienteViewModel.Ambiente != "")
-                                {
-                                    List<ElementId> tipoDeJuntaExistentes = new FilteredElementCollector(doc, keyScheduleTipoDeJunta.Id).ToElementIds().ToList();
-                                    tx.Start();
-                                    TableData tableDataTipoDeJunta = keyScheduleTipoDeJunta.GetTableData();
-                                    TableSectionData tsdTipoDeJunta = tableDataTipoDeJunta.GetSectionData(SectionType.Body);
-                                    tsdTipoDeJunta.InsertRow(1);
-                                    tx.Commit();
-                                    tipoDeJuntaComMesmoAmbiente = new FilteredElementCollector(doc, keyScheduleTipoDeJunta.Id).Where(a => !tipoDeJuntaExistentes.Contains(a.Id)).FirstOrDefault();
-                                }
-                            }
-                            tx.Start();
-                            AmbienteManagerUtils.SetAmbienteLPETipoDePiso(novoTipoDePiso, ambienteViewModel);
-                            AmbienteManagerUtils.SetAmbienteLPEItensDeDetalhe(itemDeDetalheComMesmoAmbiente, ambienteViewModel);
-                            AmbienteManagerUtils.SetAmbienteLPETipoDeJunta(tipoDeJuntaComMesmoAmbiente, ambienteViewModel);
-                            if (ambienteViewModel.SelectedfloorMatriz?.FloorName != null || ambienteViewModel.FloorMatriz?.FloorName != null)
-                            {
-                                AmbienteManagerUtils.SetFloorType(doc, ambienteViewModel, true);
-                            }
-                            tx.Commit();
-                            break;
-                        default:
-                            break;
+                        tx.Start();
+                        tsd1.InsertRow(1);
+                        tx.Commit();
+                        tipoDePisoComMesmoId = new FilteredElementCollector(doc, keyScheduleTipoDePiso.Id).Where(a => !a.LookupParameter("Ambiente").HasValue).FirstOrDefault();
                     }
+                    if (itemDeDetalheComMesmoId == null)
+                    {
+                        tx.Start();
+                        tsd2.InsertRow(1);
+                        tx.Commit();
+                        itemDeDetalheComMesmoId = new FilteredElementCollector(doc, keyScheduleItensDeDetalhe.Id).Where(a => !a.LookupParameter("Ambiente").HasValue).FirstOrDefault();
+                    }
+                    if (tipoDeJuntaComMesmoId == null)
+                    {
+                        tx.Start();
+                        tsd3.InsertRow(1);
+                        tx.Commit();
+                        tipoDeJuntaComMesmoId = new FilteredElementCollector(doc, keyScheduleTipoDeJunta.Id).Where(a => !a.LookupParameter("Ambiente").HasValue).FirstOrDefault();
+                    }
+
+                    tx.Start();
+                    AmbienteManagerUtils.SetAmbienteLPETipoDePiso(tipoDePisoComMesmoId, ambienteViewModel);
+                    AmbienteManagerUtils.SetAmbienteLPEItensDeDetalhe(itemDeDetalheComMesmoId, ambienteViewModel);
+                    AmbienteManagerUtils.SetAmbienteLPETipoDeJunta(tipoDeJuntaComMesmoId, ambienteViewModel);
+                    if (ambienteViewModel.StoredFloorMatriz?.FloorName != null || ambienteViewModel.FloorMatriz?.FloorName != null)
+                    {
+                        AmbienteManagerUtils.SetFloorType(doc, ambienteViewModel, false);
+                    }
+                    tx.Commit();
                 }
 
                 tg.Assimilate();
+                Autodesk.Revit.UI.TaskDialog.Show("Sucesso!", $"Ambientes configurados com sucesso!");
             }
             catch (Exception ex)
             {
-                TaskDialog.Show("ATENÇÃO!", $"Erro, contate os desenvolvedores.\n{ex.Message} - {ex.StackTrace}");
+                Autodesk.Revit.UI.TaskDialog.Show("ATENÇÃO!", $"Erro, contate os desenvolvedores.\n{ex.Message} - {ex.StackTrace}");
             }
-            TaskDialog.Show("Sucesso!", $"Ambientes configurados com sucesso!");
         }
 
         public string GetName()

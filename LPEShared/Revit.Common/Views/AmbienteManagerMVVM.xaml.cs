@@ -42,6 +42,8 @@ namespace Revit.Common
 
         public Dictionary<FloorMatrizClass, List<FloorMatriz>> FloorMatrizes { get; set; } = new Dictionary<FloorMatrizClass, List<FloorMatriz>>();
 
+        public List<FibraViewModel> Fibras { get; set; } = new List<FibraViewModel>();
+
         public List<string> AllMaterialNames { get; set; } = new List<string>();
 
         public Dictionary<MaterialClass, List<string>> MaterialsByClass { get; set; } = new Dictionary<MaterialClass, List<string>>();
@@ -83,7 +85,8 @@ namespace Revit.Common
 
         private void AddAmbiente_Button_Click(object sender, RoutedEventArgs e)
         {
-            AmbienteEditMVVM ambienteEditMvvm = new AmbienteEditMVVM(new FullAmbienteViewModel(), true);
+            FullAmbienteViewModel newFullAmbienteViewModel = new FullAmbienteViewModel() { EspacamentoBarra = 30, UltimaCamada = "Subleito" };
+            AmbienteEditMVVM ambienteEditMvvm = new AmbienteEditMVVM(newFullAmbienteViewModel, true);
             ambienteEditMvvm.Topmost = true;
             ambienteEditMvvm.ShowDialog();
         }
@@ -112,20 +115,75 @@ namespace Revit.Common
 
         public void ApplyAddAmbiente(FullAmbienteViewModel fullAmbienteViewModel)
         {
-            this.SetSameAmbienteItensDeDetalhe(fullAmbienteViewModel);
+            //this.SetSameAmbienteItensDeDetalhe(fullAmbienteViewModel);
             this.AmbienteViewModels.Add(fullAmbienteViewModel);
         }
 
         public void ApplyEditAmbiente(FullAmbienteViewModel fullAmbienteViewModel)
         {
-            this.SetSameAmbienteItensDeDetalhe(fullAmbienteViewModel);
+            //this.SetSameAmbienteItensDeDetalhe(fullAmbienteViewModel);
             this.SelectedFullAmbienteViewModel = fullAmbienteViewModel;
+        }
+
+        public void ApplyParentChangesToChildren(FullAmbienteViewModel fullAmbienteViewModel)
+        {
+            List<FullAmbienteViewModel> ambientesToAdd = new List<FullAmbienteViewModel>();
+            for (int i = 0; i < AmbienteViewModels.Count; i++)
+            {
+                var viewModel = AmbienteViewModels[i];
+                if (viewModel.ParentAmbienteViewModelGUID == fullAmbienteViewModel.GUID)
+                {
+                    bool boolRefSuperior = viewModel.BoolReforcoTelaSuperior;
+                    int telaRefSuperior = viewModel.ReforcoTelaSuperior;
+                    double emendaRefSuperior = viewModel.EmendaReforcoTelaSuperior;
+                    string finalidadeRefSuperior = viewModel.FinalidadeReforcoTelaSuperior;
+                    bool boolRefInferior = viewModel.BoolReforcoTelaInferior;
+                    int telaRefInferior = viewModel.ReforcoTelaInferior;
+                    double emendaRefInferior = viewModel.EmendaReforcoTelaInferior;
+                    string finalidadeRefInferior = viewModel.FinalidadeReforcoTelaInferior;
+                    ElementId pisoId = viewModel.PisoId;
+                    ElementId ksPisoId = viewModel.KSPisoId;
+                    ElementId ksDetalheId = viewModel.KSDetalheId;
+                    ElementId ksJuntaId = viewModel.KSJuntaId;
+                    string guid = viewModel.GUID;
+                    string parentGuid = viewModel.ParentAmbienteViewModelGUID;
+                    var newViewModel = fullAmbienteViewModel.Clone() as FullAmbienteViewModel;
+                    newViewModel.GUID = guid;
+                    newViewModel.ParentAmbienteViewModelGUID = parentGuid;
+                    newViewModel.PisoId = pisoId;
+                    newViewModel.KSPisoId = ksPisoId;
+                    newViewModel.KSJuntaId= ksJuntaId;
+                    newViewModel.KSDetalheId= ksDetalheId;
+                    newViewModel.BoolReforcoDeTela = true;
+                    newViewModel.BoolReforcoTelaSuperior = boolRefSuperior;
+                    newViewModel.BoolReforcoTelaSuperior = boolRefSuperior;
+                    newViewModel.ReforcoTelaSuperior = telaRefSuperior;
+                    newViewModel.EmendaReforcoTelaSuperior = emendaRefSuperior;
+                    newViewModel.FinalidadeReforcoTelaSuperior = finalidadeRefSuperior;
+                    newViewModel.BoolReforcoTelaInferior = boolRefInferior;
+                    newViewModel.ReforcoTelaInferior = telaRefInferior;
+                    newViewModel.EmendaReforcoTelaInferior = emendaRefInferior;
+                    newViewModel.FinalidadeReforcoTelaInferior = finalidadeRefInferior;
+                    newViewModel.SetTipoDePiso();
+                    AmbienteViewModels.Remove(viewModel);
+                    i--;
+                    ambientesToAdd.Add(newViewModel);
+                }
+            }
+            foreach (var ambiente in ambientesToAdd)
+            {
+                AmbienteViewModels.Add(ambiente);
+            }
         }
 
         private void EditAmbiente_Button_Click(object sender, RoutedEventArgs e)
         {
             if (this.Ambiente_DataGrid.SelectedIndex <= -1)
+            {
+                WarningMVVM warningMVVM = new WarningMVVM("Selecione um item para continuar.");
+                warningMVVM.ShowDialog();
                 return;
+            }
             this.SelectedFullAmbienteViewModelWithoutModify = this.SelectedFullAmbienteViewModel.Clone() as FullAmbienteViewModel;
             AmbienteEditMVVM ambienteEditMvvm = new AmbienteEditMVVM(this.SelectedFullAmbienteViewModel, false);
             ambienteEditMvvm.Topmost = true;
@@ -144,9 +202,13 @@ namespace Revit.Common
             try
             {
                 if (this.Ambiente_DataGrid.SelectedIndex <= -1)
+                {
+                    WarningMVVM warningMVVM = new WarningMVVM("Selecione um item para continuar.");
+                    warningMVVM.ShowDialog();
                     return;
+                }
                 FullAmbienteViewModel selectedItem = (FullAmbienteViewModel)this.Ambiente_DataGrid.SelectedItem;
-                if (selectedItem.Id != new ElementId(-1))
+                if (selectedItem.KSPisoId != new ElementId(-1))
                 {
                     selectedItem.Action = Action.Delete;
                     this.AmbienteViewModelsToDelete.Add(selectedItem);
@@ -161,10 +223,20 @@ namespace Revit.Common
         private void DuplicateAmbiente_Button_Click(object sender, RoutedEventArgs e)
         {
             if (this.Ambiente_DataGrid.SelectedIndex <= -1)
+            {
+                WarningMVVM warningMVVM = new WarningMVVM("Selecione um item para continuar.");
+                warningMVVM.ShowDialog();
                 return;
-            FullAmbienteViewModel fullAmbienteViewModels = (FullAmbienteViewModel)this.SelectedFullAmbienteViewModel.Clone();
-            fullAmbienteViewModels.TipoDePiso += "(2)";
-            AmbienteEditMVVM ambienteEditMvvm = new AmbienteEditMVVM(fullAmbienteViewModels, true);
+            }
+            FullAmbienteViewModel fullAmbienteViewModel = (FullAmbienteViewModel)this.SelectedFullAmbienteViewModel.Clone();
+            fullAmbienteViewModel.FloorMatriz = SelectedFullAmbienteViewModel.FloorMatriz.Clone() as FloorMatriz;
+            //fullAmbienteViewModels.TipoDePiso += "(2)";
+            fullAmbienteViewModel.KSPisoId = new ElementId(-1);
+            fullAmbienteViewModel.KSDetalheId = new ElementId(-1);
+            fullAmbienteViewModel.KSJuntaId = new ElementId(-1);
+            fullAmbienteViewModel.PisoId = new ElementId(-1);
+            fullAmbienteViewModel.GUID = Guid.NewGuid().ToString();
+            AmbienteEditMVVM ambienteEditMvvm = new AmbienteEditMVVM(fullAmbienteViewModel, true);
             ambienteEditMvvm.Topmost = true;
             ambienteEditMvvm.ShowDialog();
         }
@@ -172,10 +244,20 @@ namespace Revit.Common
         private void DuplicateReforcoAmbiente_Button_Click(object sender, RoutedEventArgs e)
         {
             if (this.Ambiente_DataGrid.SelectedIndex <= -1)
+            {
+                WarningMVVM warningMVVM = new WarningMVVM("Selecione um item para continuar.");
+                warningMVVM.ShowDialog();
                 return;
+            }
             FullAmbienteViewModel fullAmbienteViewModels = (FullAmbienteViewModel)this.SelectedFullAmbienteViewModel.Clone();
             fullAmbienteViewModels.BoolReforcoDeTela = true;
-            fullAmbienteViewModels.TipoDePiso += " - REFORÇO";
+            fullAmbienteViewModels.ParentAmbienteViewModelGUID = SelectedFullAmbienteViewModel.GUID;
+            //fullAmbienteViewModels.TipoDePiso += " - REFORÇO";
+            fullAmbienteViewModels.KSPisoId = new ElementId(-1);
+            fullAmbienteViewModels.KSDetalheId = new ElementId(-1);
+            fullAmbienteViewModels.KSJuntaId = new ElementId(-1);
+            fullAmbienteViewModels.PisoId = new ElementId(-1);
+            fullAmbienteViewModels.GUID = Guid.NewGuid().ToString();
             AmbienteEditMVVM ambienteEditMvvm = new AmbienteEditMVVM(fullAmbienteViewModels, true);
             ambienteEditMvvm.Topmost = true;
             ambienteEditMvvm.ShowDialog();

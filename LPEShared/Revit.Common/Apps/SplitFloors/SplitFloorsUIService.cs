@@ -202,11 +202,11 @@ namespace Revit.Common
 
                         //Level level = doc.GetElement(floors[0].LevelId) as Level;
                         Level level = Utils.CreateLevel(doc, 10000);
-                        View deletarView = new FilteredElementCollector(doc)
+                        Autodesk.Revit.DB.View deletarView = new FilteredElementCollector(doc)
                             .WhereElementIsNotElementType()
                             .OfClass(typeof(ViewPlan))
                             .Where(view => view.Name == "Deletar")
-                            .Cast<View>()
+                            .Cast<Autodesk.Revit.DB.View>()
                             .FirstOrDefault();
                         Utils.DeleteElements(doc, new List<Element>() { deletarView });
 

@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net8.0-windows</TargetFramework>
+		<RootNamespace>Revit</RootNamespace>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<UseWindowsForms>true</UseWindowsForms>
+		<UseWpf>true</UseWpf>
+		<Nullable>enable</Nullable>
+		<AssemblyName>LPE</AssemblyName>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<Optimize>False</Optimize>
+		<DebugSymbols>true</DebugSymbols>
+		<OutputPath>bin\Debug\$(RevitVersion)\</OutputPath>
+		<DefineConstants>DEBUG;TRACE;REVIT$(RevitVersion)</DefineConstants>
+		<NoWarn>MSB3052</NoWarn>
+		<DebugType>Full</DebugType>
+		<BaseOutputPath>bin\</BaseOutputPath>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Revit_All_Main_Versions_API_x64" Version="2025.0.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\Revit.Resources\Revit.Resources.csproj" />
+	</ItemGroup>
+
+	<!--<ItemGroup>
+		<Reference Include="PresentationFramework">
+			<HintPath>..\..\..\..\..\..\..\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.8\PresentationFramework.dll</HintPath>
+		</Reference>
+	</ItemGroup>-->
+
+	<Import Project="..\Revit.Common\Revit.Common.projitems" Label="Shared" />
+
+</Project>

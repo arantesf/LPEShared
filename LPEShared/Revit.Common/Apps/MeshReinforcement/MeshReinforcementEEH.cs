@@ -16,8 +16,6 @@ using Microsoft.SqlServer.Server;
 using System.Xml.Linq;
 using System.Diagnostics.Eventing.Reader;
 using System.Windows;
-using System.Windows.Controls;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using System.Threading.Tasks;
 
 namespace Revit.Common
@@ -35,7 +33,7 @@ namespace Revit.Common
 
                 UIDocument uidoc = uiapp.ActiveUIDocument;
                 Document doc = uidoc.Document;
-                View initialView = uidoc.ActiveView;
+                Autodesk.Revit.DB.View initialView = uidoc.ActiveView;
 
                 List<DimensionType> cotaLPETypeList = new FilteredElementCollector(doc)
                 .OfClass(typeof(DimensionType))
@@ -65,7 +63,7 @@ namespace Revit.Common
                     ComputeReferences = true,
                     IncludeNonVisibleObjects = true
                 };
-                double proportion = double.Parse(SelectAmbienteReinforcementMVVM.MainView.FatorDeFormaGlobal.Replace(".", ","));
+                double proportion = double.Parse(SelectAmbienteReinforcementMVVM.MainView.FatorDeFormaGlobal.Replace(",", "."));
 
 
                 foreach (var checkedAmbiente in SelectAmbienteReinforcementMVVM.MainView.AmbienteAndReinforcementViewModels.Where(x => x.SelectedReinforcement.Name != ""))
@@ -88,7 +86,7 @@ namespace Revit.Common
 
                         List<Element> existingView = new FilteredElementCollector(doc)
                             .WhereElementIsNotElementType()
-                            .OfClass(typeof(View))
+                            .OfClass(typeof(Autodesk.Revit.DB.View))
                             .Where(a => a.Name == ambiente + " - FATOR DE FORMA")
                             .ToList();
 
@@ -100,7 +98,7 @@ namespace Revit.Common
                         }
 
                         tx.Start();
-                        View view = doc.GetElement(initialView.Duplicate(ViewDuplicateOption.Duplicate)) as View;
+                        Autodesk.Revit.DB.View view = doc.GetElement(initialView.Duplicate(ViewDuplicateOption.Duplicate)) as Autodesk.Revit.DB.View;
                         view.Name = ambiente + " - FATOR DE FORMA";
                         tx.Commit();
                         uidoc.ActiveView = view;
@@ -147,8 +145,8 @@ namespace Revit.Common
                             // GET ONLY EDGES THAT REFERENCES BOUNDARIES
 
                             List<Edge> floorEdges = new List<Edge>();
-                            List<Curve> outsideCurves = floor.GetDependentElements(linesFilter).Select(a => (doc.GetElement(a) as ModelCurve).GeometryCurve).ToList();
                             List<ModelCurve> floorModelCurves = floor.GetDependentElements(linesFilter).Select(a => (doc.GetElement(a) as ModelCurve)).ToList();
+                            List<Curve> outsideCurves = floorModelCurves.Select(a => a.GeometryCurve).ToList();
                             List<Curve> boundaryCurves = new List<Curve>();
                             foreach (var curve in floorModelCurves)
                             {
@@ -177,10 +175,15 @@ namespace Revit.Common
                                                 continue;
                                             }
                                         }
-                                        if (Utils.IsCurvesEqual(Utils.GetCurveProjection(edge.AsCurve()), Utils.GetCurveProjection(modelCurve)))
+                                        if (Utils.GetCurveProjection(modelCurve).Project(Utils.GetCurveProjection(edge.AsCurve()).Evaluate(0.5, true)).Distance < 0.1);
                                         {
                                             floorEdges.Add(edge);
+                                            break;
                                         }
+                                        //if (Utils.IsCurvesEqual(Utils.GetCurveProjection(edge.AsCurve()), Utils.GetCurveProjection(modelCurve)))
+                                        //{
+                                        //    floorEdges.Add(edge);
+                                        //}
                                     }
                                     catch (Exception)
                                     {
@@ -258,6 +261,8 @@ namespace Revit.Common
                                 floor.LookupParameter("LPE_TIPO DE PISO").Set(reinforcementFloorTypeId);
                                 double floorThickness = (floor as Floor).FloorType.GetCompoundStructure().GetLayers().Where(a => a.MaterialId == (floor as Floor).FloorType.StructuralMaterialId).FirstOrDefault().Width;
                             }
+                            //floor.LookupParameter("Comprimento Placa")?.Set(Math.Round(UnitUtils.ConvertFromInternalUnits((dimUpValue / dimRightValue) < 1 ? dimRightValue : dimUpValue, UnitTypeId.Meters),2));
+                            //floor.LookupParameter("Largura da Placa")?.Set(Math.Round(UnitUtils.ConvertFromInternalUnits((dimUpValue / dimRightValue) < 1 ? dimUpValue : dimRightValue, UnitTypeId.Meters),2));
                             Reference refer = new Reference(floor);
                             if (factor > proportion)
                             {
@@ -302,7 +307,7 @@ namespace Revit.Common
             catch (Exception ex)
             {
                 SelectAmbienteReinforcementMVVM.MainView.Dispose(); 
-                TaskDialog.Show("ATENÇÃO!", "Erro não mapeado, contate os desenvolvedores.\n\n" + ex.StackTrace);
+                Autodesk.Revit.UI.TaskDialog.Show("ATENÇÃO!", "Erro não mapeado, contate os desenvolvedores.\n\n" + ex.StackTrace);
                 throw;
             }
         }

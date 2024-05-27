@@ -38,6 +38,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Apps\TagJoints\TagJoints.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Classes\GlobalVariables.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Classes\GroupOfJoints.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Classes\StaticScheduleData.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ExternalApplication\ExternalApplication.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ValidationRules\StringValidationRule.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ValidationRules\DoubleValidationRule.cs" />
@@ -45,6 +46,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\AmbienteViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Classes\CurveAndProjection.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utils\Utils.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ViewModels\TagViewModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ViewModels\FibraViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\FloorMatriz.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\EditVisibilityViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\FullAmbienteViewModel.cs" />
@@ -52,6 +55,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\LayerViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\ProgressBarViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\ViewModelBase.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Views\Warning.xaml.cs">
+      <DependentUpon>Warning.xaml</DependentUpon>
+    </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)Views\AmbienteEditMVVM.xaml.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Views\Types.xaml.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Views\About.xaml.cs" />
@@ -71,6 +77,10 @@
     <Folder Include="$(MSBuildThisFileDirectory)ExternalApplication\" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="$(MSBuildThisFileDirectory)Views\Warning.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="$(MSBuildThisFileDirectory)Views\AmbienteEditMVVM.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

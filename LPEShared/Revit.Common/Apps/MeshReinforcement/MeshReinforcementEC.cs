@@ -15,6 +15,7 @@ using Autodesk.Revit.DB.Architecture;
 using Microsoft.SqlServer.Server;
 using System.Xml.Linq;
 using System.Diagnostics.Eventing.Reader;
+using Application = Autodesk.Revit.ApplicationServices.Application;
 
 namespace Revit.Common
 {
@@ -33,7 +34,7 @@ namespace Revit.Common
 
             if (uidoc.ActiveView is View3D)
             {
-                TaskDialog.Show("Atenção!", "Abra uma vista de planta para rodar o plug-in!");
+                Autodesk.Revit.UI.TaskDialog.Show("Atenção!", "Abra uma vista de planta para rodar o plug-in!");
                 return Result.Cancelled;
             }
 
@@ -103,7 +104,7 @@ namespace Revit.Common
             }
             if (!OK || !OKfamily)
             {
-                TaskDialog.Show("ATENÇÃO!", errorFinal);
+                Autodesk.Revit.UI.TaskDialog.Show("ATENÇÃO!", errorFinal);
                 return Result.Cancelled;
             }
 
