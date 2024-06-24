@@ -11,13 +11,15 @@ namespace Revit.Common
         public List<int> Telas { get; set; }
         public List<string> Tratamentos { get; set; }
         public List<TagViewModel> Tags { get; set; }
-        public StaticScheduleData(List<FibraViewModel> fibras, List<double> emendas, List<int> telas, List<string> tratamentos, List<TagViewModel> tags)
+        public List<PisoLegendaModel> Legendas { get; set; }
+        public StaticScheduleData(List<FibraViewModel> fibras, List<double> emendas, List<int> telas, List<string> tratamentos, List<TagViewModel> tags, List<PisoLegendaModel> legendas)
         {
             Fibras = fibras;
             Emendas = emendas;
             Telas = telas;
             Tratamentos = tratamentos;
             Tags = tags;
+            Legendas = legendas;
         }
     }
 }

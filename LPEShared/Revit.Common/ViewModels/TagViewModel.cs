@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Autodesk.Revit.DB;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -12,6 +13,17 @@ namespace Revit.Common
         {
             Title = title;
             Tag = tag;
+        }
+    }
+
+    public class PisoLegendaModel : ViewModelBase
+    {
+        public string Name { get; set; }
+        public string HexColor { get; set; }
+        public PisoLegendaModel(string name, string color)
+        {
+            Name = name;
+            HexColor = color;
         }
     }
 }

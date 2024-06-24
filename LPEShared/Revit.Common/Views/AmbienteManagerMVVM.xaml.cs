@@ -230,6 +230,7 @@ namespace Revit.Common
             }
             FullAmbienteViewModel fullAmbienteViewModel = (FullAmbienteViewModel)this.SelectedFullAmbienteViewModel.Clone();
             fullAmbienteViewModel.FloorMatriz = SelectedFullAmbienteViewModel.FloorMatriz.Clone() as FloorMatriz;
+            fullAmbienteViewModel.SelectedfloorMatriz = SelectedFullAmbienteViewModel.FloorMatriz.Clone() as FloorMatriz;
             //fullAmbienteViewModels.TipoDePiso += "(2)";
             fullAmbienteViewModel.KSPisoId = new ElementId(-1);
             fullAmbienteViewModel.KSDetalheId = new ElementId(-1);

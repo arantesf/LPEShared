@@ -4,7 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    Title="Gerenciador de ambientes v2.0.8"
+    Title="Gerenciador de ambientes v2.0.9"
     Width="1000"
     Height="500"
     MinWidth="1000"
@@ -238,6 +238,17 @@
             SelectionUnit="FullRow"
             VerticalGridLinesBrush="#11000000">
             <DataGrid.Columns>
+                <DataGridTemplateColumn Header="" HeaderStyle="{StaticResource Identidade.Background}">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Rectangle
+                                Width="30"
+                                Height="Auto"
+                                Fill="{Binding SelectedLegenda.HexColor}"
+                                Stroke="Gray" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
                 <DataGridTextColumn
                     Binding="{Binding TipoDePiso, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
@@ -258,6 +269,11 @@
                     Binding="{Binding HConcreto, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
                     Header="H Concreto"
+                    HeaderStyle="{StaticResource Identidade.Background}" />
+                <DataGridTextColumn
+                    Binding="{Binding TagExtra, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
+                    Header="TAG Extra"
                     HeaderStyle="{StaticResource Identidade.Background}" />
                 <DataGridTextColumn
                     Binding="{Binding ComprimentoDaPlaca, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
@@ -502,6 +518,7 @@
                     ElementStyle="{StaticResource TextBlock_DataGrid_Centering}"
                     Header="LPE__CARGA"
                     HeaderStyle="{StaticResource Cargas.Background}" />
+
             </DataGrid.Columns>
         </DataGrid>
         <Button

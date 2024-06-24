@@ -55,7 +55,20 @@ namespace Revit.Common
             {
                 switch (layer.SelectedCamadaTipo)
                 {
-                    case "Base": break;
+                    case "Base":
+                        if (SelectedFullAmbienteViewModel.TipoDeSolucao == "PAV. INTERTRAVADO" || SelectedFullAmbienteViewModel.TipoDeSolucao == "PAV. ASFÁLTICO")
+                        {
+                            SelectedFullAmbienteViewModel.HBase = layer.Width;
+                            SelectedFullAmbienteViewModel.CBBase = true;
+                            SelectedFullAmbienteViewModel.TagBase = layer.Tag;
+                        }
+                        else
+                        {
+                            SelectedFullAmbienteViewModel.HBase = 0;
+                            SelectedFullAmbienteViewModel.CBBase = false;
+                            SelectedFullAmbienteViewModel.TagBase = "";
+                        }
+                        break;
                     //case "Base Genérica": 
                     //    SelectedFullAmbienteViewModel.CBBaseGenerica = true;
                     //    SelectedFullAmbienteViewModel.TagBaseGenerica = layer.Tag;
@@ -105,21 +118,31 @@ namespace Revit.Common
 
         private void ApplyNewAmbiente_Button_Click(object sender, RoutedEventArgs e)
         {
+            if (SelectedFullAmbienteViewModel.Ambiente == "")
+            {
+                SelectedFullAmbienteViewModel.Errors = "Preencha um nome para o ambiente";
+                return;
+            }
+            if (SelectedFullAmbienteViewModel.SelectedLegenda == null)
+            {
+                SelectedFullAmbienteViewModel.Errors = "Selecione uma legenda para o piso";
+                return;
+            }
             int existingViewModelsWithSameNameCount = AmbienteManagerMVVM.MainView.AmbienteViewModels
                 .Where(x => x.GUID != SelectedFullAmbienteViewModel.GUID)
                 .Where(x => x.TipoDePiso == SelectedFullAmbienteViewModel.TipoDePiso)
                 .Count();
-            SelectedFullAmbienteViewModel.StoredFloorMatriz = SelectedFullAmbienteViewModel.SelectedfloorMatriz;   
-            SelectedFullAmbienteViewModel.SelectedfloorMatriz = null;
             if (existingViewModelsWithSameNameCount > 0)
             {
-                SelectedFullAmbienteViewModel.Errors = "Já existe um tipo de piso com esse nome.";
+                SelectedFullAmbienteViewModel.Errors = "Já existe um tipo de piso com esse nome";
                 return;
             }
             else
             {
                 SelectedFullAmbienteViewModel.Errors = "";
             }
+            SelectedFullAmbienteViewModel.StoredFloorMatriz = SelectedFullAmbienteViewModel.SelectedfloorMatriz;   
+            SelectedFullAmbienteViewModel.SelectedfloorMatriz = null;
             CleanNonUsedParameters();
             SetPropertiesBasedOnLayers();
 

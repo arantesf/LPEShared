@@ -77,6 +77,10 @@ namespace Revit.Common
                         .ToList();
 
                     ElementId reinforcementFloorTypeId = checkedAmbiente.SelectedReinforcement.Id;
+                    ElementId floorId = new FilteredElementCollector(doc)
+                                        .OfClass(typeof(FloorType))
+                                        .Select(a => a.Id)
+                                        .FirstOrDefault(x => doc.GetElement(x).Name == doc.GetElement(reinforcementFloorTypeId).Name);
 
                     using (Transaction tx = new Transaction(doc, "Create Dimensions"))
                     {
@@ -259,6 +263,13 @@ namespace Revit.Common
                             if (factor > proportion)
                             {
                                 floor.LookupParameter("LPE_TIPO DE PISO").Set(reinforcementFloorTypeId);
+                                try
+                                {
+                                    floor.ChangeTypeId(floorId);
+                                }
+                                catch (Exception)
+                                {
+                                }
                                 double floorThickness = (floor as Floor).FloorType.GetCompoundStructure().GetLayers().Where(a => a.MaterialId == (floor as Floor).FloorType.StructuralMaterialId).FirstOrDefault().Width;
                             }
                             //floor.LookupParameter("Comprimento Placa")?.Set(Math.Round(UnitUtils.ConvertFromInternalUnits((dimUpValue / dimRightValue) < 1 ? dimRightValue : dimUpValue, UnitTypeId.Meters),2));

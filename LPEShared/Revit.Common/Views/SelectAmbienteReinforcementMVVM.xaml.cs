@@ -106,7 +106,7 @@ namespace Revit.Common
             {
                 AmbienteAndReinforcementViewModels.Add(new AmbienteAndReinforcementViewModel(ambiente.Key, ambiente.Value));
             }
-            FatorDeFormaGlobal = string.Format("{0:0.0}", fatorDeFormaLimite);
+            FatorDeFormaGlobal = string.Format("{0:0}", fatorDeFormaLimite);
             ExecuteButtonText = "REFORÇAR PISOS";
             ProgressBarViewModel = new ProgressBarViewModel();
             MainView = this; 

@@ -43,6 +43,30 @@ namespace Revit.Common
             return tagViewModels;
         }
 
+        public static List<PisoLegendaModel> GetLegendas(Document doc)
+        {
+            List<PisoLegendaModel> pisoLegendaModels = new List<PisoLegendaModel>();
+
+            ViewPlan templateDocumentacao = new FilteredElementCollector(doc)
+                .OfClass(typeof(ViewPlan))
+                .FirstOrDefault(x => x.Name == "LPE_PLANTA - DOCUMENTAÇÃO") as ViewPlan;
+
+            if (templateDocumentacao != null)
+            {
+                foreach (ParameterFilterElement filter in templateDocumentacao.GetFilters().Select(x => doc.GetElement(x)))
+                {
+                    if (filter.Name.Contains("PISO "))
+                    {
+                        var myColor = templateDocumentacao.GetFilterOverrides(filter.Id).SurfaceForegroundPatternColor;
+                        string hexColor = "#" + myColor.Red.ToString("X2") + myColor.Green.ToString("X2") + myColor.Blue.ToString("X2");
+                        pisoLegendaModels.Add(new PisoLegendaModel(filter.Name, hexColor));
+                    }
+                }
+            }
+
+            return pisoLegendaModels;
+        }
+
         public static List<FibraViewModel> GetFibras(Document doc)
         {
             List<FibraViewModel> fibraViewModels = new List<FibraViewModel>();
@@ -254,6 +278,7 @@ namespace Revit.Common
             int numberOfInteriorLayers = ambienteViewModel.FloorMatriz.Layers.ToList().Skip(coreLayerIndex).Count(x => x.IsEnabled);
             compoundStructure1.SetNumberOfShellLayers(ShellLayerType.Interior, numberOfInteriorLayers);
             compoundStructure1.EndCap = EndCapCondition.NoEndCap;
+            floorType.LookupParameter("Legenda Piso").Set(int.Parse(ambienteViewModel.SelectedLegenda.Name.Replace("PISO ", "")));
             floorType.SetCompoundStructure(compoundStructure1);
         }
 
@@ -536,7 +561,7 @@ namespace Revit.Common
                 tipoDeJuntaDict = new FilteredElementCollector(doc, viewSchedule3.Id).ToDictionary(e => e.Name);
                 dictionary4 = new FilteredElementCollector(doc).WhereElementIsElementType().OfCategory(BuiltInCategory.OST_Floors).ToDictionary(e => e.Name);
             }
-            catch (Exception)
+            catch (Exception EX)
             {
                 return false;
             }
@@ -593,7 +618,6 @@ namespace Revit.Common
             element.LookupParameter("LPE_VEÍCULOS PESADOS")?.Set(fullAmbienteViewModel.BoolLPEVeiculosPesados ? 1 : 0);
             element.LookupParameter("LPE_Carga")?.Set(fullAmbienteViewModel.LPECarga);
             element.LookupParameter("(s/n) Ref. Tela Inferior")?.Set(fullAmbienteViewModel.BoolReforcoTelaInferior ? 1 : 0);
-            element.LookupParameter("TAG_TIPO REF. TELA INFERIOR")?.Set(fullAmbienteViewModel.BoolReforcoTelaInferior ? 1 : 0);
             element.LookupParameter("(s/n) Ref. Tela Superior")?.Set(fullAmbienteViewModel.BoolReforcoTelaSuperior ? 1 : 0);
             element.LookupParameter("(s/n) Tela Inferior")?.Set(fullAmbienteViewModel.BoolTelaInferior ? 1 : 0);
             element.LookupParameter("(s/n) Tela Superior")?.Set(fullAmbienteViewModel.BoolTelaSuperior ? 1 : 0);
@@ -627,6 +651,10 @@ namespace Revit.Common
             element.LookupParameter("Tratamento Superficial")?.Set(fullAmbienteViewModel.TratamentoSuperficial);
             element.LookupParameter("CB_BARRA DE TRANSFERÊNCIA AMARRADA POR CIMA")?.Set(fullAmbienteViewModel.BoolBarraPorCima ? 1 : 0);
             element.get_Parameter(BuiltInParameter.REF_TABLE_ELEM_NAME)?.Set(fullAmbienteViewModel.TipoDePiso);
+
+            element.LookupParameter("TIPO REF. TELA SUPERIOR")?.Set(fullAmbienteViewModel.ReforcoTelaSuperior);
+            element.LookupParameter("TIPO REF. TELA INFERIOR")?.Set(fullAmbienteViewModel.ReforcoTelaInferior);
+            element.LookupParameter("TAG_EXTRA")?.Set(fullAmbienteViewModel.TagExtra);
 
             return element;
         }
@@ -665,6 +693,10 @@ namespace Revit.Common
             itensDeDetalheElement.LookupParameter("LPE_CARGA")?.Set(fullAmbienteViewModel.LPECarga);
             itensDeDetalheElement.LookupParameter("Espaçamento (BT)")?.Set(UnitUtils.ConvertToInternalUnits(fullAmbienteViewModel.EspacamentoBarra, UnitTypeId.Centimeters));
             itensDeDetalheElement.LookupParameter("CB_BARRA DE TRANSFERÊNCIA AMARRADA POR CIMA")?.Set(fullAmbienteViewModel.BoolBarraPorCima ? 1 : 0);
+
+            itensDeDetalheElement.LookupParameter("TAG_TIPO REF. TELA SUPERIOR")?.Set(fullAmbienteViewModel.ReforcoTelaSuperior);
+            itensDeDetalheElement.LookupParameter("TAG_TIPO REF. TELA INFERIOR")?.Set(fullAmbienteViewModel.ReforcoTelaInferior);
+
             return itensDeDetalheElement;
         }
 

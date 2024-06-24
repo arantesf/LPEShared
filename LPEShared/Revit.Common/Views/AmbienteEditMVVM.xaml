@@ -5,7 +5,7 @@
     xmlns:common="clr-namespace:Revit.Common"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    Title="Gerenciador de ambientes v2.0.8"
+    Title="Gerenciador de ambientes v2.0.9"
     Width="1280"
     Height="750"
     MinWidth="1100"
@@ -70,70 +70,128 @@
                 Margin="10"
                 HorizontalAlignment="Right"
                 Source="/Revit.Resources;component/Images/logo-lpe-engenharia-2.png" />
-            <GroupBox
-                Grid.Column="6"
-                VerticalAlignment="Center"
-                BorderBrush="#FF555555"
-                BorderThickness="0"
-                DataContext="{Binding SelectedFullAmbienteViewModel}"
-                FontSize="16"
-                FontWeight="Normal"
-                Foreground="#FF000000"
-                Header="TIPO DE PISO">
-                <TextBox
-                    MinWidth="300"
-                    MinHeight="30"
-                    Margin="0"
-                    Padding="5,2"
-                    VerticalContentAlignment="Center"
-                    AcceptsReturn="true"
-                    FontSize="14"
-                    IsEnabled="false"
-                    Text="{Binding TipoDePiso, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                    TextAlignment="Center"
-                    TextWrapping="Wrap" />
-            </GroupBox>
-            <GroupBox
-                Grid.Column="2"
-                VerticalAlignment="Center"
-                BorderBrush="#FF555555"
-                BorderThickness="0"
-                FontSize="16"
-                FontWeight="Normal"
-                Foreground="#FF000000"
-                Header="AMBIENTE">
-                <Grid Margin="0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="17*" />
-                        <ColumnDefinition Width="91*" />
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
-                    <StackPanel
-                        Grid.Row="0"
-                        Grid.ColumnSpan="2"
-                        Margin="0">
+            <StackPanel Grid.Column="6" VerticalAlignment="Bottom">
+                <GroupBox
+                    VerticalAlignment="Center"
+                    BorderBrush="#FF555555"
+                    BorderThickness="0"
+                    DataContext="{Binding SelectedFullAmbienteViewModel}"
+                    FontSize="16"
+                    FontWeight="Normal"
+                    Foreground="#FF000000"
+                    Header="TIPO DE PISO">
+                    <StackPanel>
                         <TextBox
-                            Grid.Row="1"
-                            Height="30"
+                            MinWidth="300"
+                            MinHeight="30"
+                            Margin="0"
                             Padding="5,2"
                             VerticalContentAlignment="Center"
                             AcceptsReturn="true"
-                            DataContext="{Binding SelectedFullAmbienteViewModel}"
                             FontSize="14"
-                            IsEnabled="{Binding NotBoolReforcoDeTela}"
-                            Text="{Binding Ambiente, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            IsEnabled="false"
+                            Text="{Binding TipoDePiso, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            TextAlignment="Center"
                             TextWrapping="Wrap" />
+
                     </StackPanel>
+                </GroupBox>
+                <StackPanel
+                    HorizontalAlignment="Right"
+                    DataContext="{Binding SelectedFullAmbienteViewModel}"
+                    Orientation="Horizontal">
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        FontSize="14"
+                        FontWeight="Normal"
+                        Foreground="#FF000000">
+                        TAG EXTRA
+                    </TextBlock>
+                    <TextBox
+                        MinWidth="300"
+                        MinHeight="30"
+                        Margin="6,0"
+                        Padding="5,2"
+                        VerticalContentAlignment="Center"
+                        AcceptsReturn="true"
+                        FontSize="14"
+                        IsEnabled="{Binding ParametersScrollVisible}"
+                        Text="{Binding TagExtra, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        TextAlignment="Center"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+            </StackPanel>
+            <StackPanel Grid.Column="2" VerticalAlignment="Bottom">
+                <GroupBox
+                    BorderBrush="#FF555555"
+                    BorderThickness="0"
+                    FontSize="16"
+                    FontWeight="Normal"
+                    Foreground="#FF000000"
+                    Header="AMBIENTE">
+                    <TextBox
+                        Grid.Row="1"
+                        Height="30"
+                        Padding="5,2"
+                        VerticalContentAlignment="Center"
+                        AcceptsReturn="true"
+                        DataContext="{Binding SelectedFullAmbienteViewModel}"
+                        FontSize="14"
+                        IsEnabled="{Binding NotBoolReforcoDeTela}"
+                        Text="{Binding Ambiente, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        TextWrapping="Wrap" />
+                </GroupBox>
+                <Grid HorizontalAlignment="Stretch" DataContext="{Binding SelectedFullAmbienteViewModel}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="200" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock
+                        Margin="6,0,0,0"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center"
+                        FontSize="14"
+                        FontWeight="Normal"
+                        Foreground="#FF000000">
+                        LEGENDA
+                    </TextBlock>
+                    <ComboBox
+                        Grid.Column="1"
+                        Height="30"
+                        Margin="6,0"
+                        Padding="10,0,0,0"
+                        HorizontalAlignment="Stretch"
+                        VerticalContentAlignment="Center"
+                        FontSize="14"
+                        FontWeight="Normal"
+                        ItemsSource="{Binding Legendas, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        SelectedItem="{Binding SelectedLegenda, UpdateSourceTrigger=PropertyChanged}"
+                        SelectionChanged="Fibra_SelectionChanged">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <Rectangle
+                                        Width="50"
+                                        Height="24"
+                                        Margin="0,2"
+                                        Stroke="Black">
+                                        <Rectangle.Fill>
+                                            <SolidColorBrush Color="{Binding HexColor}" />
+                                        </Rectangle.Fill>
+                                    </Rectangle>
+                                    <TextBlock
+                                        Margin="5,0,0,0"
+                                        VerticalAlignment="Center"
+                                        Text="{Binding Name}" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
                 </Grid>
-            </GroupBox>
+            </StackPanel>
             <GroupBox
                 Grid.Column="4"
+                Margin="0,0,0,13"
                 VerticalAlignment="Center"
                 BorderBrush="#FF555555"
                 BorderThickness="0"

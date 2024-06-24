@@ -37,10 +37,11 @@ namespace Revit.Common
             Dictionary<FloorMatrizClass, List<FloorMatriz>> floorMatrizes = AmbienteManagerUtils.GetFloorMatrizes(doc, GlobalVariables.MaterialsByClass);
             List<FibraViewModel> fibras = AmbienteManagerUtils.GetFibras(doc);
             List<TagViewModel> tags = AmbienteManagerUtils.GetTags(doc);
+            List<PisoLegendaModel> legendas = AmbienteManagerUtils.GetLegendas(doc);
             List<double> emendas = AmbienteManagerUtils.GetEmendas(doc);
             List<int> telas = AmbienteManagerUtils.GetTelas(doc);
             List<string> tratamentos = AmbienteManagerUtils.GetTratamentoSuperficial(doc);
-            GlobalVariables.StaticScheduleData = new StaticScheduleData(fibras, emendas, telas, tratamentos, tags);
+            GlobalVariables.StaticScheduleData = new StaticScheduleData(fibras, emendas, telas, tratamentos, tags, legendas);
             List<FullAmbienteViewModel> fullAmbienteViewModels = new List<FullAmbienteViewModel>();
             if (!AmbienteManagerUtils.GetAmbientes(doc, out fullAmbienteViewModels))
             {

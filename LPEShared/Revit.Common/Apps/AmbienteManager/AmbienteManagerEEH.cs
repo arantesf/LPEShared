@@ -97,7 +97,7 @@ namespace Revit.Common
                         .OfClass(typeof(FloorType))
                         .Cast<FloorType>()
                         .FirstOrDefault(a => a.Name == ambienteViewModel.FloorMatriz?.FloorName);
-                    if (floorType != null)
+                    if (floorType != null && ambienteViewModel.ParentAmbienteViewModelGUID == null)
                         doc.Delete(floorType.Id);
                     if (ambienteViewModel.KSPisoId.IntegerValue != -1)
                         doc.Delete(ambienteViewModel.KSPisoId);
