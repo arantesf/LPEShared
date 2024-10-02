@@ -45,7 +45,7 @@ namespace Revit.Common
                 return;
             UIDocument activeUiDocument = this.uiApp.ActiveUIDocument;
             this.AmbienteManagerMVVM = new AmbienteManagerMVVM(floorMatrizes, fullAmbienteViewModels, allMaterialNames, materialsByClass);
-            this.AmbienteManagerMVVM.Topmost = true;
+            //this.AmbienteManagerMVVM.Topmost = true;
             if (!this.AmbienteManagerMVVM.IsInitialized)
                 return;
             this.AmbienteManagerMVVM.Show();
@@ -58,7 +58,7 @@ namespace Revit.Common
                 UIDocument uidoc = uiApp.ActiveUIDocument;
                 //INICIALIZANDO A JANELA E PASSANDO O EXTERNAL EVENT
                 SelectAmbienteReinforcementMVVM = new SelectAmbienteReinforcementMVVM(uidoc);
-                SelectAmbienteReinforcementMVVM.Topmost = true;
+                //SelectAmbienteReinforcementMVVM.Topmost = true;
                 if (SelectAmbienteReinforcementMVVM.IsInitialized)
                 {
                     SelectAmbienteReinforcementMVVM.Show();
@@ -74,7 +74,7 @@ namespace Revit.Common
 
                 //INICIALIZANDO A JANELA E PASSANDO O EXTERNAL EVENT
                 SelectAmbienteMVVM = new SelectAmbienteMVVM(uidoc, SelectAmbientMVVMExecuteCommand.SplitFloors);
-                SelectAmbienteMVVM.Topmost = true;
+                //SelectAmbienteMVVM.Topmost = true;
                 if (SelectAmbienteMVVM.IsInitialized)
                 {
                     SelectAmbienteMVVM.Show();
@@ -90,7 +90,7 @@ namespace Revit.Common
 
                 //INICIALIZANDO A JANELA E PASSANDO O EXTERNAL EVENT
                 SelectAmbienteMVVM = new SelectAmbienteMVVM(uidoc, SelectAmbientMVVMExecuteCommand.RestoreFloors);
-                SelectAmbienteMVVM.Topmost = true;
+                //SelectAmbienteMVVM.Topmost = true;
                 if (SelectAmbienteMVVM.IsInitialized)
                 {
                     SelectAmbienteMVVM.Show();
@@ -106,7 +106,7 @@ namespace Revit.Common
 
                 //INICIALIZANDO A JANELA E PASSANDO O EXTERNAL EVENT
                 SelectAmbienteMVVM = new SelectAmbienteMVVM(uidoc, SelectAmbientMVVMExecuteCommand.RestoreJoints);
-                SelectAmbienteMVVM.Topmost = true;
+                //SelectAmbienteMVVM.Topmost = true;
                 if (SelectAmbienteMVVM.IsInitialized)
                 {
                     SelectAmbienteMVVM.Show();
@@ -122,7 +122,7 @@ namespace Revit.Common
 
                 //INICIALIZANDO A JANELA E PASSANDO O EXTERNAL EVENT
                 SelectAmbienteMVVM = new SelectAmbienteMVVM(uidoc, SelectAmbientMVVMExecuteCommand.DimensionFloors);
-                SelectAmbienteMVVM.Topmost = true;
+                //SelectAmbienteMVVM.Topmost = true;
                 if (SelectAmbienteMVVM.IsInitialized)
                 {
                     SelectAmbienteMVVM.Show();
@@ -138,7 +138,7 @@ namespace Revit.Common
 
                 //INICIALIZANDO A JANELA E PASSANDO O EXTERNAL EVENT
                 SelectAmbienteMVVM = new SelectAmbienteMVVM(uidoc, SelectAmbientMVVMExecuteCommand.TagJoints);
-                SelectAmbienteMVVM.Topmost = true;
+                //SelectAmbienteMVVM.Topmost = true;
                 if (SelectAmbienteMVVM.IsInitialized)
                 {
                     SelectAmbienteMVVM.Show();
@@ -154,7 +154,7 @@ namespace Revit.Common
 
                 //INICIALIZANDO A JANELA E PASSANDO O EXTERNAL EVENT
                 SelectAmbienteMVVM = new SelectAmbienteMVVM(uidoc, SelectAmbientMVVMExecuteCommand.SplitJoints);
-                SelectAmbienteMVVM.Topmost = true;
+                //SelectAmbienteMVVM.Topmost = true;
                 if (SelectAmbienteMVVM.IsInitialized)
                 {
                     SelectAmbienteMVVM.Show();

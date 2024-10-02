@@ -263,15 +263,16 @@ namespace Revit.Common
                             if (factor > proportion)
                             {
                                 floor.LookupParameter("LPE_TIPO DE PISO").Set(reinforcementFloorTypeId);
-                                try
-                                {
-                                    floor.ChangeTypeId(floorId);
-                                }
-                                catch (Exception)
-                                {
-                                }
+                                //try
+                                //{
+                                //    floor.ChangeTypeId(floorId);
+                                //}
+                                //catch (Exception)
+                                //{
+                                //}
                                 double floorThickness = (floor as Floor).FloorType.GetCompoundStructure().GetLayers().Where(a => a.MaterialId == (floor as Floor).FloorType.StructuralMaterialId).FirstOrDefault().Width;
                             }
+                            
                             //floor.LookupParameter("Comprimento Placa")?.Set(Math.Round(UnitUtils.ConvertFromInternalUnits((dimUpValue / dimRightValue) < 1 ? dimRightValue : dimUpValue, UnitTypeId.Meters),2));
                             //floor.LookupParameter("Largura da Placa")?.Set(Math.Round(UnitUtils.ConvertFromInternalUnits((dimUpValue / dimRightValue) < 1 ? dimUpValue : dimRightValue, UnitTypeId.Meters),2));
                             Reference refer = new Reference(floor);

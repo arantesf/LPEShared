@@ -9,6 +9,7 @@
     <Import_RootNamespace>Revit.Common</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)TestCommand.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Apps\About\About.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Apps\AmbienteManager\AmbienteManagerUtils.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Apps\DimensionFloors\DimensionFloors.cs" />

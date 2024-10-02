@@ -41,7 +41,7 @@ namespace Revit.Common
                 Dictionary<string, List<Element>> groupedJointsByAmbiente = new FilteredElementCollector(doc)
                     .WhereElementIsNotElementType()
                     .OfCategory(BuiltInCategory.OST_StructuralFraming)
-                    .Where(a => !a.Name.Contains("JPE") && !a.Name.EndsWith("JE") && selectedAmbientes.Contains(a.LookupParameter("Ambiente").AsString()))
+                    .Where(a => !a.Name.Contains("JPE") /*&& !a.Name.EndsWith("JE")*/ && selectedAmbientes.Contains(a.LookupParameter("Ambiente").AsString()))
                     .GroupBy(a => a.LookupParameter("Ambiente").AsString())
                     .ToDictionary(a => a.Key, a => a.ToList());
 
@@ -243,13 +243,13 @@ namespace Revit.Common
                                             if (intersection0.Any())
                                             {
                                                 double ep0Offset = intersection0.First().GetEndPoint(1).Z - splitCurve.GetEndPoint(0).Z;
-                                                newJoint.get_Parameter(BuiltInParameter.STRUCTURAL_BEAM_END0_ELEVATION).Set(ep0Offset);
+                                                newJoint.get_Parameter(BuiltInParameter.STRUCTURAL_BEAM_END0_ELEVATION).Set(ep0Offset - level.ProjectElevation /*+ level.Elevation*/);
                                             }
                                             SolidCurveIntersection intersection1 = floorSolid.IntersectWithCurve(curveEp1, new SolidCurveIntersectionOptions());
                                             if (intersection1.Any())
                                             {
                                                 double ep1Offset = intersection1.First().GetEndPoint(1).Z - splitCurve.GetEndPoint(1).Z;
-                                                newJoint.get_Parameter(BuiltInParameter.STRUCTURAL_BEAM_END1_ELEVATION).Set(ep1Offset);
+                                                newJoint.get_Parameter(BuiltInParameter.STRUCTURAL_BEAM_END1_ELEVATION).Set(ep1Offset - level.ProjectElevation /*+ level.Elevation*/);
                                             }
                                         }
 

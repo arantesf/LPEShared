@@ -176,7 +176,7 @@ namespace Revit.Common
             Dictionary<string, List<Element>> groupedJointsByAmbiente = new FilteredElementCollector(doc)
                 .WhereElementIsNotElementType()
                 .OfCategory(BuiltInCategory.OST_StructuralFraming)
-                .Where(a => !a.Name.Contains("JPE") && !a.Name.EndsWith("JE") && selectedAmbientes.Contains(a.LookupParameter("Ambiente").AsString()))
+                .Where(a => !a.Name.Contains("JPE") /*&& !a.Name.EndsWith("JE")*/ && selectedAmbientes.Contains(a.LookupParameter("Ambiente").AsString()))
                 .GroupBy(a => a.LookupParameter("Ambiente").AsString())
                 .ToDictionary(a => a.Key, a => a.ToList());
 

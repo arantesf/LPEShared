@@ -90,6 +90,7 @@ namespace Revit.Common
                             {
                                 FamilyInstance newJoint = doc.Create.NewFamilyInstance(curve, (GUIDGroupedJoints[guid][0] as FamilyInstance).Symbol, doc.GetElement((GUIDGroupedJoints[guid][0] as FamilyInstance).LevelId) as Level, Autodesk.Revit.DB.Structure.StructuralType.Beam);
                                 Utils.CopyAllParametersWithoutTransaction(GUIDGroupedJoints[guid].First(), newJoint, new List<BuiltInParameter>() { BuiltInParameter.ALL_MODEL_MARK, BuiltInParameter.FLOOR_HEIGHTABOVELEVEL_PARAM });
+                                newJoint.get_Parameter(BuiltInParameter.ALL_MODEL_INSTANCE_COMMENTS).Set("");
                             }
                             catch (Exception)
                             {

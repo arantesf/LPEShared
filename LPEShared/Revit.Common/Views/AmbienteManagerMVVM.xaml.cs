@@ -87,7 +87,7 @@ namespace Revit.Common
         {
             FullAmbienteViewModel newFullAmbienteViewModel = new FullAmbienteViewModel() { EspacamentoBarra = 30, UltimaCamada = "Subleito" };
             AmbienteEditMVVM ambienteEditMvvm = new AmbienteEditMVVM(newFullAmbienteViewModel, true);
-            ambienteEditMvvm.Topmost = true;
+            //ambienteEditMvvm.Topmost = true;
             ambienteEditMvvm.ShowDialog();
         }
 
@@ -100,15 +100,19 @@ namespace Revit.Common
                     ambienteViewModel.CBBaseGenerica = fullAmbienteViewModel.CBBaseGenerica;
                     ambienteViewModel.CBRefSubleito = fullAmbienteViewModel.CBRefSubleito;
                     ambienteViewModel.CBSubBase = fullAmbienteViewModel.CBSubBase;
+                    ambienteViewModel.CBBase = fullAmbienteViewModel.CBBase;
                     ambienteViewModel.CBSubleito = fullAmbienteViewModel.CBSubleito;
                     ambienteViewModel.HRefSubleito = fullAmbienteViewModel.HRefSubleito;
                     ambienteViewModel.HSubBase = fullAmbienteViewModel.HSubBase;
+                    ambienteViewModel.HBase = fullAmbienteViewModel.HBase;
                     ambienteViewModel.LPECarga = fullAmbienteViewModel.LPECarga;
                     ambienteViewModel.TagBaseGenerica = fullAmbienteViewModel.TagBaseGenerica;
                     ambienteViewModel.TagConcreto = fullAmbienteViewModel.TagConcreto;
                     ambienteViewModel.TagRefSubleito = fullAmbienteViewModel.TagRefSubleito;
                     ambienteViewModel.TagSubBase = fullAmbienteViewModel.TagSubBase;
+                    ambienteViewModel.TagBase = fullAmbienteViewModel.TagBase;
                     ambienteViewModel.TagSubleito = fullAmbienteViewModel.TagSubleito;
+                    ambienteViewModel.CBUQFaixaA = fullAmbienteViewModel.CBUQFaixaA;
                 }
             }
         }
@@ -186,7 +190,7 @@ namespace Revit.Common
             }
             this.SelectedFullAmbienteViewModelWithoutModify = this.SelectedFullAmbienteViewModel.Clone() as FullAmbienteViewModel;
             AmbienteEditMVVM ambienteEditMvvm = new AmbienteEditMVVM(this.SelectedFullAmbienteViewModel, false);
-            ambienteEditMvvm.Topmost = true;
+            //ambienteEditMvvm.Topmost = true;
             bool? nullable = ambienteEditMvvm.ShowDialog();
             if (nullable.HasValue && nullable.Value)
                 return;
@@ -238,7 +242,7 @@ namespace Revit.Common
             fullAmbienteViewModel.PisoId = new ElementId(-1);
             fullAmbienteViewModel.GUID = Guid.NewGuid().ToString();
             AmbienteEditMVVM ambienteEditMvvm = new AmbienteEditMVVM(fullAmbienteViewModel, true);
-            ambienteEditMvvm.Topmost = true;
+            //ambienteEditMvvm.Topmost = true;
             ambienteEditMvvm.ShowDialog();
         }
 
@@ -260,7 +264,7 @@ namespace Revit.Common
             fullAmbienteViewModels.PisoId = new ElementId(-1);
             fullAmbienteViewModels.GUID = Guid.NewGuid().ToString();
             AmbienteEditMVVM ambienteEditMvvm = new AmbienteEditMVVM(fullAmbienteViewModels, true);
-            ambienteEditMvvm.Topmost = true;
+            //ambienteEditMvvm.Topmost = true;
             ambienteEditMvvm.ShowDialog();
         }
 

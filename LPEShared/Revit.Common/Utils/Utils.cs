@@ -3633,7 +3633,15 @@ namespace Revit.Common
                         XYZ c2p1 = nonUsedCurves[i].GetEndPoint(1);
                         if (pt1.DistanceTo(c2p0) < 0.01)
                         {
-                            curveLoop.Append(nonUsedCurves[i]);
+                            if (nonUsedCurves[i] is Line)
+                            {
+                                curveLoop.Append(Line.CreateBound(pt1, c2p1));
+                            }
+                            else
+                            {
+                                curveLoop.Append(Arc.Create(pt1, c2p1, nonUsedCurves[i].Evaluate(0.5, true)));
+                            }
+                            //curveLoop.Append(nonUsedCurves[i]);
                             nonUsedCurves.RemoveAt(i);
                             pt1 = c2p1;
                             number = 0;
@@ -3641,7 +3649,15 @@ namespace Revit.Common
                         }
                         else if (pt1.DistanceTo(c2p1) < 0.01)
                         {
-                            curveLoop.Append(nonUsedCurves[i].CreateReversed());
+                            if (nonUsedCurves[i] is Line)
+                            {
+                                curveLoop.Append(Line.CreateBound(pt1, c2p0));
+                            }
+                            else
+                            {
+                                curveLoop.Append(Arc.Create(pt1, c2p0, nonUsedCurves[i].Evaluate(0.5, true)));
+                            }
+                            //curveLoop.Append(nonUsedCurves[i].CreateReversed());
                             nonUsedCurves.RemoveAt(i);
                             pt1 = c2p0;
                             number = 0;

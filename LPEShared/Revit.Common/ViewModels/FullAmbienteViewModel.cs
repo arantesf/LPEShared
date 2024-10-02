@@ -96,9 +96,7 @@ namespace Revit.Common
         private bool boolBarraPorCima;
         private bool boolTratamentoSuperficial;
         private string tratamentoSuperficial = "";
-        private bool boolEspacadorSuperior;
         private int hEspacadorSuperior;
-        private bool boolEspacadorInferior;
         private int hEspacadorInferior;
         private bool boolReforcoTelaSuperior;
         private int reforcoTelaSuperior;
@@ -307,63 +305,67 @@ namespace Revit.Common
 
         public void SetTipoDePiso()
         {
-            string str1 = "";
-            string str2 = "";
-            string str3 = "";
-            string str4 = "";
-            string str5 = "";
-            string str6 = "";
-            string str7 = "";
+            string telaSuperior = "";
+            string refFibraSupFinalidade = "";
+            string refFibraSupSolucao = "";
+            string refSupFinalidade = "";
+            string refSupSolucao = "";
+            string refInfFinalidade = "";
+            string refInfSolucao = "";
+            string veiculos = "";
+            string tagExtra = "";
             if (this.boolFibra)
-                str1 += string.Format(" (FIBRA {0})", (object)this.dosagemFibra);
+                telaSuperior += string.Format(" (FIBRA {0})", (object)this.dosagemFibra).Replace(".",",");
             else if (this.boolTelaSuperior)
             {
-                str1 += " (Q" + this.telaSuperior;
+                telaSuperior += " (Q" + this.telaSuperior;
                 if (this.boolTelaInferior)
-                    str1 = str1 + "/" + "Q" + this.telaInferior;
-                str1 += ")";
+                    telaSuperior = telaSuperior + "/" + "Q" + this.telaInferior;
+                telaSuperior += ")";
             }
             else if (this.boolTelaInferior)
-                str1 += " (Q" + this.telaInferior + ")";
+                telaSuperior += " (Q" + this.telaInferior + ")";
 
             if (this.BoolFibra && !this.BoolReforcoDeTela && this.boolTelaSuperior)
             {
-                str2 = " - REF_" + this.finalidadeTelaSuperior;
-                str3 = " (" + this.telaSuperior + ")";
+                refFibraSupFinalidade = "REF_" + this.finalidadeTelaSuperior;
+                refFibraSupSolucao = " (" + this.telaSuperior + ")";
             }
 
             if (this.boolReforcoTelaSuperior)
             {
-                str2 = " - REF_" + this.finalidadeReforcoTelaSuperior;
-                str3 = " (" + this.reforcoTelaSuperior + ")";
+                refSupFinalidade = "REF_" + this.finalidadeReforcoTelaSuperior;
+                refSupSolucao = " (" + this.reforcoTelaSuperior + ")";
                 if (this.boolReforcoTelaInferior)
                 {
-                    str4 = " + REF_" + this.finalidadeReforcoTelaInferior;
-                    str5 = " (" + this.reforcoTelaInferior + ")";
+                    refInfFinalidade = " + REF_" + this.finalidadeReforcoTelaInferior;
+                    refInfSolucao = " (" + this.reforcoTelaInferior + ")";
                 }
             }
             else if (this.boolReforcoTelaInferior)
             {
-                str4 = " - REF_" + this.finalidadeReforcoTelaInferior;
-                str5 = " (" + this.reforcoTelaInferior + ")";
+                refInfFinalidade = "REF_" + this.finalidadeReforcoTelaInferior;
+                refInfSolucao = " (" + this.reforcoTelaInferior + ")";
             }
             if (this.TipoDeSolucao != null && this.TipoDeSolucao.Contains("INTER"))
             {
                 if (this.BoolLPEVeiculosPesados)
                 {
-                    str6 += " - VEIC. PESADOS";
+                    veiculos += " - VEIC. PESADOS";
                 }
                 else
                 {
-                    str6 += " - VEIC. LEVES";
+                    veiculos += " - VEIC. LEVES";
                 }
             }
-            
+
+            string refSlash = refInfSolucao != "" || refSupSolucao != "" ? " // " : "";
+
             if (this.TagExtra != "")
             {
-                str7 = " - " + this.TagExtra;
+                tagExtra = " - " + this.TagExtra;
             }
-            this.TipoDePiso = string.Format("{0} - H={1}cm{2}{3}{4}{5}{6}{7}{8}", (object)this.ambiente, (object)this.HConcreto, (object)str1, (object)str2, (object)str3, (object)str4, (object)str5, (object)str6, (object)str7);
+            this.TipoDePiso = string.Format("{0} - H={1}cm{2}{3}{4}{5}{6}{7}{8}{9}{10}{11}", ambiente, HConcreto, telaSuperior, tagExtra, refSlash, refFibraSupFinalidade, refFibraSupSolucao, refSupFinalidade, refSupSolucao, refInfFinalidade, refInfSolucao, veiculos);
         }
 
         public bool ParametersScrollVisible
@@ -693,6 +695,22 @@ namespace Revit.Common
             }
         }
 
+        private bool projetoBasico;
+        public bool ProjetoBasico
+        {
+            get => this.projetoBasico;
+            set
+            {
+                this.projetoBasico = value;
+                this.OnPropertyChanged(nameof(ProjetoBasico));
+                if (!projetoBasico)
+                {
+                    ComprimentoDaPlaca = 0;
+                    LarguraDaPlaca = 0;
+                }
+            }
+        }
+
         public double ComprimentoDaPlaca
         {
             get => this.comprimentoDaPlaca;
@@ -738,6 +756,16 @@ namespace Revit.Common
             }
         }
 
+        public bool NotBoolTelaSuperior
+        {
+            get => !this.boolTelaSuperior;
+        }
+
+        public bool NotBoolTelaInferior
+        {
+            get => !this.boolTelaInferior;
+        }
+
         public bool BoolTelaSuperior
         {
             get => this.boolTelaSuperior;
@@ -745,6 +773,8 @@ namespace Revit.Common
             {
                 this.boolTelaSuperior = value;
                 this.OnPropertyChanged(nameof(BoolTelaSuperior));
+                this.OnPropertyChanged(nameof(NotBoolTelaSuperior));
+                this.OnPropertyChanged(nameof(BoolEspacadorSuperior));
                 this.SetTipoDePiso();
             }
         }
@@ -809,6 +839,8 @@ namespace Revit.Common
             {
                 this.boolTelaInferior = value;
                 this.OnPropertyChanged(nameof(BoolTelaInferior));
+                this.OnPropertyChanged(nameof(NotBoolTelaInferior));
+                this.OnPropertyChanged(nameof(BoolEspacadorInferior));
                 this.SetTipoDePiso();
             }
         }
@@ -864,6 +896,16 @@ namespace Revit.Common
             {
                 this.espacamentoBarra = value;
                 this.OnPropertyChanged(nameof(EspacamentoBarra));
+            }
+        }
+        private bool cBUQFaixaA;
+        public bool CBUQFaixaA
+        {
+            get => this.cBUQFaixaA;
+            set
+            {
+                this.cBUQFaixaA = value;
+                this.OnPropertyChanged(nameof(CBUQFaixaA));
             }
         }
 
@@ -932,16 +974,7 @@ namespace Revit.Common
             }
         }
 
-        public bool BoolEspacadorSuperior
-        {
-            get => this.boolEspacadorSuperior;
-            set
-            {
-                this.boolEspacadorSuperior = value;
-                this.OnPropertyChanged(nameof(BoolEspacadorSuperior));
-                this.SetTipoDePiso();
-            }
-        }
+        public bool BoolEspacadorSuperior => this.BoolTelaSuperior || this.BoolReforcoTelaSuperior;
 
         public int HEspacadorSuperior
         {
@@ -954,16 +987,7 @@ namespace Revit.Common
             }
         }
 
-        public bool BoolEspacadorInferior
-        {
-            get => this.boolEspacadorInferior;
-            set
-            {
-                this.boolEspacadorInferior = value;
-                this.OnPropertyChanged(nameof(BoolEspacadorInferior));
-                this.SetTipoDePiso();
-            }
-        }
+        public bool BoolEspacadorInferior => this.BoolTelaInferior || this.BoolReforcoTelaInferior;
 
         public int HEspacadorInferior
         {
@@ -983,6 +1007,7 @@ namespace Revit.Common
             {
                 this.boolReforcoTelaSuperior = value;
                 this.OnPropertyChanged(nameof(BoolReforcoTelaSuperior));
+                this.OnPropertyChanged(nameof(BoolEspacadorSuperior));
                 this.SetTipoDePiso();
             }
         }
@@ -1027,6 +1052,7 @@ namespace Revit.Common
             {
                 this.boolReforcoTelaInferior = value;
                 this.OnPropertyChanged(nameof(BoolReforcoTelaInferior));
+                this.OnPropertyChanged(nameof(BoolEspacadorInferior));
                 this.SetTipoDePiso();
             }
         }
@@ -1308,8 +1334,8 @@ namespace Revit.Common
             this.KSJuntaId = juntaElement == null ? new ElementId(-1) : juntaElement.Id;
             this.Action = Action.Continue;
             this.Ambiente = tipoDePisoElement.LookupParameter(nameof(Ambiente)).AsString() ?? "";
-            this.BoolEspacadorInferior = tipoDePisoElement.LookupParameter("(s/n) Espaçador Inf.").AsInteger() == 1;
-            this.BoolEspacadorSuperior = tipoDePisoElement.LookupParameter("(s/n) Espaçador Sup.").AsInteger() == 1;
+            //this.BoolEspacadorInferior = tipoDePisoElement.LookupParameter("(s/n) Espaçador Inf.").AsInteger() == 1;
+            //this.BoolEspacadorSuperior = tipoDePisoElement.LookupParameter("(s/n) Espaçador Sup.").AsInteger() == 1;
             this.BoolFibra = tipoDePisoElement.LookupParameter("(s/n) Fibra").AsInteger() == 1;
             this.BoolLPEVeiculosPesados = tipoDePisoElement.LookupParameter("LPE_VEÍCULOS PESADOS").AsInteger() == 1;
             this.BoolReforcoTelaInferior = tipoDePisoElement.LookupParameter("(s/n) Ref. Tela Inferior").AsInteger() == 1;
@@ -1318,6 +1344,7 @@ namespace Revit.Common
             this.BoolTelaSuperior = tipoDePisoElement.LookupParameter("(s/n) Tela Superior").AsInteger() == 1;
             this.BoolTratamentoSuperficial = tipoDePisoElement.LookupParameter("(s/n) Tratamento Superficial").AsInteger() == 1;
             this.ComprimentoDaPlaca = UnitUtils.ConvertFromInternalUnits(tipoDePisoElement.LookupParameter("Comprimento Placa").AsDouble(), UnitTypeId.Meters);
+
             this.DosagemFibra = tipoDePisoElement.LookupParameter("Dosagem da Fibra (kg/m\u00B3)").AsDouble();
             this.EmendaReforcoTelaInferior = tipoDePisoElement.LookupParameter("Emenda - Ref. Tela Inf").AsDouble();
             this.EmendaReforcoTelaSuperior = tipoDePisoElement.LookupParameter("Emenda - Ref. Tela Sup").AsDouble();
@@ -1356,63 +1383,20 @@ namespace Revit.Common
             this.HEspacadorSoldado = tipoDePisoElement.LookupParameter("H-Espaçador Soldado (cm)").AsInteger();
             this.HEspacadorSuperior = tipoDePisoElement.LookupParameter("H-Espaçador Superior (cm)").AsInteger();
             this.LarguraDaPlaca = UnitUtils.ConvertFromInternalUnits(tipoDePisoElement.LookupParameter("Largura da Placa").AsDouble(), UnitTypeId.Meters);
+            if (ComprimentoDaPlaca != 0 || LarguraDaPlaca != 0)
+            {
+                this.ProjetoBasico = true;
+            }
             string reforcoTelaInferiorString = tipoDePisoElement.LookupParameter("Ref. Tela Inferior").AsString();
             if (reforcoTelaInferiorString != null) this.ReforcoTelaInferior = reforcoTelaInferiorString == "" ? 0 : int.Parse(reforcoTelaInferiorString.Replace("Q", ""));
             string reforcoTelaSuperiorString = tipoDePisoElement.LookupParameter("Ref. Tela Superior").AsString();
             if (reforcoTelaSuperiorString != null) this.ReforcoTelaSuperior = reforcoTelaSuperiorString == "" ? 0 : int.Parse(reforcoTelaSuperiorString.Replace("Q", ""));
-            this.TelaInferior = tipoDePisoElement.LookupParameter("Tela Inferior").HasValue ? int.Parse(tipoDePisoElement.LookupParameter("Tela Inferior").AsString().Replace("Q", "")) : 0;
-            this.TelaSuperior = tipoDePisoElement.LookupParameter("Tela Superior").HasValue ? int.Parse(tipoDePisoElement.LookupParameter("Tela Superior").AsString().Replace("Q", "")) : 0;
+            this.TelaInferior = tipoDePisoElement.LookupParameter("Tela Inferior").HasValue && tipoDePisoElement.LookupParameter("Tela Inferior").AsString() != "" ? int.Parse(tipoDePisoElement.LookupParameter("Tela Inferior").AsString().Replace("Q", "")) : 0;
+            this.TelaSuperior = tipoDePisoElement.LookupParameter("Tela Superior").HasValue && tipoDePisoElement.LookupParameter("Tela Superior").AsString() != "" ? int.Parse(tipoDePisoElement.LookupParameter("Tela Superior").AsString().Replace("Q", "")) : 0;
             this.TratamentoSuperficial = tipoDePisoElement.LookupParameter("Tratamento Superficial").AsString() ?? "";
             this.TipoDePiso = tipoDePisoElement.Name;
-            if (itensDeDetalheElement == null)
-                return;
-            try
-            {
-                this.EspacamentoBarra = UnitUtils.ConvertFromInternalUnits(itensDeDetalheElement.LookupParameter("Espaçamento (BT)").AsDouble(), UnitTypeId.Centimeters);
-                this.BoolBarraPorCima = itensDeDetalheElement.LookupParameter("CB_BARRA DE TRANSFERÊNCIA AMARRADA POR CIMA").AsInteger() == 1;
-            }
-            catch (Exception)
-            {
-            }
-            this.CBBaseGenerica = itensDeDetalheElement.LookupParameter("CB_BASE GENÉRICA").AsInteger() == 1;
-            this.CBRefSubleito = itensDeDetalheElement.LookupParameter("CB_REF. SUBLEITO").AsInteger() == 1;
-            this.CBSubBase = itensDeDetalheElement.LookupParameter("CB_SUB_BASE").AsInteger() == 1;
-            this.CBSubleito = itensDeDetalheElement.LookupParameter("CB_SUBLEITO").AsInteger() == 1;
-            try
-            {
-                this.HRefSubleito = UnitUtils.ConvertFromInternalUnits(itensDeDetalheElement.LookupParameter("H Ref. Subleito").AsDouble(), UnitTypeId.Centimeters);
-            }
-            catch (Exception ex)
-            {
-            }
-            this.HSubBase = UnitUtils.ConvertFromInternalUnits(itensDeDetalheElement.LookupParameter("H SUB_BASE").AsDouble(), UnitTypeId.Centimeters);
-            this.LPECarga = itensDeDetalheElement.LookupParameter("LPE_CARGA").AsString();
-            this.LPECargaParam1 = 0.0;
-            this.LPECargaParam2 = 0.0;
-            this.TagBaseGenerica = itensDeDetalheElement.LookupParameter("TAG_BASE GENÉRICA").AsString();
-            this.TagConcreto = itensDeDetalheElement.LookupParameter("TAG_CONCRETO").AsString();
-            this.TagRefSubleito = itensDeDetalheElement.LookupParameter("TAG_REF. SUBLEITO").AsString();
-            this.TagSubBase = itensDeDetalheElement.LookupParameter("TAG_SUB-BASE").AsString();
-            this.TagSubleito = itensDeDetalheElement.LookupParameter("TAG_SUBLEITO").AsString();
             this.Legendas = GlobalVariables.StaticScheduleData.Legendas.OrderBy(x => x.Name).ToList();
-            try
-            {
-                FloorType floorType = new FilteredElementCollector(doc)
-                    .OfClass(typeof(FloorType))
-                    .Cast<FloorType>()
-                    .FirstOrDefault(x => tipoDePisoElement.Name == x.Name);
-
-                if (floorType != null)
-                {
-                    FloorMatriz floorMatriz = new FloorMatriz();
-                    floorMatriz.GetFloorTypeData(floorType, GlobalVariables.MaterialsByClass, this);
-                    FloorMatriz = floorMatriz;
-                }
-                SelectedLegenda = Legendas.FirstOrDefault(x => x.Name == $"PISO {floorType.LookupParameter("Legenda Piso")?.AsInteger()}");
-            }
-            catch (Exception)
-            {
-            }
+            
 
             this.Fibras = GlobalVariables.StaticScheduleData.Fibras;
             this.Emendas = GlobalVariables.StaticScheduleData.Emendas;
@@ -1424,6 +1408,79 @@ namespace Revit.Common
             this.UltimaCamada = CBBaseGenerica ? "Base genérica" : CBSubleito ? "Subleito" : "Nenhum";
             this.TagUltimaCamada = CBBaseGenerica ? TagBaseGenerica : CBSubleito ? TagSubleito : "";
 
+            if (itensDeDetalheElement == null)
+                return;
+            try
+            {
+                this.EspacamentoBarra = UnitUtils.ConvertFromInternalUnits(itensDeDetalheElement.LookupParameter("Espaçamento (BT)").AsDouble(), UnitTypeId.Centimeters);
+                this.BoolBarraPorCima = itensDeDetalheElement.LookupParameter("CB_BARRA DE TRANSFERÊNCIA AMARRADA POR CIMA").AsInteger() == 1;
+            }
+            catch (Exception)
+            {
+            }
+
+            this.CBBaseGenerica = itensDeDetalheElement.LookupParameter("CB_BASE GENÉRICA").AsInteger() == 1;
+            this.CBRefSubleito = itensDeDetalheElement.LookupParameter("CB_REF. SUBLEITO").AsInteger() == 1;
+            this.CBSubBase = itensDeDetalheElement.LookupParameter("CB_SUB_BASE").AsInteger() == 1;
+            this.CBBase = itensDeDetalheElement.LookupParameter("CB_BASE").AsInteger() == 1;
+            this.CBSubleito = itensDeDetalheElement.LookupParameter("CB_SUBLEITO").AsInteger() == 1;
+            try
+            {
+                this.HRefSubleito = UnitUtils.ConvertFromInternalUnits(itensDeDetalheElement.LookupParameter("H Ref. Subleito").AsDouble(), UnitTypeId.Centimeters);
+            }
+            catch (Exception ex)
+            {
+            }
+            this.HBase = UnitUtils.ConvertFromInternalUnits(itensDeDetalheElement.LookupParameter("H BASE").AsDouble(), UnitTypeId.Centimeters);
+            this.HSubBase = UnitUtils.ConvertFromInternalUnits(itensDeDetalheElement.LookupParameter("H SUB_BASE").AsDouble(), UnitTypeId.Centimeters);
+            this.LPECarga = itensDeDetalheElement.LookupParameter("LPE_CARGA").AsString();
+            this.LPECargaParam1 = 0.0;
+            this.LPECargaParam2 = 0.0;
+            this.TagConcreto = itensDeDetalheElement.LookupParameter("TAG_CONCRETO").AsString();
+            this.TagRefSubleito = itensDeDetalheElement.LookupParameter("TAG_REF. SUBLEITO").AsString();
+            this.TagSubBase = itensDeDetalheElement.LookupParameter("TAG_SUB-BASE").AsString();
+            this.TagBase = itensDeDetalheElement.LookupParameter("TAG_BASE").AsString();
+            this.TagBaseGenerica = itensDeDetalheElement.LookupParameter("TAG_BASE GENÉRICA").AsString();
+            this.TagSubleito = itensDeDetalheElement.LookupParameter("TAG_SUBLEITO").AsString();
+            this.CBBaseGenerica = TagBaseGenerica != "";
+            this.CBSubleito = TagSubleito != "";
+            this.UltimaCamada = CBSubleito ? "Subleito" : CBBaseGenerica ? "Base genérica" : "Nenhum";
+            this.TagUltimaCamada = CBSubleito ? TagSubleito : CBBaseGenerica ? TagBaseGenerica : "";
+
+            try
+            {
+                FloorType floorType = new FilteredElementCollector(doc)
+                    .OfClass(typeof(FloorType))
+                    .Cast<FloorType>()
+                    .FirstOrDefault(x => tipoDePisoElement.Name == x.Name);
+
+                if (floorType != null)
+                {
+                    FloorMatriz floorMatriz = new FloorMatriz();
+                    floorMatriz.GetFloorTypeData(floorType, GlobalVariables.MaterialsByClass, this);
+                    var concretoLayer = floorMatriz.Layers.FirstOrDefault(l => l.SelectedCamadaTipo == "Concreto");
+                    if (concretoLayer != null && !TagConcreto.Equals("")) concretoLayer.Tag = TagConcreto;
+                    var refSubleitoLayer = floorMatriz.Layers.FirstOrDefault(l => l.SelectedCamadaTipo == "Reforço de Subleito");
+                    if (refSubleitoLayer != null && !TagRefSubleito.Equals("")) refSubleitoLayer.Tag = TagRefSubleito;
+                    var subbaseLayer = floorMatriz.Layers.FirstOrDefault(l => l.SelectedCamadaTipo == "Sub-Base");
+                    if (subbaseLayer != null && !TagSubBase.Equals("")) subbaseLayer.Tag = TagSubBase;
+                    var baseLayer = floorMatriz.Layers.FirstOrDefault(l => l.SelectedCamadaTipo == "Base");
+                    if (baseLayer != null && !TagBase.Equals("")) baseLayer.Tag = TagBase;
+                    var faixaA = floorMatriz.Layers.FirstOrDefault(l => l.SelectedMaterial.Contains("FAIXA A"));
+                    if (faixaA != null ) CBUQFaixaA = true;
+                    FloorMatriz = floorMatriz;
+                }
+                var pisoLegendaModel = Legendas.Where(x => x.Name == $"PISO {floorType?.LookupParameter("Legenda Piso")?.AsInteger()}")?.FirstOrDefault();
+
+                if (pisoLegendaModel != null)
+                {
+                    SelectedLegenda = pisoLegendaModel;
+
+                }
+            }
+            catch (Exception)
+            {
+            }
         }
 
         public void FillReforcoParameters(Element tipoDePisoElement, Element itensDeDetalheElement, Element juntaElement, Element pisoElementType, Document doc)

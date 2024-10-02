@@ -28,7 +28,7 @@
             <TextBlock
                 HorizontalAlignment="Center"
                 Foreground="White"
-                Text="V2.0.9" />
+                Text="V2.0.14" />
             <TextBlock
                 HorizontalAlignment="Center"
                 Foreground="White"

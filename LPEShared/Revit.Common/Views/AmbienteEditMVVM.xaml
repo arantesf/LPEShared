@@ -5,7 +5,7 @@
     xmlns:common="clr-namespace:Revit.Common"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    Title="Gerenciador de ambientes v2.0.9"
+    Title="Gerenciador de ambientes v2.0.14"
     Width="1280"
     Height="750"
     MinWidth="1100"
@@ -306,7 +306,8 @@
                                     VerticalContentAlignment="Center"
                                     Click="ProjBasico_Checkbox_Click"
                                     FontWeight="Normal"
-                                    Foreground="#FF000000">
+                                    Foreground="#FF000000"
+                                    IsChecked="{Binding ProjetoBasico, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                                     <ContentControl>
                                         <TextBlock FontSize="16" TextWrapping="Wrap">PROJETO BÁSICO</TextBlock>
                                     </ContentControl>
@@ -1228,6 +1229,24 @@
                                     FontSize="14"
                                     Text="{Binding FinalidadeReforcoTelaSuperior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                     TextWrapping="Wrap" />
+                                <TextBlock
+                                    FontSize="14"
+                                    FontWeight="Normal"
+                                    TextWrapping="Wrap"
+                                    Visibility="{Binding NotBoolTelaSuperior, Converter={StaticResource b2v}}">
+                                    COBRIMENTO SUPERIOR
+                                </TextBlock>
+                                <TextBox
+                                    Grid.Row="1"
+                                    Height="Auto"
+                                    MinHeight="30"
+                                    Padding="5,2"
+                                    VerticalContentAlignment="Center"
+                                    AcceptsReturn="true"
+                                    FontSize="14"
+                                    Text="{Binding CobrimentoTelaSuperior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    TextWrapping="Wrap"
+                                    Visibility="{Binding NotBoolTelaSuperior, Converter={StaticResource b2v}}" />
                             </StackPanel>
                             <CheckBox
                                 x:Name="ReforcoTelaInferior_CheckBox"
@@ -1296,6 +1315,24 @@
                                     FontSize="14"
                                     Text="{Binding FinalidadeReforcoTelaInferior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                     TextWrapping="Wrap" />
+                                <TextBlock
+                                    FontSize="14"
+                                    FontWeight="Normal"
+                                    TextWrapping="Wrap"
+                                    Visibility="{Binding NotBoolTelaInferior, Converter={StaticResource b2v}}">
+                                    COBRIMENTO INFERIOR
+                                </TextBlock>
+                                <TextBox
+                                    Grid.Row="1"
+                                    Height="Auto"
+                                    MinHeight="30"
+                                    Padding="5,2"
+                                    VerticalContentAlignment="Center"
+                                    AcceptsReturn="true"
+                                    FontSize="14"
+                                    Text="{Binding CobrimentoTelaInferior, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    TextWrapping="Wrap"
+                                    Visibility="{Binding NotBoolTelaInferior, Converter={StaticResource b2v}}" />
                             </StackPanel>
                         </Grid>
                     </GroupBox>

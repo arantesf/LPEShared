@@ -10,6 +10,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Forms;
 
 namespace Revit.Common
 {
@@ -183,10 +184,17 @@ namespace Revit.Common
                 if (!isMatch)
                 {
                     CompoundStructureLayer newLayer = new CompoundStructureLayer();
-                    newLayer.MaterialId = new FilteredElementCollector(doc)
-                        .OfClass(typeof(Material))
-                        .First(m => m.Name == tableLayer.SelectedMaterial)
-                        .Id;
+                    try
+                    {
+                        newLayer.MaterialId = new FilteredElementCollector(doc)
+                            .OfClass(typeof(Material))
+                            .First(m => m.Name == tableLayer.SelectedMaterial)
+                            .Id;
+                    }
+                    catch (Exception)
+                    {
+                        MessageBox.Show($"Erro ao aplicar material {tableLayer.SelectedMaterial}");
+                    }
                     newLayer.Width = UnitUtils.ConvertToInternalUnits(tableLayer.Width, UnitTypeId.Centimeters);
                     switch (tableLayer.SelectedCamadaTipo)
                     {
@@ -462,6 +470,10 @@ namespace Revit.Common
             source.Add(FloorMatrizClass.Nenhum, new List<FloorMatriz>());
             foreach (FloorType floorType in ((IEnumerable)new FilteredElementCollector(doc).WhereElementIsElementType().OfCategory(BuiltInCategory.OST_Floors).Cast<FloorType>().ToList()))
             {
+                if (!floorType.Name.Contains("0. MODELO"))
+                {
+                    continue;
+                }
                 switch (((Element)floorType).LookupParameter("LPE_TIPOLOGIA (ART)").AsString())
                 {
                     case "Concreto Sobre Solo":
@@ -566,7 +578,7 @@ namespace Revit.Common
                 return false;
             }
 
-            tipoDePisoRows.OrderBy(x => x.LookupParameter("Reforço de Tela").AsInteger()).ToList();
+            tipoDePisoRows = tipoDePisoRows.OrderBy(x => x.Name.Contains("REF_") ? 1 : 0).ToList();
             foreach (Element tipoDePiso in tipoDePisoRows)
             {
                 string name = tipoDePiso.Name;
@@ -582,10 +594,10 @@ namespace Revit.Common
                 FullAmbienteViewModel ambienteViewModel = new FullAmbienteViewModel(tipoDePiso, itensDeDetalheElement, juntaElement, pisoElementType, doc);
                 if (tipoDePiso.LookupParameter("Reforço de Tela").AsInteger() == 1)
                 {
-                    FullAmbienteViewModel parent = fullAmbienteViewModels.First(x => tipoDePiso.Name.Contains(x.TipoDePiso));
-                    ambienteViewModel.ParentAmbienteViewModelGUID = parent.GUID;
+                    FullAmbienteViewModel parent = fullAmbienteViewModels.Where(x => tipoDePiso.Name.Contains(x.TipoDePiso))?.OrderBy(x => x.TipoDePiso.Length).FirstOrDefault();
                     try
                     {
+                        ambienteViewModel.ParentAmbienteViewModelGUID = parent.GUID;
                         FloorType floorType = new FilteredElementCollector(doc)
                             .OfClass(typeof(FloorType))
                             .Cast<FloorType>()
@@ -596,6 +608,13 @@ namespace Revit.Common
                             FloorMatriz floorMatriz = new FloorMatriz();
                             floorMatriz.GetFloorTypeData(floorType, GlobalVariables.MaterialsByClass, ambienteViewModel);
                             ambienteViewModel.FloorMatriz = floorMatriz;
+                        }
+
+                        var pisoLegendaModel = ambienteViewModel.Legendas.Where(x => x.Name == $"PISO {floorType?.LookupParameter("Legenda Piso")?.AsInteger()}")?.FirstOrDefault();
+
+                        if (pisoLegendaModel != null)
+                        {
+                            ambienteViewModel.SelectedLegenda = pisoLegendaModel;
                         }
                     }
                     catch (Exception)
@@ -672,6 +691,9 @@ namespace Revit.Common
             itensDeDetalheElement.LookupParameter("CB_SUB_BASE")?.Set(fullAmbienteViewModel.CBSubBase ? 1 : 0);
             itensDeDetalheElement.LookupParameter("H SUB_BASE")?.Set(UnitUtils.ConvertToInternalUnits(fullAmbienteViewModel.HSubBase, UnitTypeId.Centimeters));
             itensDeDetalheElement.LookupParameter("TAG_SUB-BASE")?.Set(fullAmbienteViewModel.TagSubBase);
+            itensDeDetalheElement.LookupParameter("CB_BASE")?.Set(fullAmbienteViewModel.CBBase ? 1 : 0);
+            itensDeDetalheElement.LookupParameter("H BASE")?.Set(UnitUtils.ConvertToInternalUnits(fullAmbienteViewModel.HBase, UnitTypeId.Centimeters));
+            itensDeDetalheElement.LookupParameter("TAG_BASE")?.Set(fullAmbienteViewModel.TagBase);
             itensDeDetalheElement.LookupParameter("CB_BASE GENÉRICA")?.Set(fullAmbienteViewModel.CBBaseGenerica ? 1 : 0);
             itensDeDetalheElement.LookupParameter("TAG_BASE GENÉRICA")?.Set(fullAmbienteViewModel.TagBaseGenerica);
             itensDeDetalheElement.LookupParameter("CB_REF. SUBLEITO")?.Set(fullAmbienteViewModel.CBRefSubleito ? 1 : 0);
@@ -693,7 +715,9 @@ namespace Revit.Common
             itensDeDetalheElement.LookupParameter("LPE_CARGA")?.Set(fullAmbienteViewModel.LPECarga);
             itensDeDetalheElement.LookupParameter("Espaçamento (BT)")?.Set(UnitUtils.ConvertToInternalUnits(fullAmbienteViewModel.EspacamentoBarra, UnitTypeId.Centimeters));
             itensDeDetalheElement.LookupParameter("CB_BARRA DE TRANSFERÊNCIA AMARRADA POR CIMA")?.Set(fullAmbienteViewModel.BoolBarraPorCima ? 1 : 0);
+            itensDeDetalheElement.LookupParameter("CB_CAUQ FAIXA A")?.Set(fullAmbienteViewModel.FloorMatriz.Layers.Where(a => a.SelectedMaterial.Contains("FAIXA A")).Count() > 0 ? 1 : 0);
 
+            
             itensDeDetalheElement.LookupParameter("TAG_TIPO REF. TELA SUPERIOR")?.Set(fullAmbienteViewModel.ReforcoTelaSuperior);
             itensDeDetalheElement.LookupParameter("TAG_TIPO REF. TELA INFERIOR")?.Set(fullAmbienteViewModel.ReforcoTelaInferior);
 
@@ -712,6 +736,7 @@ namespace Revit.Common
             tipoDeJuntaElement.LookupParameter("H-Espaçador Soldado (cm)")?.Set(fullAmbienteViewModel.HEspacadorSoldado);
             tipoDeJuntaElement.LookupParameter("LPE_COBRIMENTO SUPERIOR")?.Set(UnitUtils.ConvertToInternalUnits(fullAmbienteViewModel.CobrimentoTelaSuperior, UnitTypeId.Centimeters));
             tipoDeJuntaElement.LookupParameter("LPE_COBRIMENTO INFERIOR")?.Set(UnitUtils.ConvertToInternalUnits(fullAmbienteViewModel.CobrimentoTelaInferior, UnitTypeId.Centimeters));
+            tipoDeJuntaElement.LookupParameter("Espaçamento (BT)")?.Set(UnitUtils.ConvertToInternalUnits(fullAmbienteViewModel.EspacamentoBarra, UnitTypeId.Centimeters));
             tipoDeJuntaElement.LookupParameter("CB_BARRA DE TRANSFERÊNCIA AMARRADA POR CIMA")?.Set(fullAmbienteViewModel.BoolBarraPorCima ? 1 : 0);
             tipoDeJuntaElement.get_Parameter(BuiltInParameter.REF_TABLE_ELEM_NAME)?.Set(fullAmbienteViewModel.TipoDePiso);
             tipoDeJuntaElement.LookupParameter("TIPO TELA INFERIOR")?.Set(fullAmbienteViewModel.TelaInferior);

@@ -331,7 +331,7 @@ namespace Revit.Common
                             }
                             tx.Commit();
                             SelectAmbienteMVVM.ProgressBarViewModel.ProgressBarValue += 1;
-
+                            tx.SetFailureHandlingOptions(failOpt);
                             tx.Start("Recriar Openings");
 
                             Dictionary<int, List<CurveLoop>> openingCurveLoopsByIndex = new Dictionary<int, List<CurveLoop>>();
