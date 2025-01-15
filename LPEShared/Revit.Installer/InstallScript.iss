@@ -3,7 +3,7 @@
 
 #define MyAppName "Plug-in Revit LPE"
 #define FolderName "LPE"
-#define MyAppVersion "2.0.14"
+#define MyAppVersion "2.0.16"
 #define MyAppPublisher "FCA"
 #define Revit2021 "\Autodesk\Revit\Addins\2021\"
 #define Revit2022 "\Autodesk\Revit\Addins\2022\"

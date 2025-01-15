@@ -13,7 +13,7 @@
 	<PropertyGroup>
 		<Optimize>False</Optimize>
 		<DebugSymbols>true</DebugSymbols>
-		<OutputPath>bin\Debug\$(RevitVersion)\</OutputPath>
+		<OutputPath>bin\Release\$(RevitVersion)\</OutputPath>
 		<DefineConstants>DEBUG;TRACE;REVIT$(RevitVersion)</DefineConstants>
 		<NoWarn>MSB3052</NoWarn>
 		<DebugType>Full</DebugType>

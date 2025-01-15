@@ -326,10 +326,14 @@ namespace Revit.Common
             else if (this.boolTelaInferior)
                 telaSuperior += " (Q" + this.telaInferior + ")";
 
-            if (this.BoolFibra && !this.BoolReforcoDeTela && this.boolTelaSuperior)
+            if (this.BoolFibra && this.boolTelaSuperior)
             {
                 refFibraSupFinalidade = "REF_" + this.finalidadeTelaSuperior;
                 refFibraSupSolucao = " (" + this.telaSuperior + ")";
+                if (this.boolReforcoTelaSuperior || this.boolReforcoTelaInferior)
+                {
+                    refFibraSupSolucao += " + ";
+                }
             }
 
             if (this.boolReforcoTelaSuperior)
@@ -359,7 +363,7 @@ namespace Revit.Common
                 }
             }
 
-            string refSlash = refInfSolucao != "" || refSupSolucao != "" ? " // " : "";
+            string refSlash = refFibraSupSolucao != "" || refInfSolucao != "" || refSupSolucao != "" ? " // " : "";
 
             if (this.TagExtra != "")
             {
