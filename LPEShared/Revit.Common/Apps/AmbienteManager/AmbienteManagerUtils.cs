@@ -468,7 +468,10 @@ namespace Revit.Common
             source.Add(FloorMatrizClass.PavIntertravado, new List<FloorMatriz>());
             source.Add(FloorMatrizClass.PavAsfaltico, new List<FloorMatriz>());
             source.Add(FloorMatrizClass.Nenhum, new List<FloorMatriz>());
-            foreach (FloorType floorType in ((IEnumerable)new FilteredElementCollector(doc).WhereElementIsElementType().OfCategory(BuiltInCategory.OST_Floors).Cast<FloorType>().ToList()))
+            foreach (FloorType floorType in ((IEnumerable)new FilteredElementCollector(doc)
+                .WhereElementIsElementType()
+                .OfClass(typeof(FloorType))
+                .Cast<FloorType>().ToList()))
             {
                 if (!floorType.Name.Contains("0. MODELO"))
                 {
