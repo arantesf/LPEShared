@@ -595,11 +595,24 @@ namespace Revit.Common
                 if (dictionary4.ContainsKey(name))
                     pisoElementType = dictionary4[name];
                 FullAmbienteViewModel ambienteViewModel = new FullAmbienteViewModel(tipoDePiso, itensDeDetalheElement, juntaElement, pisoElementType, doc);
-                if (tipoDePiso.LookupParameter("Reforço de Tela").AsInteger() == 1)
+                
+                fullAmbienteViewModels.Add(ambienteViewModel);
+            }
+
+            foreach (var ambienteViewModel in fullAmbienteViewModels)
+            {
+                if (ambienteViewModel.BoolReforcoDeTela)
                 {
-                    FullAmbienteViewModel parent = fullAmbienteViewModels.Where(x => tipoDePiso.Name.Contains(x.TipoDePiso))?.OrderBy(x => x.TipoDePiso.Length).FirstOrDefault();
                     try
                     {
+                        bool refFIbra = ambienteViewModel.BoolFibra && ambienteViewModel.BoolTelaSuperior;
+                        string baseName = refFIbra ?
+                            ambienteViewModel.TipoDePiso.Split(new string[] { " // REF_FIBRA" }, StringSplitOptions.None).First() + $" // REF_FIBRA ({ambienteViewModel.TelaSuperior})":
+                            ambienteViewModel.TipoDePiso.Split(new string[] { " //" }, StringSplitOptions.None).First();
+                        FullAmbienteViewModel parent = fullAmbienteViewModels
+                            .Where(x => x.TipoDePiso.Equals(baseName)) ? 
+                            .FirstOrDefault();
+                        if (parent == null) continue;
                         ambienteViewModel.ParentAmbienteViewModelGUID = parent.GUID;
                         FloorType floorType = new FilteredElementCollector(doc)
                             .OfClass(typeof(FloorType))
@@ -612,7 +625,6 @@ namespace Revit.Common
                             floorMatriz.GetFloorTypeData(floorType, GlobalVariables.MaterialsByClass, ambienteViewModel);
                             ambienteViewModel.FloorMatriz = floorMatriz;
                         }
-
                         var pisoLegendaModel = ambienteViewModel.Legendas.Where(x => x.Name == $"PISO {floorType?.LookupParameter("Legenda Piso")?.AsInteger()}")?.FirstOrDefault();
 
                         if (pisoLegendaModel != null)
@@ -624,7 +636,6 @@ namespace Revit.Common
                     {
                     }
                 }
-                fullAmbienteViewModels.Add(ambienteViewModel);
             }
             return true;
         }
